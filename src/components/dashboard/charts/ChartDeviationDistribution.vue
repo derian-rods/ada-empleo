@@ -37,21 +37,25 @@ const option = computed(() => ({
   tooltip: {
     trigger: 'axis',
     confine: true,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    borderColor: '#333',
+    borderWidth: 1,
     textStyle: {
-      width: 250,
-      overflow: 'break',
-      lineHeight: 1.5,
+      color: '#fff',
+      fontSize: 13,
+      lineHeight: 20,
     },
+    padding: [12, 16],
     formatter: (params: any) => {
       if (params.length > 0) {
         const param = params[0]
         const bucket = distribution.value[param.dataIndex]
         return `
-          <div style="max-width: 280px; word-wrap: break-word; white-space: normal;">
-            <strong>${bucket.range}</strong><br/>
-            <hr style="margin: 4px 0; border: none; border-top: 1px solid #ccc;"/>
-            <strong>Solicitudes:</strong> ${bucket.count}<br/>
-            <strong>Porcentaje:</strong> ${bucket.percentage.toFixed(1)}%
+          <div style="max-width: 320px; word-wrap: break-word; white-space: normal; line-height: 1.8;">
+            <div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">${bucket.range}</div>
+            <div style="border-top: 1px solid #666; margin: 8px 0; padding-top: 8px;"></div>
+            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Solicitudes:</span> <strong>${bucket.count}</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Porcentaje:</span> <strong>${bucket.percentage.toFixed(1)}%</strong></div>
           </div>
         `
       }

@@ -70,24 +70,28 @@ const option = computed(() => ({
   tooltip: {
     trigger: 'item',
     confine: true,
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
+    borderColor: '#333',
+    borderWidth: 1,
     textStyle: {
-      width: 300,
-      overflow: 'break',
-      lineHeight: 1.5,
+      color: '#fff',
+      fontSize: 13,
+      lineHeight: 20,
     },
+    padding: [12, 16],
     formatter: (params: any) => {
       if (params.componentSubType === 'scatter') {
         const data = params.value[3] as RiskMatrixPoint
         return `
-          <div style="max-width: 320px; word-wrap: break-word; white-space: normal;">
-            <strong>${data.parentCode}</strong><br/>
-            <span style="font-size: 12px; word-break: break-word;">${data.parentSubject}</span><br/>
-            <hr style="margin: 4px 0; border: none; border-top: 1px solid #ccc;"/>
-            <strong>Riesgo:</strong> ${data.riskLevel}<br/>
-            <strong>Resultado:</strong> ${data.resultStatus}<br/>
-            <strong>Est.:</strong> ${data.estimatedHours.toFixed(1)}h<br/>
-            <strong>Real:</strong> ${data.actualHours.toFixed(1)}h<br/>
-            <strong>Diferencia:</strong> ${data.differenceHours.toFixed(1)}h
+          <div style="max-width: 350px; word-wrap: break-word; white-space: normal; line-height: 1.8;">
+            <div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">${data.parentCode}</div>
+            <div style="font-size: 12px; margin-bottom: 8px; color: #ddd; word-break: break-word;">${data.parentSubject}</div>
+            <div style="border-top: 1px solid #666; margin: 8px 0; padding-top: 8px;"></div>
+            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Riesgo:</span> <strong>${data.riskLevel}</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Resultado:</span> <strong>${data.resultStatus}</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Estimado:</span> <strong>${data.estimatedHours.toFixed(1)}h</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Real:</span> <strong>${data.actualHours.toFixed(1)}h</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Diferencia:</span> <strong>${data.differenceHours.toFixed(1)}h</strong></div>
           </div>
         `
       }
