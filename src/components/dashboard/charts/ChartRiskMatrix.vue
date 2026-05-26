@@ -69,14 +69,20 @@ const option = computed(() => ({
   },
   tooltip: {
     trigger: 'item',
+    confine: true,
+    textStyle: {
+      width: 300,
+      overflow: 'break',
+      lineHeight: 1.5,
+    },
     formatter: (params: any) => {
       if (params.componentSubType === 'scatter') {
         const data = params.value[3] as RiskMatrixPoint
         return `
-          <div style="padding: 8px;">
+          <div style="max-width: 320px; word-wrap: break-word; white-space: normal;">
             <strong>${data.parentCode}</strong><br/>
-            ${data.parentSubject}<br/>
-            <hr style="margin: 4px 0;"/>
+            <span style="font-size: 12px; word-break: break-word;">${data.parentSubject}</span><br/>
+            <hr style="margin: 4px 0; border: none; border-top: 1px solid #ccc;"/>
             <strong>Riesgo:</strong> ${data.riskLevel}<br/>
             <strong>Resultado:</strong> ${data.resultStatus}<br/>
             <strong>Est.:</strong> ${data.estimatedHours.toFixed(1)}h<br/>

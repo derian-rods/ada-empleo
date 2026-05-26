@@ -36,15 +36,22 @@ const option = computed(() => ({
   },
   tooltip: {
     trigger: 'axis',
+    confine: true,
+    textStyle: {
+      width: 250,
+      overflow: 'break',
+      lineHeight: 1.5,
+    },
     formatter: (params: any) => {
       if (params.length > 0) {
         const param = params[0]
         const bucket = distribution.value[param.dataIndex]
         return `
-          <div style="padding: 8px;">
+          <div style="max-width: 280px; word-wrap: break-word; white-space: normal;">
             <strong>${bucket.range}</strong><br/>
-            Solicitudes: <strong>${bucket.count}</strong><br/>
-            Porcentaje: <strong>${bucket.percentage.toFixed(1)}%</strong>
+            <hr style="margin: 4px 0; border: none; border-top: 1px solid #ccc;"/>
+            <strong>Solicitudes:</strong> ${bucket.count}<br/>
+            <strong>Porcentaje:</strong> ${bucket.percentage.toFixed(1)}%
           </div>
         `
       }
