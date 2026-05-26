@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import Card from 'primevue/card'
 import Message from 'primevue/message'
-import DashboardKpis from './DashboardKpis.vue'
 import type { DashboardSummary, CalculatedRequest } from '../domain/types'
 
 interface SummaryTabProps {
@@ -15,6 +14,10 @@ defineProps<SummaryTabProps>()
 
 function fmt(n: number): string {
   return n.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+}
+
+function fmtPct(n: number): string {
+  return n.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + '%'
 }
 </script>
 
@@ -34,49 +37,30 @@ function fmt(n: number): string {
       </Message>
     </div>
 
-    <!-- KPIs -->
-    <DashboardKpis />
+    <!-- Main KPIs: Only 4 metrics -->
+    <div v-if="summary" class="kpi-grid">
+      <Card class="kpi-card">
+        <template #title>Horas estimadas</template>
+        <template #content><span class="kpi-value">{{ fmt(summary.totalEstimatedHours) }}</span></template>
+      </Card>
 
-    <!-- Summary Cards -->
-    <div v-if="summary" class="summary-cards">
-      <Card class="summary-card profit">
-        <template #title>Total Ganancias</template>
+      <Card class="kpi-card">
+        <template #title>Horas reales</template>
+        <template #content><span class="kpi-value">{{ fmt(summary.totalActualHours) }}</span></template>
+      </Card>
+
+      <Card class="kpi-card">
+        <template #title>Diferencia</template>
         <template #content>
-          <div class="card-content">
-            <span class="card-value">{{ fmt(summary.totalDifferenceHours) }}h</span>
-            <span class="card-label">de {{ summary.profitableRequests }} peticiones</span>
-          </div>
+          <span class="kpi-value" :class="summary.totalDifferenceHours >= 0 ? 'profit' : 'loss'">
+            {{ fmt(summary.totalDifferenceHours) }}h
+          </span>
         </template>
       </Card>
 
-      <Card class="summary-card loss">
-        <template #title>Total Pérdidas</template>
-        <template #content>
-          <div class="card-content">
-            <span class="card-value">{{ summary.lossRequests }}</span>
-            <span class="card-label">peticiones</span>
-          </div>
-        </template>
-      </Card>
-
-      <Card class="summary-card neutral">
-        <template #title>Peticiones Neutrales</template>
-        <template #content>
-          <div class="card-content">
-            <span class="card-value">{{ summary.neutralRequests }}</span>
-            <span class="card-label">sin variación</span>
-          </div>
-        </template>
-      </Card>
-
-      <Card class="summary-card">
-        <template #title>Participantes</template>
-        <template #content>
-          <div class="card-content">
-            <span class="card-value">{{ summary.totalPeople }}</span>
-            <span class="card-label">personas</span>
-          </div>
-        </template>
+      <Card class="kpi-card">
+        <template #title>Desviación media</template>
+        <template #content><span class="kpi-value">{{ fmtPct(summary.averageDeviationPercent) }}</span></template>
       </Card>
     </div>
   </div>
@@ -95,41 +79,27 @@ function fmt(n: number): string {
   gap: 0.5rem;
 }
 
-.summary-cards {
+.kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
 }
 
-.summary-card {
-  border-left: 4px solid #ccc;
+.kpi-card {
+  text-align: center;
 }
 
-.summary-card.profit {
-  border-left-color: #22c55e;
-}
-
-.summary-card.loss {
-  border-left-color: #ef4444;
-}
-
-.summary-card.neutral {
-  border-left-color: #f59e0b;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.card-value {
+.kpi-value {
   font-size: 2rem;
   font-weight: 700;
+  display: block;
 }
 
-.card-label {
-  font-size: 0.85rem;
-  color: #999;
+.kpi-value.profit {
+  color: var(--p-green-500, #22c55e);
+}
+
+.kpi-value.loss {
+  color: var(--p-red-500, #ef4444);
 }
 </style>
