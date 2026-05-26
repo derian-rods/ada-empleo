@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+
+  "instructions": ["AGENTS.md"],
+
+  "formatter": true,
+  "lsp": true,
+  "share": "disabled",
+
+  "compaction": {
+    "auto": true,
+    "tail_turns": 15
+  },
+
+  "permission": {
+    "edit": "allow",
+    "bash": {
+      "npm *": "allow",
+      "npx *": "allow",
+      "git *": "allow",
+      "vitest *": "allow",
+      "*": "ask"
+    }
+  },
+
+  "agent": {
+    "planner": {
+      "description": "Analiza tareas y propone planes sin modificar código.",
+      "mode": "subagent",
+      "permission": {
+        "edit": "deny",
+        "bash": "deny"
+      }
+    },
+
+    "reviewer": {
+      "description": "Revisa calidad, bugs, tipos, escalabilidad y cálculos.",
+      "mode": "subagent",
+      "permission": {
+        "edit": "deny",
+        "bash": {
+          "vitest *": "allow",
+          "*": "deny"
+        }
+      }
+    },
+
+    "tester": {
+      "description": "Crea y mejora tests con Vitest para dominio y cálculos.",
+      "mode": "subagent",
+      "permission": {
+        "edit": "allow",
+        "bash": {
+          "vitest *": "allow",
+          "npx *": "allow",
+          "*": "deny"
+        }
+      }
+    }
+  },
+
+  "command": {
+    "plan": {
+      "description": "Planifica una funcionalidad sin modificar código.",
+      "template": "Analiza esta funcionalidad y propón un plan pequeño de implementación sin modificar código: $ARGUMENTS"
+    },
+
+    "review": {
+      "description": "Revisa el código actual buscando bugs y deuda técnica.",
+      "template": "Revisa el código actual según AGENTS.md. Busca bugs, sobrearquitectura, errores de tipos, problemas de escalabilidad y fallos en cálculos."
+    },
+
+    "test": {
+      "description": "Añade o mejora tests.",
+      "template": "Añade o mejora tests para esta parte del proyecto: $ARGUMENTS"
+    }
+  }
+}
