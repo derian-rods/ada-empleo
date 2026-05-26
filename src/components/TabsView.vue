@@ -13,7 +13,7 @@ const activeTab = ref(0)
 </script>
 
 <template>
-  <TabView v-model:activeIndex="activeTab" class="tabs-view" :disabled="store.isProcessingCsv">
+  <TabView v-model:activeIndex="activeTab" class="tabs-view" :disabled="store.isProcessing">
     <!-- Resumen Tab -->
     <TabPanel header="Resumen" value="resumen" :leftIcon="'pi pi-fw pi-home'">
       <SummaryTab

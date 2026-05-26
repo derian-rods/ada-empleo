@@ -50,6 +50,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const parentsLoaded = ref(false)
   const childrenLoaded = ref(false)
   const timeEntriesLoaded = ref(false)
+  const isCalculating = ref(false)
 
   const hasData = computed(
     () => parentsLoaded.value && timeEntriesLoaded.value
@@ -60,6 +61,10 @@ export const useDashboardStore = defineStore('dashboard', () => {
       csvLoadStatus.value.parents.status === 'loading' ||
       csvLoadStatus.value.children.status === 'loading' ||
       csvLoadStatus.value.timeEntries.status === 'loading'
+  )
+
+  const isProcessing = computed(
+    () => isProcessingCsv.value || isCalculating.value
   )
 
   const allCsvsValid = computed(
@@ -227,46 +232,52 @@ export const useDashboardStore = defineStore('dashboard', () => {
   async function recalculate() {
     if (!parentsLoaded.value || !timeEntriesLoaded.value) return
 
-    // Permitir que la UI se actualice antes de empezar cálculos
-    await allowUIUpdate()
+    isCalculating.value = true
 
-    const result = buildCalculatedRequests(
-      parents.value,
-      children.value,
-      timeEntries.value
-    )
+    try {
+      // Permitir que la UI se actualice antes de empezar cálculos
+      await allowUIUpdate()
 
-    // Permitir que la UI se actualice entre operaciones
-    await allowUIUpdate()
-
-    calculatedRequests.value = result.calculatedRequests
-    orphanTimeEntries.value = result.orphanTimeEntries
-
-    // Permitir que la UI se actualice
-    await allowUIUpdate()
-
-    summary.value = calculateDashboardSummary(
-      result.calculatedRequests,
-      result.orphanTimeEntries
-    )
-
-    // Permitir que la UI se actualice
-    await allowUIUpdate()
-
-    // Generate warnings
-    warnings.value = []
-    if (result.orphanTimeEntries.length > 0) {
-      warnings.value.push(
-        `${result.orphanTimeEntries.length} entradas de tiempo huérfanas (sin petición padre)`
+      const result = buildCalculatedRequests(
+        parents.value,
+        children.value,
+        timeEntries.value
       )
-    }
-    const zeroEstWithActual = result.calculatedRequests.filter(
-      (r) => r.estimatedHours === 0 && r.actualHours > 0
-    )
-    if (zeroEstWithActual.length > 0) {
-      warnings.value.push(
-        `${zeroEstWithActual.length} peticiones con 0h estimadas pero horas reales > 0`
+
+      // Permitir que la UI se actualice entre operaciones
+      await allowUIUpdate()
+
+      calculatedRequests.value = result.calculatedRequests
+      orphanTimeEntries.value = result.orphanTimeEntries
+
+      // Permitir que la UI se actualice
+      await allowUIUpdate()
+
+      summary.value = calculateDashboardSummary(
+        result.calculatedRequests,
+        result.orphanTimeEntries
       )
+
+      // Permitir que la UI se actualice
+      await allowUIUpdate()
+
+      // Generate warnings
+      warnings.value = []
+      if (result.orphanTimeEntries.length > 0) {
+        warnings.value.push(
+          `${result.orphanTimeEntries.length} entradas de tiempo huérfanas (sin petición padre)`
+        )
+      }
+      const zeroEstWithActual = result.calculatedRequests.filter(
+        (r) => r.estimatedHours === 0 && r.actualHours > 0
+      )
+      if (zeroEstWithActual.length > 0) {
+        warnings.value.push(
+          `${zeroEstWithActual.length} peticiones con 0h estimadas pero horas reales > 0`
+        )
+      }
+    } finally {
+      isCalculating.value = false
     }
   }
 
@@ -301,9 +312,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
     parentsLoaded,
     childrenLoaded,
     timeEntriesLoaded,
+    isCalculating,
     csvLoadStatus,
     hasData,
     isProcessingCsv,
+    isProcessing,
     allCsvsValid,
     canCalculate,
     loadParents,

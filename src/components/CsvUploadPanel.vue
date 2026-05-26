@@ -23,7 +23,7 @@ function onTimeSelect(event: FileUploadSelectEvent) {
   if (file) store.loadTimeEntries(file)
 }
 
-function getProcessingCsvName(): string {
+function getProcessingMessage(): string {
   if (store.csvLoadStatus.parents.status === 'loading') {
     return 'Peticiones padre'
   }
@@ -32,6 +32,9 @@ function getProcessingCsvName(): string {
   }
   if (store.csvLoadStatus.timeEntries.status === 'loading') {
     return 'Tiempo dedicado'
+  }
+  if (store.isCalculating) {
+    return 'Calculando...'
   }
   return ''
 }
@@ -49,7 +52,7 @@ function getProcessingCsvName(): string {
             accept=".csv"
             :auto="true"
             choose-label="Seleccionar"
-            :disabled="store.isProcessingCsv"
+            :disabled="store.isProcessing"
             @select="onParentSelect"
           />
         </div>
@@ -61,7 +64,7 @@ function getProcessingCsvName(): string {
             accept=".csv"
             :auto="true"
             choose-label="Seleccionar"
-            :disabled="store.isProcessingCsv"
+            :disabled="store.isProcessing"
             @select="onChildSelect"
           />
         </div>
@@ -73,7 +76,7 @@ function getProcessingCsvName(): string {
             accept=".csv"
             :auto="true"
             choose-label="Seleccionar"
-            :disabled="store.isProcessingCsv"
+            :disabled="store.isProcessing"
             @select="onTimeSelect"
           />
         </div>
@@ -92,15 +95,14 @@ function getProcessingCsvName(): string {
       </div>
 
       <!-- Global Processing Overlay -->
-      <div v-if="store.isProcessingCsv" class="processing-overlay">
+      <div v-if="store.isProcessing" class="processing-overlay">
         <div class="processing-content">
           <ProgressSpinner
             stroke-width="2"
             fill="var(--surface-ground)"
             style="width: 50px; height: 50px"
           />
-          <p>Procesando: <strong>{{ getProcessingCsvName() }}</strong></p>
-          <p class="text-muted">Contando filas y validando estructura...</p>
+          <p>Procesando: <strong>{{ getProcessingMessage() }}</strong></p>
           <p class="text-muted">Por favor espera, no cierres esta ventana</p>
         </div>
       </div>
