@@ -37,7 +37,12 @@ const activeTab = ref(0)
 
     <!-- Gráficas Tab -->
     <TabPanel header="Gráficas" value="graficos" :leftIcon="'pi pi-fw pi-chart-bar'">
-      <ChartsTab :requests="store.calculatedRequests" />
+      <ChartsTab
+        :requests="store.calculatedRequests"
+        :parents="store.parents"
+        :children="store.children"
+        :time-entries="store.timeEntries"
+      />
     </TabPanel>
 
     <!-- Tiempos Huérfanos Tab -->

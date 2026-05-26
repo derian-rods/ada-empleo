@@ -1,27 +1,47 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
-import ChartEstimatedVsActual from './ChartEstimatedVsActual.vue'
-import ChartTopLosses from './ChartTopLosses.vue'
-import ChartHoursByPerson from './ChartHoursByPerson.vue'
-import ChartHoursByApp from './ChartHoursByApp.vue'
-import type { CalculatedRequest } from '../domain/types'
+import { ref, watch, onMounted, computed } from 'vue'
+import ChartRiskMatrix from './dashboard/charts/ChartRiskMatrix.vue'
+import ChartDeviationDistribution from './dashboard/charts/ChartDeviationDistribution.vue'
+import {
+  buildParentGroupedTableRows,
+} from '../domain/parentGroupedTable'
+import type { CalculatedRequest, ParentRequest, ChildRequest, TimeEntry } from '../domain/types'
 
 interface ChartsTabProps {
   requests: CalculatedRequest[]
+  parents?: ParentRequest[]
+  children?: ChildRequest[]
+  timeEntries?: TimeEntry[]
 }
 
-const props = defineProps<ChartsTabProps>()
+const props = withDefaults(defineProps<ChartsTabProps>(), {
+  parents: () => [],
+  children: () => [],
+  timeEntries: () => [],
+})
+
 const renderCharts = ref(false)
 
+// Build grouped rows for charts
+const groupedRows = computed(() => {
+  if (!props.parents || !props.children || !props.timeEntries) {
+    return []
+  }
+  return buildParentGroupedTableRows(
+    props.parents,
+    props.children,
+    props.timeEntries,
+    props.requests
+  )
+})
+
 onMounted(() => {
-  // Render charts after component is mounted and visible
   renderCharts.value = true
 })
 
 watch(
   () => props.requests,
   () => {
-    // Re-render when data changes
     renderCharts.value = false
     setTimeout(() => {
       renderCharts.value = true
@@ -32,13 +52,11 @@ watch(
 
 <template>
   <div class="charts-tab">
-    <div v-if="renderCharts && requests.length > 0" class="charts-grid">
-      <ChartEstimatedVsActual :data="requests" />
-      <ChartTopLosses :data="requests" />
-      <ChartHoursByPerson :data="requests" />
-      <ChartHoursByApp :data="requests" />
+    <div v-if="renderCharts && groupedRows.length > 0" class="charts-grid">
+      <ChartRiskMatrix :rows="groupedRows" />
+      <ChartDeviationDistribution :rows="groupedRows" />
     </div>
-    <div v-else-if="requests.length === 0" class="no-data">
+    <div v-else-if="groupedRows.length === 0" class="no-data">
       <p>No hay datos para mostrar gráficos</p>
     </div>
   </div>
@@ -53,6 +71,7 @@ watch(
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   gap: 1.5rem;
+  padding: 1.5rem;
 }
 
 .no-data {
