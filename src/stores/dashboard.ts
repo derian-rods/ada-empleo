@@ -95,10 +95,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     })
   }
 
+  // Helper para actualizar estado de CSV sin deprecation warning
+  function updateCsvStatus(kind: CsvKind, updates: Partial<CsvLoadStatus>) {
+    csvLoadStatus.value[kind] = { ...csvLoadStatus.value[kind], ...updates }
+  }
+
   async function loadParents(file: File) {
-    csvLoadStatus.value.parents.status = 'loading'
-    csvLoadStatus.value.parents.fileName = file.name
-    csvLoadStatus.value.parents.error = undefined
+    updateCsvStatus('parents', { status: 'loading', fileName: file.name, error: undefined })
     errors.value = errors.value.filter((e) => !e.includes('padre'))
 
     // Permitir que la UI se actualice antes de procesar
@@ -109,9 +112,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       if (!rows.length || !('#' in rows[0])) {
         const error = 'Peticiones padre: falta columna #'
         errors.value.push(error)
-        csvLoadStatus.value.parents.status = 'error'
-        csvLoadStatus.value.parents.error = error
-        csvLoadStatus.value.parents.rowsCount = 0
+        updateCsvStatus('parents', { status: 'error', error, rowsCount: 0 })
         parentsLoaded.value = false
         return
       }
@@ -120,8 +121,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       await allowUIUpdate()
 
       parents.value = normalizeParentRequests(rows)
-      csvLoadStatus.value.parents.rowsCount = rows.length
-      csvLoadStatus.value.parents.status = 'success'
+      updateCsvStatus('parents', { rowsCount: rows.length, status: 'success' })
       parentsLoaded.value = true
 
       // Permitir que la UI se actualice antes de calcular
@@ -131,17 +131,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     } catch (e) {
       const error = `Error al cargar peticiones padre: ${e}`
       errors.value.push(error)
-      csvLoadStatus.value.parents.status = 'error'
-      csvLoadStatus.value.parents.error = error
-      csvLoadStatus.value.parents.rowsCount = 0
+      updateCsvStatus('parents', { status: 'error', error, rowsCount: 0 })
       parentsLoaded.value = false
     }
   }
 
   async function loadChildren(file: File) {
-    csvLoadStatus.value.children.status = 'loading'
-    csvLoadStatus.value.children.fileName = file.name
-    csvLoadStatus.value.children.error = undefined
+    updateCsvStatus('children', { status: 'loading', fileName: file.name, error: undefined })
     errors.value = errors.value.filter((e) => !e.includes('hijas'))
 
     // Permitir que la UI se actualice antes de procesar
@@ -152,9 +148,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       if (!rows.length || !('#' in rows[0])) {
         const error = 'Peticiones hijas: falta columna #'
         errors.value.push(error)
-        csvLoadStatus.value.children.status = 'error'
-        csvLoadStatus.value.children.error = error
-        csvLoadStatus.value.children.rowsCount = 0
+        updateCsvStatus('children', { status: 'error', error, rowsCount: 0 })
         childrenLoaded.value = false
         return
       }
@@ -163,8 +157,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
       await allowUIUpdate()
 
       children.value = normalizeChildRequests(rows)
-      csvLoadStatus.value.children.rowsCount = rows.length
-      csvLoadStatus.value.children.status = 'success'
+      updateCsvStatus('children', { rowsCount: rows.length, status: 'success' })
       childrenLoaded.value = true
 
       // Permitir que la UI se actualice antes de calcular
@@ -174,17 +167,13 @@ export const useDashboardStore = defineStore('dashboard', () => {
     } catch (e) {
       const error = `Error al cargar peticiones hijas: ${e}`
       errors.value.push(error)
-      csvLoadStatus.value.children.status = 'error'
-      csvLoadStatus.value.children.error = error
-      csvLoadStatus.value.children.rowsCount = 0
+      updateCsvStatus('children', { status: 'error', error, rowsCount: 0 })
       childrenLoaded.value = false
     }
   }
 
   async function loadTimeEntries(file: File) {
-    csvLoadStatus.value.timeEntries.status = 'loading'
-    csvLoadStatus.value.timeEntries.fileName = file.name
-    csvLoadStatus.value.timeEntries.error = undefined
+    updateCsvStatus('timeEntries', { status: 'loading', fileName: file.name, error: undefined })
     errors.value = errors.value.filter((e) => !e.includes('tiempo dedicado'))
     warnings.value = warnings.value.filter(
       (w) => !w.includes('Tiempo dedicado')
@@ -210,17 +199,17 @@ export const useDashboardStore = defineStore('dashboard', () => {
       await allowUIUpdate()
 
       if (hasError) {
-        csvLoadStatus.value.timeEntries.status = 'error'
-        csvLoadStatus.value.timeEntries.error =
-          'Tiempo dedicado: falta columna Horas'
-        csvLoadStatus.value.timeEntries.rowsCount = 0
+        updateCsvStatus('timeEntries', { 
+          status: 'error', 
+          error: 'Tiempo dedicado: falta columna Horas',
+          rowsCount: 0
+        })
         timeEntriesLoaded.value = false
         return
       }
 
       timeEntries.value = normalizeTimeEntries(rows)
-      csvLoadStatus.value.timeEntries.rowsCount = rows.length
-      csvLoadStatus.value.timeEntries.status = 'success'
+      updateCsvStatus('timeEntries', { rowsCount: rows.length, status: 'success' })
       timeEntriesLoaded.value = true
 
       // Permitir que la UI se actualice antes de calcular
@@ -230,10 +219,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     } catch (e) {
       const error = `Error al cargar tiempo dedicado: ${e}`
       errors.value.push(error)
-      csvLoadStatus.value.timeEntries.status = 'error'
-      csvLoadStatus.value.timeEntries.error = error
-      csvLoadStatus.value.timeEntries.rowsCount = 0
-       timeEntriesLoaded.value = false
+      updateCsvStatus('timeEntries', { status: 'error', error, rowsCount: 0 })
+      timeEntriesLoaded.value = false
     }
   }
 
