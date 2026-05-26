@@ -87,19 +87,46 @@ function fmtPct(n: number): string {
 
 .kpi-card {
   text-align: center;
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.kpi-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.kpi-card :deep(.p-card-header) {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.kpi-card :deep(.p-card-title) {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.kpi-card :deep(.p-card-content) {
+  background: var(--bg-primary);
+  padding: 2rem 1rem;
 }
 
 .kpi-value {
   font-size: 2rem;
   font-weight: 700;
   display: block;
+  color: var(--text-primary);
 }
 
 .kpi-value.profit {
-  color: var(--p-green-500, #22c55e);
+  color: var(--color-success);
 }
 
 .kpi-value.loss {
-  color: var(--p-red-500, #ef4444);
+  color: var(--color-danger);
 }
 </style>

@@ -65,6 +65,8 @@ watch(
 <style scoped>
 .charts-tab {
   width: 100%;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .charts-grid {
@@ -72,11 +74,16 @@ watch(
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   gap: 1.5rem;
   padding: 1.5rem;
+  background: var(--bg-primary);
 }
 
 .no-data {
   padding: 2rem;
   text-align: center;
-  color: var(--text-color-secondary);
+  color: var(--text-secondary);
+  background: var(--bg-primary);
+  border: 2px dashed var(--border-color);
+  border-radius: 0.5rem;
+  margin: 1.5rem;
 }
 </style>

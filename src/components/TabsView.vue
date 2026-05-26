@@ -55,5 +55,45 @@ const activeTab = ref(0)
 <style scoped>
 .tabs-view {
   width: 100%;
+  background: var(--bg-primary);
+}
+
+.tabs-view :deep(.p-tabs) {
+  background: var(--bg-primary);
+}
+
+.tabs-view :deep(.p-tabs-nav) {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tabs-view :deep(.p-tabs-nav .p-tablist button) {
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tabs-view :deep(.p-tabs-nav .p-tablist button:hover) {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.tabs-view :deep(.p-tabs-nav .p-tablist button[aria-selected='true']) {
+  color: var(--color-primary);
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.tabs-view :deep(.p-tabs-panels) {
+  background: var(--bg-primary);
+  padding: 1rem;
+}
+
+.tabs-view :deep(.p-tabs-panel) {
+  color: var(--text-primary);
+  background: var(--bg-primary);
 }
 </style>

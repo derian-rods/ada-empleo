@@ -59,5 +59,52 @@ const activeTab = ref('grouped')
 <style scoped>
 .tables-tabs {
   width: 100%;
+  background: var(--bg-primary);
+}
+
+.tables-tabs :deep(.p-tabs) {
+  background: var(--bg-primary);
+}
+
+.tables-tabs :deep(.p-tabs-nav) {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.tables-tabs :deep(.p-tabs-nav .p-tablist) {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tables-tabs :deep(.p-tabs-nav .p-tablist .p-tab) {
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  padding: 1rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tables-tabs :deep(.p-tabs-nav .p-tablist .p-tab:hover) {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.tables-tabs :deep(.p-tabs-nav .p-tablist .p-tab[aria-selected='true']) {
+  color: var(--color-primary);
+  border-bottom: 3px solid var(--color-primary);
+}
+
+.tables-tabs :deep(.p-tabs-panels) {
+  background: var(--bg-primary);
+  padding: 1rem;
+}
+
+.tables-tabs :deep(.p-tabs-panel) {
+  color: var(--text-primary);
+  background: var(--bg-primary);
 }
 </style>

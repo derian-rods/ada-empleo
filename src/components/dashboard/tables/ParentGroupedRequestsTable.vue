@@ -468,8 +468,9 @@ function clearFilters() {
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
-  background: var(--surface-50);
-  border-radius: 8px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
 }
 
 .filter-row {
@@ -488,7 +489,7 @@ function clearFilters() {
 .filter-item label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-color);
+  color: var(--text-primary);
 }
 
 .filter-item.checkbox-item {
@@ -499,21 +500,32 @@ function clearFilters() {
 
 .filter-item.checkbox-item label {
   margin: 0;
+  color: var(--text-primary);
 }
 
 :deep(.p-inputtext-sm),
 :deep(.p-multiselect-sm),
 :deep(.p-dropdown-sm) {
   font-size: 0.875rem;
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+:deep(.p-inputtext-sm:focus),
+:deep(.p-multiselect-sm:focus),
+:deep(.p-dropdown-sm:focus) {
+  border-color: var(--color-primary);
 }
 
 .grouped-table {
   width: 100%;
+  background: var(--bg-primary);
 }
 
 .expansion-content {
   padding: 1.5rem;
-  background: var(--surface-ground);
+  background: var(--bg-secondary);
 }
 
 .children-grid {
@@ -523,22 +535,25 @@ function clearFilters() {
 }
 
 .child-card {
-  border: 1px solid var(--surface-border);
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
   padding: 1rem;
-  background: var(--surface-card);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .child-header {
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--border-color);
   padding-bottom: 0.75rem;
   margin-bottom: 0.75rem;
+  color: var(--text-primary);
 }
 
 .child-header h4 {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .child-metrics {
@@ -547,8 +562,8 @@ function clearFilters() {
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding: 0.75rem;
-  background: var(--surface-50);
-  border-radius: 4px;
+  background: var(--bg-tertiary);
+  border-radius: 0.375rem;
 }
 
 .metric {
@@ -560,13 +575,14 @@ function clearFilters() {
 
 .metric .label {
   font-size: 0.75rem;
-  color: var(--text-color-secondary);
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .metric .value {
   font-size: 0.95rem;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .user-role-table {
@@ -577,22 +593,26 @@ function clearFilters() {
   width: 100%;
   font-size: 0.85rem;
   border-collapse: collapse;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .user-role-table thead {
-  background: var(--surface-100);
+  background: var(--bg-tertiary);
 }
 
 .user-role-table th {
   padding: 0.5rem;
   text-align: left;
   font-weight: 600;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .user-role-table td {
   padding: 0.5rem;
-  border-bottom: 1px solid var(--surface-border);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .user-role-table td.text-right {
@@ -600,13 +620,16 @@ function clearFilters() {
 }
 
 .user-role-table tbody tr:hover {
-  background: var(--surface-50);
+  background: var(--bg-hover);
 }
 
 .empty-state {
   padding: 2rem;
   text-align: center;
-  color: var(--text-color-secondary);
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border-color);
+  border-radius: 0.5rem;
 }
 
 .empty-state p {

@@ -116,17 +116,21 @@ function getProcessingMessage(): string {
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 }
+
 .upload-item {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
+
 .upload-item label {
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  color: var(--text-primary);
 }
+
 .messages {
   margin-top: 1rem;
   display: flex;
@@ -146,6 +150,7 @@ function getProcessingMessage(): string {
   justify-content: center;
   z-index: 1000;
   pointer-events: auto;
+  backdrop-filter: blur(2px);
 }
 
 .processing-content {
@@ -153,24 +158,27 @@ function getProcessingMessage(): string {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  background: var(--surface-card);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-xl);
 }
 
 .processing-content p {
   margin: 0;
-  color: var(--text-color);
+  color: var(--text-primary);
   text-align: center;
 }
 
 .processing-content strong {
-  color: var(--primary-color);
+  color: var(--color-primary);
+  font-weight: 700;
 }
 
 .text-muted {
-  color: var(--text-color-secondary);
+  color: var(--text-secondary);
   font-size: 0.875rem;
 }
 </style>

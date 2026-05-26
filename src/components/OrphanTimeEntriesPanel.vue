@@ -67,4 +67,29 @@ function fmt(n: number): string {
 .orphan-table {
   margin-top: 1rem;
 }
+
+.orphan-table :deep(.p-datatable) {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+}
+
+.orphan-table :deep(.p-datatable .p-datatable-thead > tr > th) {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.orphan-table :deep(.p-datatable .p-datatable-tbody > tr) {
+  border-color: var(--border-color);
+  background: var(--bg-primary);
+}
+
+.orphan-table :deep(.p-datatable .p-datatable-tbody > tr > td) {
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.orphan-table :deep(.p-datatable .p-datatable-tbody > tr:hover) {
+  background: var(--bg-hover);
+}
 </style>
