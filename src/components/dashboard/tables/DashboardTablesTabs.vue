@@ -1,18 +1,11 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import TabView from 'primevue/tabview'
+import { ref } from 'vue'
+import Tabs from 'primevue/tabs'
+import TabList from 'primevue/tablist'
+import Tab from 'primevue/tab'
+import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
-import UsersTable from './UsersTable.vue'
-import ChildRequestsTable from './ChildRequestsTable.vue'
-import ParentRequestsTable from './ParentRequestsTable.vue'
-import ParentProjectGroupTable from './ParentProjectGroupTable.vue'
 import ParentGroupedRequestsTable from './ParentGroupedRequestsTable.vue'
-import {
-  buildUserTableRows,
-  buildChildRequestTableRows,
-  buildParentRequestTableRows,
-  buildParentProjectGroupTableRows,
-} from '../../../domain/tableAggregations'
 import type {
   ParentRequest,
   ChildRequest,
@@ -36,68 +29,31 @@ const props = withDefaults(defineProps<DashboardTablesTabsProps>(), {
   rowsPerPageOptions: () => [10, 25, 50, 100],
 })
 
-const activeTab = ref(0)
-
-const userRows = computed(() =>
-  buildUserTableRows(props.calculatedRequests, props.children, props.timeEntries)
-)
-
-const childRows = computed(() =>
-  buildChildRequestTableRows(
-    props.parents,
-    props.children,
-    props.calculatedRequests,
-    props.timeEntries
-  )
-)
-
-const parentRows = computed(() => buildParentRequestTableRows(props.calculatedRequests))
-
-const projectGroupRows = computed(() =>
-  buildParentProjectGroupTableRows(
-    props.parents,
-    props.children,
-    props.calculatedRequests,
-    props.timeEntries
-  )
-)
+const activeTab = ref('grouped')
 </script>
 
 <template>
-  <TabView v-model:activeIndex="activeTab" class="tables-tabs">
-    <!-- Tabla agrupada por padre Tab (PRINCIPAL) -->
-    <TabPanel header="Tabla agrupada por padre" value="grouped" :leftIcon="'pi pi-fw pi-sitemap'">
-      <ParentGroupedRequestsTable
-        :parents="parents"
-        :children="children"
-        :time-entries="timeEntries"
-        :calculated-requests="calculatedRequests"
-        :loading="loading"
-        :rows="rowsPerPage"
-        :rows-per-page-options="rowsPerPageOptions"
-      />
-    </TabPanel>
-
-    <!-- Usuarios Tab -->
-    <TabPanel header="Usuarios" value="usuarios" :leftIcon="'pi pi-fw pi-users'">
-      <UsersTable :rows="userRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
-    </TabPanel>
-
-    <!-- Peticiones hijas Tab -->
-    <TabPanel header="Peticiones hijas" value="hijas" :leftIcon="'pi pi-fw pi-list'">
-      <ChildRequestsTable :rows="childRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
-    </TabPanel>
-
-    <!-- Peticiones padre Tab -->
-    <TabPanel header="Peticiones padre" value="padre" :leftIcon="'pi pi-fw pi-home'">
-      <ParentRequestsTable :rows="parentRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
-    </TabPanel>
-
-    <!-- Agrupado por proyecto padre Tab -->
-    <TabPanel header="Agrupado por proyecto" value="proyecto" :leftIcon="'pi pi-fw pi-folder'">
-      <ParentProjectGroupTable :rows="projectGroupRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
-    </TabPanel>
-  </TabView>
+  <Tabs v-model:value="activeTab" class="tables-tabs">
+    <TabList>
+      <Tab value="grouped" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-sitemap"></i>
+        <span>Tabla agrupada por padre</span>
+      </Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel value="grouped">
+        <ParentGroupedRequestsTable
+          :parents="parents"
+          :children="children"
+          :time-entries="timeEntries"
+          :calculated-requests="calculatedRequests"
+          :loading="loading"
+          :rows="rowsPerPage"
+          :rows-per-page-options="rowsPerPageOptions"
+        />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
 </template>
 
 <style scoped>

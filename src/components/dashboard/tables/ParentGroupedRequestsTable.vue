@@ -37,7 +37,7 @@ const props = withDefaults(defineProps<ParentGroupedRequestsTableProps>(), {
 })
 
 // State
-const expandedRows = ref<Record<string, boolean>>({})
+const expandedRows = ref<string[]>([])
 const filters = ref<ParentGroupedTableFilters>({})
 
 // Build and filter data
@@ -133,7 +133,7 @@ function fmtPct(n: number): string {
 
 function clearFilters() {
   filters.value = {}
-  expandedRows.value = {}
+  expandedRows.value = []
 }
 </script>
 
@@ -312,6 +312,7 @@ function clearFilters() {
       responsive-layout="scroll"
       :global-filter-fields="['parentCode', 'parentSubject']"
       class="grouped-table"
+      data-key="parentId"
     >
       <!-- Expansion column for children -->
       <Column :expander="true" style="width: 50px" />
