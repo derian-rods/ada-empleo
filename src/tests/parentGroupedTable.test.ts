@@ -413,7 +413,7 @@ describe('filterParentGroupedRows', () => {
       calculatedRequests
     )
 
-    const filtered = filterParentGroupedRows(rows, { user: 'Juan' })
+    const filtered = filterParentGroupedRows(rows, { user: ['Juan'] })
     expect(filtered).toHaveLength(1)
     expect(filtered[0].parentCode).toBe('P-1000')
   })
@@ -445,7 +445,7 @@ describe('filterParentGroupedRows', () => {
       calculatedRequests
     )
 
-    const filtered = filterParentGroupedRows(rows, { role: 'Developer' })
+    const filtered = filterParentGroupedRows(rows, { role: ['Developer'] })
     expect(filtered).toHaveLength(1)
     expect(filtered[0].parentCode).toBe('P-1000')
   })

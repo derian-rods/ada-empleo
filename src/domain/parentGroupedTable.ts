@@ -85,11 +85,11 @@ export interface ParentGroupedTableFilters {
   childCode?: string
   childSubject?: string
   project?: string
-  application?: string
+  application?: string[]
   status?: string
-  user?: string
-  role?: string
-  activity?: string
+  user?: string[]
+  role?: string[]
+  activity?: string[]
   resultStatus?: ResultStatus
   riskLevel?: RiskLevel
   onlyLosses?: boolean
@@ -385,9 +385,9 @@ export function filterParentGroupedRows(
       if (
         filters.childCode ||
         filters.childSubject ||
-        filters.user ||
-        filters.role ||
-        filters.activity
+        filters.user?.length ||
+        filters.role?.length ||
+        filters.activity?.length
       ) {
         filteredChildren = filteredChildren.filter((child) => {
           if (
@@ -408,23 +408,29 @@ export function filterParentGroupedRows(
             return false
           }
 
-          if (filters.user) {
+          if (filters.user && filters.user.length > 0) {
             const userExists = child.userRoleHours.some((urh) =>
-              urh.user.toLowerCase().includes(filters.user!.toLowerCase())
+              filters.user!.some((u) =>
+                urh.user.toLowerCase().includes(u.toLowerCase())
+              )
             )
             if (!userExists) return false
           }
 
-          if (filters.role) {
+          if (filters.role && filters.role.length > 0) {
             const roleExists = child.userRoleHours.some((urh) =>
-              urh.role.toLowerCase().includes(filters.role!.toLowerCase())
+              filters.role!.some((r) =>
+                urh.role.toLowerCase().includes(r.toLowerCase())
+              )
             )
             if (!roleExists) return false
           }
 
-          if (filters.activity) {
+          if (filters.activity && filters.activity.length > 0) {
             const activityExists = child.activities.some((a) =>
-              a.toLowerCase().includes(filters.activity!.toLowerCase())
+              filters.activity!.some((act) =>
+                a.toLowerCase().includes(act.toLowerCase())
+              )
             )
             if (!activityExists) return false
           }
@@ -435,19 +441,27 @@ export function filterParentGroupedRows(
 
       // Calculate filtered actual hours if user/role filters are active
       let filteredActualHours: number | undefined = undefined
-      if (filters.user || filters.role || filters.activity) {
+      if (filters.user?.length || filters.role?.length || filters.activity?.length) {
         filteredActualHours = filteredChildren.reduce((sum, child) => {
           const childHours = child.userRoleHours.reduce((s, urh) => {
             let matches = true
 
-            if (filters.user && !urh.user.toLowerCase().includes(filters.user.toLowerCase())) {
-              matches = false
+            if (filters.user && filters.user.length > 0) {
+              matches = matches && filters.user.some((u) =>
+                urh.user.toLowerCase().includes(u.toLowerCase())
+              )
             }
-            if (filters.role && !urh.role.toLowerCase().includes(filters.role.toLowerCase())) {
-              matches = false
+            if (filters.role && filters.role.length > 0) {
+              matches = matches && filters.role.some((r) =>
+                urh.role.toLowerCase().includes(r.toLowerCase())
+              )
             }
-            if (filters.activity && !urh.activities.some((a) => a.toLowerCase().includes(filters.activity!.toLowerCase()))) {
-              matches = false
+            if (filters.activity && filters.activity.length > 0) {
+              matches = matches && filters.activity.some((act) =>
+                urh.activities.some((a) =>
+                  a.toLowerCase().includes(act.toLowerCase())
+                )
+              )
             }
 
             return matches ? s + urh.hours : s
@@ -486,7 +500,12 @@ export function filterParentGroupedRows(
         return false
       }
 
-      if (filters.application && !row.applications.includes(filters.application)) {
+      if (
+        filters.application &&
+        !row.applications.some((a) =>
+          filters.application!.includes(a)
+        )
+      ) {
         return false
       }
 
@@ -523,7 +542,7 @@ export function filterParentGroupedRows(
 
       // If user/role/activity filters exist, only show if children passed the filter
       if (
-        (filters.user || filters.role || filters.activity) &&
+        (filters.user?.length || filters.role?.length || filters.activity?.length) &&
         row.children.length === 0
       ) {
         return false
@@ -533,9 +552,9 @@ export function filterParentGroupedRows(
       if (
         filters.childCode ||
         filters.childSubject ||
-        filters.user ||
-        filters.role ||
-        filters.activity
+        filters.user?.length ||
+        filters.role?.length ||
+        filters.activity?.length
       ) {
         if (row.children.length === 0) {
           return false
