@@ -6,11 +6,13 @@ import Aura from '@primevue/themes/aura'
 import VChart from 'vue-echarts'
 import 'primeicons/primeicons.css'
 import './style.css'
+import './styles/theme.css'
 import App from './App.vue'
 
 const app = createApp(App)
+const pinia = createPinia()
 
-app.use(createPinia())
+app.use(pinia)
 app.use(PrimeVue, {
   theme: {
     preset: Aura,

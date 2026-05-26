@@ -3,8 +3,10 @@ import AppLayout from './components/AppLayout.vue'
 import CsvUploadPanel from './components/CsvUploadPanel.vue'
 import TabsView from './components/TabsView.vue'
 import { useDashboardStore } from './stores/dashboard'
+import { useThemeInit } from './composables/useThemeInit'
 
 const store = useDashboardStore()
+useThemeInit()
 </script>
 
 <template>
@@ -31,7 +33,7 @@ const store = useDashboardStore()
 .empty-state {
   text-align: center;
   padding: 2rem;
-  color: var(--text-color-secondary);
+  color: var(--text-secondary);
   font-size: 1rem;
 }
 </style>
