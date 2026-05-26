@@ -3,10 +3,15 @@ import AppLayout from './components/AppLayout.vue'
 import CsvUploadPanel from './components/CsvUploadPanel.vue'
 import TabsView from './components/TabsView.vue'
 import { useDashboardStore } from './stores/dashboard'
-import { useThemeInit } from './composables/useThemeInit'
+import { useThemeStore } from './stores/theme'
+import { onMounted } from 'vue'
 
 const store = useDashboardStore()
-useThemeInit()
+const themeStore = useThemeStore()
+
+onMounted(() => {
+  themeStore.loadTheme()
+})
 </script>
 
 <template>

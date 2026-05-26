@@ -4,7 +4,6 @@ import Toast from 'primevue/toast'
 import Toolbar from 'primevue/toolbar'
 import Button from 'primevue/button'
 import { useDashboardStore } from '../stores/dashboard'
-import ThemeSwitcher from './ThemeSwitcher.vue'
 
 const store = useDashboardStore()
 const toast = useToast()
@@ -22,7 +21,6 @@ function handleReset() {
         <h2 style="margin: 0; font-size: 1.25rem">CCV Dashboard</h2>
       </template>
       <template #end>
-        <ThemeSwitcher />
         <Button
           label="Vaciar datos"
           icon="pi pi-trash"
