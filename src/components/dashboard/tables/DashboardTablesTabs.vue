@@ -6,6 +6,7 @@ import UsersTable from './UsersTable.vue'
 import ChildRequestsTable from './ChildRequestsTable.vue'
 import ParentRequestsTable from './ParentRequestsTable.vue'
 import ParentProjectGroupTable from './ParentProjectGroupTable.vue'
+import ParentGroupedRequestsTable from './ParentGroupedRequestsTable.vue'
 import {
   buildUserTableRows,
   buildChildRequestTableRows,
@@ -64,6 +65,19 @@ const projectGroupRows = computed(() =>
 
 <template>
   <TabView v-model:activeIndex="activeTab" class="tables-tabs">
+    <!-- Tabla agrupada por padre Tab (PRINCIPAL) -->
+    <TabPanel header="Tabla agrupada por padre" value="grouped" :leftIcon="'pi pi-fw pi-sitemap'">
+      <ParentGroupedRequestsTable
+        :parents="parents"
+        :children="children"
+        :time-entries="timeEntries"
+        :calculated-requests="calculatedRequests"
+        :loading="loading"
+        :rows="rowsPerPage"
+        :rows-per-page-options="rowsPerPageOptions"
+      />
+    </TabPanel>
+
     <!-- Usuarios Tab -->
     <TabPanel header="Usuarios" value="usuarios" :leftIcon="'pi pi-fw pi-users'">
       <UsersTable :rows="userRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
