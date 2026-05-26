@@ -30,6 +30,7 @@ const themeIcon = computed(() => {
 .theme-switcher {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .theme-toggle {
@@ -38,22 +39,36 @@ const themeIcon = computed(() => {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-secondary);
+  border: 1.5px solid var(--border-color);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
   cursor: pointer;
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .theme-toggle:hover {
   background-color: var(--hover-bg);
   border-color: var(--color-primary);
   color: var(--color-primary);
+  transform: scale(1.05);
 }
 
 .theme-toggle:active {
   transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .theme-switcher {
+    gap: 0.25rem;
+  }
+
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
 }
 </style>

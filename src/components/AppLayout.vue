@@ -47,10 +47,19 @@ function handleReset() {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background-color: var(--bg-primary);
 }
 
 .app-toolbar {
   border-radius: 0;
+  background-color: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-color);
+}
+
+.app-toolbar :deep(h2) {
+  color: var(--text-primary);
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .app-content {
@@ -59,7 +68,8 @@ function handleReset() {
   max-width: 1400px;
   margin: 0 auto;
   width: 100%;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s ease, background-color 0.3s ease;
+  background-color: var(--bg-primary);
 }
 
 .app-content.is-processing {
