@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
 import UsersTable from './UsersTable.vue'
@@ -35,6 +35,8 @@ const props = withDefaults(defineProps<DashboardTablesTabsProps>(), {
   rowsPerPageOptions: () => [10, 25, 50, 100],
 })
 
+const activeTab = ref(0)
+
 const userRows = computed(() =>
   buildUserTableRows(props.calculatedRequests, props.children, props.timeEntries)
 )
@@ -61,24 +63,24 @@ const projectGroupRows = computed(() =>
 </script>
 
 <template>
-  <TabView class="tables-tabs">
+  <TabView v-model:activeIndex="activeTab" class="tables-tabs">
     <!-- Usuarios Tab -->
-    <TabPanel header="Usuarios" value="0" :leftIcon="'pi pi-fw pi-users'">
+    <TabPanel header="Usuarios" value="usuarios" :leftIcon="'pi pi-fw pi-users'">
       <UsersTable :rows="userRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
     </TabPanel>
 
     <!-- Peticiones hijas Tab -->
-    <TabPanel header="Peticiones hijas" value="1" :leftIcon="'pi pi-fw pi-list'">
+    <TabPanel header="Peticiones hijas" value="hijas" :leftIcon="'pi pi-fw pi-list'">
       <ChildRequestsTable :rows="childRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
     </TabPanel>
 
     <!-- Peticiones padre Tab -->
-    <TabPanel header="Peticiones padre" value="2" :leftIcon="'pi pi-fw pi-home'">
+    <TabPanel header="Peticiones padre" value="padre" :leftIcon="'pi pi-fw pi-home'">
       <ParentRequestsTable :rows="parentRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
     </TabPanel>
 
     <!-- Agrupado por proyecto padre Tab -->
-    <TabPanel header="Agrupado por proyecto" value="3" :leftIcon="'pi pi-fw pi-folder'">
+    <TabPanel header="Agrupado por proyecto" value="proyecto" :leftIcon="'pi pi-fw pi-folder'">
       <ParentProjectGroupTable :rows="projectGroupRows" :loading="loading" :rows-per-page="rowsPerPage" :rows-per-page-options="rowsPerPageOptions" />
     </TabPanel>
   </TabView>
