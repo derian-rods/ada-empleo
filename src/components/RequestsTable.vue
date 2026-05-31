@@ -94,7 +94,12 @@ function fmtPct(n: number): string {
       <template #body="{ data }">{{ fmt(data.estimatedHours) }}</template>
     </Column>
 
-    <Column field="actualHours" header="Reales" sortable style="width: 100px">
+    <Column
+      field="actualHours"
+      header="Incurridas"
+      sortable
+      style="width: 100px"
+    >
       <template #body="{ data }">{{ fmt(data.actualHours) }}</template>
     </Column>
 

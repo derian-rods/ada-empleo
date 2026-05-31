@@ -88,7 +88,7 @@ function fmt(n: number): string {
 
     <Column
       field="actualHours"
-      header="Reales imputadas"
+      header="Incurridas"
       sortable
       style="width: 140px"
     >

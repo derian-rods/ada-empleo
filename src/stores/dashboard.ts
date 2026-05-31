@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import Papa from 'papaparse'
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import Papa from "papaparse";
 import type {
   ParentRequest,
   ChildRequest,
@@ -8,296 +8,314 @@ import type {
   OrphanTimeEntry,
   CalculatedRequest,
   DashboardSummary,
-} from '../domain/types'
+} from "../domain/types";
 import {
   normalizeParentRequests,
   normalizeChildRequests,
   normalizeTimeEntries,
-} from '../domain/normalizeCsv'
-import { buildCalculatedRequests } from '../domain/relationships'
-import { calculateDashboardSummary } from '../domain/calculations'
+} from "../domain/normalizeCsv";
+import { buildCalculatedRequests } from "../domain/relationships";
+import { calculateDashboardSummary } from "../domain/calculations";
 
-export type CsvKind = 'parents' | 'children' | 'timeEntries'
+export type CsvKind = "parents" | "children" | "timeEntries";
 
 export interface CsvLoadStatus {
-  fileName?: string
-  rowsCount: number
-  status: 'idle' | 'loading' | 'success' | 'error'
-  error?: string
+  fileName?: string;
+  rowsCount: number;
+  status: "idle" | "loading" | "success" | "error";
+  error?: string;
 }
 
-export const useDashboardStore = defineStore('dashboard', () => {
+export const useDashboardStore = defineStore("dashboard", () => {
   // Raw normalized data
-  const parents = ref<ParentRequest[]>([])
-  const children = ref<ChildRequest[]>([])
-  const timeEntries = ref<TimeEntry[]>([])
+  const parents = ref<ParentRequest[]>([]);
+  const children = ref<ChildRequest[]>([]);
+  const timeEntries = ref<TimeEntry[]>([]);
 
   // Computed results
-  const calculatedRequests = ref<CalculatedRequest[]>([])
-  const orphanTimeEntries = ref<OrphanTimeEntry[]>([])
-  const summary = ref<DashboardSummary | null>(null)
+  const calculatedRequests = ref<CalculatedRequest[]>([]);
+  const orphanTimeEntries = ref<OrphanTimeEntry[]>([]);
+  const summary = ref<DashboardSummary | null>(null);
 
   // CSV Load Status
   const csvLoadStatus = ref<Record<CsvKind, CsvLoadStatus>>({
-    parents: { status: 'idle', rowsCount: 0 },
-    children: { status: 'idle', rowsCount: 0 },
-    timeEntries: { status: 'idle', rowsCount: 0 },
-  })
+    parents: { status: "idle", rowsCount: 0 },
+    children: { status: "idle", rowsCount: 0 },
+    timeEntries: { status: "idle", rowsCount: 0 },
+  });
 
   // Status
-  const errors = ref<string[]>([])
-  const warnings = ref<string[]>([])
-  const parentsLoaded = ref(false)
-  const childrenLoaded = ref(false)
-  const timeEntriesLoaded = ref(false)
-  const isCalculating = ref(false)
+  const errors = ref<string[]>([]);
+  const warnings = ref<string[]>([]);
+  const parentsLoaded = ref(false);
+  const childrenLoaded = ref(false);
+  const timeEntriesLoaded = ref(false);
+  const isCalculating = ref(false);
 
   const hasData = computed(
-    () => parentsLoaded.value && timeEntriesLoaded.value
-  )
+    () => parentsLoaded.value && timeEntriesLoaded.value,
+  );
 
   const isProcessingCsv = computed(
     () =>
-      csvLoadStatus.value.parents.status === 'loading' ||
-      csvLoadStatus.value.children.status === 'loading' ||
-      csvLoadStatus.value.timeEntries.status === 'loading'
-  )
+      csvLoadStatus.value.parents.status === "loading" ||
+      csvLoadStatus.value.children.status === "loading" ||
+      csvLoadStatus.value.timeEntries.status === "loading",
+  );
 
   const isProcessing = computed(
-    () => isProcessingCsv.value || isCalculating.value
-  )
+    () => isProcessingCsv.value || isCalculating.value,
+  );
 
   const allCsvsValid = computed(
     () =>
-      csvLoadStatus.value.parents.status === 'success' &&
-      csvLoadStatus.value.children.status === 'success' &&
-      csvLoadStatus.value.timeEntries.status === 'success'
-  )
+      csvLoadStatus.value.parents.status === "success" &&
+      csvLoadStatus.value.children.status === "success" &&
+      csvLoadStatus.value.timeEntries.status === "success",
+  );
 
-  const canCalculate = computed(() => allCsvsValid.value)
+  const canCalculate = computed(() => allCsvsValid.value);
 
   function parseCsvFile(file: File): Promise<Record<string, unknown>[]> {
     return new Promise((resolve, reject) => {
       Papa.parse(file, {
         header: true,
-        delimiter: ';',
+        delimiter: ";",
         skipEmptyLines: true,
-        encoding: 'UTF-8',
+        encoding: "UTF-8",
         complete: (results) => {
-          resolve(results.data as Record<string, unknown>[])
+          resolve(results.data as Record<string, unknown>[]);
         },
         error: (err: Error) => {
-          reject(err)
+          reject(err);
         },
-      })
-    })
+      });
+    });
   }
 
   // Helper para permitir que la UI se actualice
   function allowUIUpdate(): Promise<void> {
     return new Promise((resolve) => {
-      setTimeout(resolve, 0)
-    })
+      setTimeout(resolve, 0);
+    });
   }
 
   // Helper para actualizar estado de CSV sin deprecation warning
   function updateCsvStatus(kind: CsvKind, updates: Partial<CsvLoadStatus>) {
-    csvLoadStatus.value[kind] = { ...csvLoadStatus.value[kind], ...updates }
+    csvLoadStatus.value[kind] = { ...csvLoadStatus.value[kind], ...updates };
   }
 
   async function loadParents(file: File) {
-    updateCsvStatus('parents', { status: 'loading', fileName: file.name, error: undefined })
-    errors.value = errors.value.filter((e) => !e.includes('padre'))
+    updateCsvStatus("parents", {
+      status: "loading",
+      fileName: file.name,
+      error: undefined,
+    });
+    errors.value = errors.value.filter((e) => !e.includes("padre"));
 
     // Permitir que la UI se actualice antes de procesar
-    await allowUIUpdate()
+    await allowUIUpdate();
 
     try {
-      const rows = await parseCsvFile(file)
-      if (!rows.length || !('#' in rows[0])) {
-        const error = 'Peticiones padre: falta columna #'
-        errors.value.push(error)
-        updateCsvStatus('parents', { status: 'error', error, rowsCount: 0 })
-        parentsLoaded.value = false
-        return
+      const rows = await parseCsvFile(file);
+      if (!rows.length || !("#" in rows[0])) {
+        const error = "Peticiones padre: falta columna #";
+        errors.value.push(error);
+        updateCsvStatus("parents", { status: "error", error, rowsCount: 0 });
+        parentsLoaded.value = false;
+        return;
       }
 
       // Permitir que la UI responda durante la normalización
-      await allowUIUpdate()
+      await allowUIUpdate();
 
-      parents.value = normalizeParentRequests(rows)
-      updateCsvStatus('parents', { rowsCount: rows.length, status: 'success' })
-      parentsLoaded.value = true
+      parents.value = normalizeParentRequests(rows);
+      updateCsvStatus("parents", { rowsCount: rows.length, status: "success" });
+      parentsLoaded.value = true;
 
       // Permitir que la UI se actualice antes de calcular
-      await allowUIUpdate()
+      await allowUIUpdate();
 
-      await recalculate()
+      await recalculate();
     } catch (e) {
-      const error = `Error al cargar peticiones padre: ${e}`
-      errors.value.push(error)
-      updateCsvStatus('parents', { status: 'error', error, rowsCount: 0 })
-      parentsLoaded.value = false
+      const error = `Error al cargar peticiones padre: ${e}`;
+      errors.value.push(error);
+      updateCsvStatus("parents", { status: "error", error, rowsCount: 0 });
+      parentsLoaded.value = false;
     }
   }
 
   async function loadChildren(file: File) {
-    updateCsvStatus('children', { status: 'loading', fileName: file.name, error: undefined })
-    errors.value = errors.value.filter((e) => !e.includes('hijas'))
+    updateCsvStatus("children", {
+      status: "loading",
+      fileName: file.name,
+      error: undefined,
+    });
+    errors.value = errors.value.filter((e) => !e.includes("hijas"));
 
     // Permitir que la UI se actualice antes de procesar
-    await allowUIUpdate()
+    await allowUIUpdate();
 
     try {
-      const rows = await parseCsvFile(file)
-      if (!rows.length || !('#' in rows[0])) {
-        const error = 'Peticiones hijas: falta columna #'
-        errors.value.push(error)
-        updateCsvStatus('children', { status: 'error', error, rowsCount: 0 })
-        childrenLoaded.value = false
-        return
+      const rows = await parseCsvFile(file);
+      if (!rows.length || !("#" in rows[0])) {
+        const error = "Peticiones hijas: falta columna #";
+        errors.value.push(error);
+        updateCsvStatus("children", { status: "error", error, rowsCount: 0 });
+        childrenLoaded.value = false;
+        return;
       }
 
       // Permitir que la UI responda durante la normalización
-      await allowUIUpdate()
+      await allowUIUpdate();
 
-      children.value = normalizeChildRequests(rows)
-      updateCsvStatus('children', { rowsCount: rows.length, status: 'success' })
-      childrenLoaded.value = true
+      children.value = normalizeChildRequests(rows);
+      updateCsvStatus("children", {
+        rowsCount: rows.length,
+        status: "success",
+      });
+      childrenLoaded.value = true;
 
       // Permitir que la UI se actualice antes de calcular
-      await allowUIUpdate()
+      await allowUIUpdate();
 
-      await recalculate()
+      await recalculate();
     } catch (e) {
-      const error = `Error al cargar peticiones hijas: ${e}`
-      errors.value.push(error)
-      updateCsvStatus('children', { status: 'error', error, rowsCount: 0 })
-      childrenLoaded.value = false
+      const error = `Error al cargar peticiones hijas: ${e}`;
+      errors.value.push(error);
+      updateCsvStatus("children", { status: "error", error, rowsCount: 0 });
+      childrenLoaded.value = false;
     }
   }
 
   async function loadTimeEntries(file: File) {
-    updateCsvStatus('timeEntries', { status: 'loading', fileName: file.name, error: undefined })
-    errors.value = errors.value.filter((e) => !e.includes('tiempo dedicado'))
+    updateCsvStatus("timeEntries", {
+      status: "loading",
+      fileName: file.name,
+      error: undefined,
+    });
+    errors.value = errors.value.filter((e) => !e.includes("tiempo dedicado"));
     warnings.value = warnings.value.filter(
-      (w) => !w.includes('Tiempo dedicado')
-    )
+      (w) => !w.includes("Tiempo dedicado"),
+    );
 
     // Permitir que la UI se actualice antes de procesar
-    await allowUIUpdate()
+    await allowUIUpdate();
 
     try {
-      const rows = await parseCsvFile(file)
-      let hasError = false
-      if (rows.length && !('Horas' in rows[0])) {
-        const error = 'Tiempo dedicado: falta columna Horas'
-        errors.value.push(error)
-        hasError = true
+      const rows = await parseCsvFile(file);
+      let hasError = false;
+      if (rows.length && !("Horas" in rows[0])) {
+        const error = "Tiempo dedicado: falta columna Horas";
+        errors.value.push(error);
+        hasError = true;
       }
-      if (rows.length && !('Petición' in rows[0])) {
-        const warning = 'Tiempo dedicado: falta columna Petición'
-        warnings.value.push(warning)
+      if (rows.length && !("Petición" in rows[0])) {
+        const warning = "Tiempo dedicado: falta columna Petición";
+        warnings.value.push(warning);
       }
 
       // Permitir que la UI responda durante la normalización
-      await allowUIUpdate()
+      await allowUIUpdate();
 
       if (hasError) {
-        updateCsvStatus('timeEntries', { 
-          status: 'error', 
-          error: 'Tiempo dedicado: falta columna Horas',
-          rowsCount: 0
-        })
-        timeEntriesLoaded.value = false
-        return
+        updateCsvStatus("timeEntries", {
+          status: "error",
+          error: "Tiempo dedicado: falta columna Horas",
+          rowsCount: 0,
+        });
+        timeEntriesLoaded.value = false;
+        return;
       }
 
-      timeEntries.value = normalizeTimeEntries(rows)
-      updateCsvStatus('timeEntries', { rowsCount: rows.length, status: 'success' })
-      timeEntriesLoaded.value = true
+      timeEntries.value = normalizeTimeEntries(rows);
+      updateCsvStatus("timeEntries", {
+        rowsCount: rows.length,
+        status: "success",
+      });
+      timeEntriesLoaded.value = true;
 
       // Permitir que la UI se actualice antes de calcular
-      await allowUIUpdate()
+      await allowUIUpdate();
 
-      await recalculate()
+      await recalculate();
     } catch (e) {
-      const error = `Error al cargar tiempo dedicado: ${e}`
-      errors.value.push(error)
-      updateCsvStatus('timeEntries', { status: 'error', error, rowsCount: 0 })
-      timeEntriesLoaded.value = false
+      const error = `Error al cargar tiempo dedicado: ${e}`;
+      errors.value.push(error);
+      updateCsvStatus("timeEntries", { status: "error", error, rowsCount: 0 });
+      timeEntriesLoaded.value = false;
     }
   }
 
   async function recalculate() {
-    if (!parentsLoaded.value || !timeEntriesLoaded.value) return
+    if (!parentsLoaded.value || !timeEntriesLoaded.value) return;
 
-    isCalculating.value = true
+    isCalculating.value = true;
 
     try {
       // Permitir que la UI se actualice antes de empezar cálculos
-      await allowUIUpdate()
+      await allowUIUpdate();
 
       const result = buildCalculatedRequests(
         parents.value,
         children.value,
-        timeEntries.value
-      )
+        timeEntries.value,
+      );
 
       // Permitir que la UI se actualice entre operaciones
-      await allowUIUpdate()
+      await allowUIUpdate();
 
-      calculatedRequests.value = result.calculatedRequests
-      orphanTimeEntries.value = result.orphanTimeEntries
+      calculatedRequests.value = result.calculatedRequests;
+      orphanTimeEntries.value = result.orphanTimeEntries;
 
       // Permitir que la UI se actualice
-      await allowUIUpdate()
+      await allowUIUpdate();
 
       summary.value = calculateDashboardSummary(
         result.calculatedRequests,
-        result.orphanTimeEntries
-      )
+        result.orphanTimeEntries,
+      );
 
       // Permitir que la UI se actualice
-      await allowUIUpdate()
+      await allowUIUpdate();
 
       // Generate warnings
-      warnings.value = []
+      warnings.value = [];
       if (result.orphanTimeEntries.length > 0) {
         warnings.value.push(
-          `${result.orphanTimeEntries.length} entradas de tiempo huérfanas (sin petición padre)`
-        )
+          `${result.orphanTimeEntries.length} entradas de tiempo huérfanas (sin petición padre)`,
+        );
       }
       const zeroEstWithActual = result.calculatedRequests.filter(
-        (r) => r.estimatedHours === 0 && r.actualHours > 0
-      )
+        (r) => r.estimatedHours === 0 && r.actualHours > 0,
+      );
       if (zeroEstWithActual.length > 0) {
         warnings.value.push(
-          `${zeroEstWithActual.length} peticiones con 0h estimadas pero horas reales > 0`
-        )
+          `${zeroEstWithActual.length} peticiones con 0h estimadas pero horas incurridas > 0`,
+        );
       }
     } finally {
-      isCalculating.value = false
+      isCalculating.value = false;
     }
   }
 
   function reset() {
-    parents.value = []
-    children.value = []
-    timeEntries.value = []
-    calculatedRequests.value = []
-    orphanTimeEntries.value = []
-    summary.value = null
-    errors.value = []
-    warnings.value = []
-    parentsLoaded.value = false
-    childrenLoaded.value = false
-    timeEntriesLoaded.value = false
+    parents.value = [];
+    children.value = [];
+    timeEntries.value = [];
+    calculatedRequests.value = [];
+    orphanTimeEntries.value = [];
+    summary.value = null;
+    errors.value = [];
+    warnings.value = [];
+    parentsLoaded.value = false;
+    childrenLoaded.value = false;
+    timeEntriesLoaded.value = false;
     csvLoadStatus.value = {
-      parents: { status: 'idle', rowsCount: 0 },
-      children: { status: 'idle', rowsCount: 0 },
-      timeEntries: { status: 'idle', rowsCount: 0 },
-    }
+      parents: { status: "idle", rowsCount: 0 },
+      children: { status: "idle", rowsCount: 0 },
+      timeEntries: { status: "idle", rowsCount: 0 },
+    };
   }
 
   return {
@@ -323,5 +341,5 @@ export const useDashboardStore = defineStore('dashboard', () => {
     loadChildren,
     loadTimeEntries,
     reset,
-  }
-})
+  };
+});
