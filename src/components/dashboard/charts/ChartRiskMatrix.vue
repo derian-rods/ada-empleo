@@ -1,40 +1,48 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { use } from 'echarts'
-import { ScatterChart, BarChart } from 'echarts/charts'
+import { ref, computed, onMounted } from "vue";
+import { use } from "echarts";
+import { ScatterChart, BarChart } from "echarts/charts";
 import {
   TitleComponent,
   TooltipComponent,
   GridComponent,
   LegendComponent,
-} from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
-import VChart from 'vue-echarts'
+} from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
+import VChart from "vue-echarts";
 import {
   buildRiskMatrixData,
   getResultStatusValue,
   type RiskMatrixPoint,
-} from '../../../domain/chartsData'
-import type { ParentGroupedTableRow } from '../../../domain/parentGroupedTable'
+} from "../../../domain/chartsData";
+import type { ParentGroupedTableRow } from "../../../domain/parentGroupedTable";
 
-use([ScatterChart, BarChart, TitleComponent, TooltipComponent, GridComponent, LegendComponent, CanvasRenderer])
+use([
+  ScatterChart,
+  BarChart,
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  CanvasRenderer,
+]);
 
 interface ChartRiskMatrixProps {
-  rows: ParentGroupedTableRow[]
+  rows: ParentGroupedTableRow[];
 }
 
-const props = defineProps<ChartRiskMatrixProps>()
+const props = defineProps<ChartRiskMatrixProps>();
 
-const chartRef = ref()
+const chartRef = ref();
 const chartData = computed(() => {
-  const points = buildRiskMatrixData(props.rows)
+  const points = buildRiskMatrixData(props.rows);
 
   // Organize by risk level
   const byRisk = {
-    low: points.filter((p) => p.riskLevel === 'low'),
-    medium: points.filter((p) => p.riskLevel === 'medium'),
-    high: points.filter((p) => p.riskLevel === 'high'),
-  }
+    low: points.filter((p) => p.riskLevel === "low"),
+    medium: points.filter((p) => p.riskLevel === "medium"),
+    high: points.filter((p) => p.riskLevel === "high"),
+  };
 
   return {
     low: byRisk.low.map((p) => [
@@ -55,73 +63,73 @@ const chartData = computed(() => {
       p.estimatedHours,
       p,
     ]),
-  }
-})
+  };
+});
 
 const option = computed(() => ({
   title: {
-    text: 'Matriz de Riesgo: Resultado vs Riesgo',
-    left: 'center',
+    text: "Matriz de Riesgo: Resultado vs Riesgo",
+    left: "center",
     textStyle: {
       fontSize: 16,
-      fontWeight: 'bold',
+      fontWeight: "bold",
     },
   },
   tooltip: {
-    trigger: 'item',
+    trigger: "item",
     confine: true,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    borderColor: '#333',
+    backgroundColor: "var(--tooltip-bg)",
+    borderColor: "var(--tooltip-border)",
     borderWidth: 1,
     textStyle: {
-      color: '#fff',
+      color: "var(--tooltip-text)",
       fontSize: 13,
       lineHeight: 20,
     },
     padding: [12, 16],
     formatter: (params: any) => {
-      if (params.componentSubType === 'scatter') {
-        const data = params.value[3] as RiskMatrixPoint
+      if (params.componentSubType === "scatter") {
+        const data = params.value[3] as RiskMatrixPoint;
         return `
           <div style="max-width: 350px; word-wrap: break-word; white-space: normal; line-height: 1.8;">
             <div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">${data.parentCode}</div>
-            <div style="font-size: 12px; margin-bottom: 8px; color: #ddd; word-break: break-word;">${data.parentSubject}</div>
-            <div style="border-top: 1px solid #666; margin: 8px 0; padding-top: 8px;"></div>
-            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Riesgo:</span> <strong>${data.riskLevel}</strong></div>
-            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Resultado:</span> <strong>${data.resultStatus}</strong></div>
-            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Estimado:</span> <strong>${data.estimatedHours.toFixed(1)}h</strong></div>
-            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Real:</span> <strong>${data.actualHours.toFixed(1)}h</strong></div>
-            <div style="margin-bottom: 6px;"><span style="color: #aaa;">Diferencia:</span> <strong>${data.differenceHours.toFixed(1)}h</strong></div>
+            <div style="font-size: 12px; margin-bottom: 8px; color: var(--text-soft); word-break: break-word;">${data.parentSubject}</div>
+            <div style="border-top: 1px solid var(--border-color-dark); margin: 8px 0; padding-top: 8px;"></div>
+            <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Riesgo:</span> <strong>${data.riskLevel}</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Resultado:</span> <strong>${data.resultStatus}</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Estimado:</span> <strong>${data.estimatedHours.toFixed(1)}h</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Real:</span> <strong>${data.actualHours.toFixed(1)}h</strong></div>
+            <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Diferencia:</span> <strong>${data.differenceHours.toFixed(1)}h</strong></div>
           </div>
-        `
+        `;
       }
-      return ''
+      return "";
     },
   },
   xAxis: {
-    type: 'value',
-    name: 'Resultado',
-    nameLocation: 'middle',
+    type: "value",
+    name: "Resultado",
+    nameLocation: "middle",
     nameGap: 25,
     axisLabel: {
       formatter: (value: number) => {
-        if (value === -1) return 'Pérdida'
-        if (value === 0) return 'Neutral'
-        return 'Ganancia'
+        if (value === -1) return "Pérdida";
+        if (value === 0) return "Neutral";
+        return "Ganancia";
       },
     },
     min: -1.5,
     max: 1.5,
     splitLine: {
       show: true,
-      lineStyle: { type: 'dashed', color: '#e5e7eb' },
+      lineStyle: { type: "dashed", color: "var(--border-color-light)" },
     },
   },
   yAxis: {
-    type: 'category',
-    data: ['Bajo', 'Medio', 'Alto'],
-    name: 'Nivel de Riesgo',
-    nameLocation: 'middle',
+    type: "category",
+    data: ["Bajo", "Medio", "Alto"],
+    name: "Nivel de Riesgo",
+    nameLocation: "middle",
     nameGap: 50,
     axisLine: { show: true },
     splitLine: { show: false },
@@ -135,52 +143,57 @@ const option = computed(() => ({
   },
   series: [
     {
-      name: 'Bajo',
-      type: 'scatter',
+      name: "Bajo",
+      type: "scatter",
       data: chartData.value.low,
       symbolSize: (val: any) => Math.sqrt(val[2] ?? 20) * 1.5,
-      itemStyle: { color: '#10b981' },
+      itemStyle: { color: "#10b981", opacity: 0.85 }, // Verde esmeralda
       emphasis: {
-        itemStyle: { borderColor: '#059669', borderWidth: 2 },
+        itemStyle: { borderColor: "#059669", borderWidth: 3 },
       },
     },
     {
-      name: 'Medio',
-      type: 'scatter',
+      name: "Medio",
+      type: "scatter",
       data: chartData.value.medium,
       symbolSize: (val: any) => Math.sqrt(val[2] ?? 20) * 1.5,
-      itemStyle: { color: '#f59e0b' },
+      itemStyle: { color: "#f59e0b", opacity: 0.85 }, // Naranja ámbar
       emphasis: {
-        itemStyle: { borderColor: '#d97706', borderWidth: 2 },
+        itemStyle: { borderColor: "#d97706", borderWidth: 3 },
       },
     },
     {
-      name: 'Alto',
-      type: 'scatter',
+      name: "Alto",
+      type: "scatter",
       data: chartData.value.high,
       symbolSize: (val: any) => Math.sqrt(val[2] ?? 20) * 1.5,
-      itemStyle: { color: '#ef4444' },
+      itemStyle: { color: "#ef4444", opacity: 0.85 }, // Rojo
       emphasis: {
-        itemStyle: { borderColor: '#dc2626', borderWidth: 2 },
+        itemStyle: { borderColor: "#dc2626", borderWidth: 3 },
       },
     },
   ],
   legend: {
-    orient: 'horizontal',
+    orient: "horizontal",
     bottom: 10,
   },
-}))
+}));
 
 onMounted(() => {
   if (chartRef.value) {
-    chartRef.value.resize()
+    chartRef.value.resize();
   }
-})
+});
 </script>
 
 <template>
   <div class="chart-container">
-    <VChart ref="chartRef" :option="option" autoresize style="width: 100%; height: 100%" />
+    <VChart
+      ref="chartRef"
+      :option="option"
+      autoresize
+      style="width: 100%; height: 100%"
+    />
   </div>
 </template>
 

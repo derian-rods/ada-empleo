@@ -1,42 +1,42 @@
 <script setup lang="ts">
-import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
-import Card from 'primevue/card'
-import Tag from 'primevue/tag'
-import Message from 'primevue/message'
-import ProgressSpinner from 'primevue/progressspinner'
-import { useDashboardStore } from '../stores/dashboard'
+import FileUpload, { type FileUploadSelectEvent } from "primevue/fileupload";
+import Card from "primevue/card";
+import Tag from "primevue/tag";
+import Message from "primevue/message";
+import ProgressSpinner from "primevue/progressspinner";
+import { useDashboardStore } from "../stores/dashboard";
 
-const store = useDashboardStore()
+const store = useDashboardStore();
 
 function onParentSelect(event: FileUploadSelectEvent) {
-  const file = event.files[0]
-  if (file) store.loadParents(file)
+  const file = event.files[0];
+  if (file) store.loadParents(file);
 }
 
 function onChildSelect(event: FileUploadSelectEvent) {
-  const file = event.files[0]
-  if (file) store.loadChildren(file)
+  const file = event.files[0];
+  if (file) store.loadChildren(file);
 }
 
 function onTimeSelect(event: FileUploadSelectEvent) {
-  const file = event.files[0]
-  if (file) store.loadTimeEntries(file)
+  const file = event.files[0];
+  if (file) store.loadTimeEntries(file);
 }
 
 function getProcessingMessage(): string {
-  if (store.csvLoadStatus.parents.status === 'loading') {
-    return 'Peticiones padre'
+  if (store.csvLoadStatus.parents.status === "loading") {
+    return "Peticiones padre";
   }
-  if (store.csvLoadStatus.children.status === 'loading') {
-    return 'Peticiones hijas'
+  if (store.csvLoadStatus.children.status === "loading") {
+    return "Peticiones hijas";
   }
-  if (store.csvLoadStatus.timeEntries.status === 'loading') {
-    return 'Tiempo dedicado'
+  if (store.csvLoadStatus.timeEntries.status === "loading") {
+    return "Tiempo dedicado";
   }
   if (store.isCalculating) {
-    return 'Calculando...'
+    return "Calculando...";
   }
-  return ''
+  return "";
 }
 </script>
 
@@ -46,7 +46,10 @@ function getProcessingMessage(): string {
     <template #content>
       <div class="upload-grid">
         <div class="upload-item">
-          <label>Peticiones padre <Tag v-if="store.parentsLoaded" severity="success" value="OK" /></label>
+          <label
+            >Peticiones padre
+            <Tag v-if="store.parentsLoaded" severity="success" value="OK"
+          /></label>
           <FileUpload
             mode="basic"
             accept=".csv"
@@ -58,7 +61,10 @@ function getProcessingMessage(): string {
         </div>
 
         <div class="upload-item">
-          <label>Peticiones hijas <Tag v-if="store.childrenLoaded" severity="success" value="OK" /></label>
+          <label
+            >Peticiones hijas
+            <Tag v-if="store.childrenLoaded" severity="success" value="OK"
+          /></label>
           <FileUpload
             mode="basic"
             accept=".csv"
@@ -70,7 +76,10 @@ function getProcessingMessage(): string {
         </div>
 
         <div class="upload-item">
-          <label>Tiempo dedicado <Tag v-if="store.timeEntriesLoaded" severity="success" value="OK" /></label>
+          <label
+            >Tiempo dedicado
+            <Tag v-if="store.timeEntriesLoaded" severity="success" value="OK"
+          /></label>
           <FileUpload
             mode="basic"
             accept=".csv"
@@ -83,13 +92,23 @@ function getProcessingMessage(): string {
       </div>
 
       <div v-if="store.errors.length" class="messages">
-        <Message v-for="(err, i) in store.errors" :key="i" severity="error" :closable="false">
+        <Message
+          v-for="(err, i) in store.errors"
+          :key="i"
+          severity="error"
+          :closable="false"
+        >
           {{ err }}
         </Message>
       </div>
 
       <div v-if="store.warnings.length" class="messages">
-        <Message v-for="(warn, i) in store.warnings" :key="i" severity="warn" :closable="false">
+        <Message
+          v-for="(warn, i) in store.warnings"
+          :key="i"
+          severity="warn"
+          :closable="false"
+        >
           {{ warn }}
         </Message>
       </div>
@@ -102,7 +121,9 @@ function getProcessingMessage(): string {
             fill="var(--surface-ground)"
             style="width: 50px; height: 50px"
           />
-          <p>Procesando: <strong>{{ getProcessingMessage() }}</strong></p>
+          <p>
+            Procesando: <strong>{{ getProcessingMessage() }}</strong>
+          </p>
           <p class="text-muted">Por favor espera, no cierres esta ventana</p>
         </div>
       </div>
@@ -144,7 +165,7 @@ function getProcessingMessage(): string {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: var(--overlay-dark);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,4 +203,3 @@ function getProcessingMessage(): string {
   font-size: 0.875rem;
 }
 </style>
-

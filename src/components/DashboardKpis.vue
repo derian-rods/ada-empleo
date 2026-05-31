@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import Card from 'primevue/card'
-import { useDashboardStore } from '../stores/dashboard'
+import Card from "primevue/card";
+import { useDashboardStore } from "../stores/dashboard";
 
-const store = useDashboardStore()
+const store = useDashboardStore();
 
 function fmt(n: number): string {
-  return n.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+  return n.toLocaleString("es-ES", { maximumFractionDigits: 1 });
 }
 
 function fmtPct(n: number): string {
-  return n.toLocaleString('es-ES', { maximumFractionDigits: 1 }) + '%'
+  return n.toLocaleString("es-ES", { maximumFractionDigits: 1 }) + "%";
 }
 </script>
 
@@ -17,18 +17,29 @@ function fmtPct(n: number): string {
   <div v-if="store.summary" class="kpi-grid">
     <Card class="kpi-card">
       <template #title>Horas estimadas</template>
-      <template #content><span class="kpi-value">{{ fmt(store.summary.totalEstimatedHours) }}</span></template>
+      <template #content
+        ><span class="kpi-value">{{
+          fmt(store.summary.totalEstimatedHours)
+        }}</span></template
+      >
     </Card>
 
     <Card class="kpi-card">
       <template #title>Horas reales</template>
-      <template #content><span class="kpi-value">{{ fmt(store.summary.totalActualHours) }}</span></template>
+      <template #content
+        ><span class="kpi-value">{{
+          fmt(store.summary.totalActualHours)
+        }}</span></template
+      >
     </Card>
 
     <Card class="kpi-card">
       <template #title>Diferencia</template>
       <template #content>
-        <span class="kpi-value" :class="store.summary.totalDifferenceHours >= 0 ? 'profit' : 'loss'">
+        <span
+          class="kpi-value"
+          :class="store.summary.totalDifferenceHours >= 0 ? 'profit' : 'loss'"
+        >
           {{ fmt(store.summary.totalDifferenceHours) }}h
         </span>
       </template>
@@ -36,28 +47,47 @@ function fmtPct(n: number): string {
 
     <Card class="kpi-card">
       <template #title>Desviación media</template>
-      <template #content><span class="kpi-value">{{ fmtPct(store.summary.averageDeviationPercent) }}</span></template>
+      <template #content
+        ><span class="kpi-value">{{
+          fmtPct(store.summary.averageDeviationPercent)
+        }}</span></template
+      >
     </Card>
 
     <Card class="kpi-card">
       <template #title>Con ganancia</template>
-      <template #content><span class="kpi-value profit">{{ store.summary.profitableRequests }}</span></template>
+      <template #content
+        ><span class="kpi-value profit">{{
+          store.summary.profitableRequests
+        }}</span></template
+      >
     </Card>
 
     <Card class="kpi-card">
       <template #title>Con pérdida</template>
-      <template #content><span class="kpi-value loss">{{ store.summary.lossRequests }}</span></template>
+      <template #content
+        ><span class="kpi-value loss">{{
+          store.summary.lossRequests
+        }}</span></template
+      >
     </Card>
 
     <Card class="kpi-card">
       <template #title>Neutras</template>
-      <template #content><span class="kpi-value">{{ store.summary.neutralRequests }}</span></template>
+      <template #content
+        ><span class="kpi-value">{{
+          store.summary.neutralRequests
+        }}</span></template
+      >
     </Card>
 
     <Card class="kpi-card">
       <template #title>Huérfanas</template>
       <template #content>
-        <span class="kpi-value" :class="store.summary.orphanTimeEntries > 0 ? 'loss' : ''">
+        <span
+          class="kpi-value"
+          :class="store.summary.orphanTimeEntries > 0 ? 'loss' : ''"
+        >
           {{ store.summary.orphanTimeEntries }}
         </span>
       </template>
@@ -65,12 +95,20 @@ function fmtPct(n: number): string {
 
     <Card class="kpi-card">
       <template #title>Personas</template>
-      <template #content><span class="kpi-value">{{ store.summary.totalPeople }}</span></template>
+      <template #content
+        ><span class="kpi-value">{{
+          store.summary.totalPeople
+        }}</span></template
+      >
     </Card>
 
     <Card class="kpi-card">
       <template #title>Aplicaciones</template>
-      <template #content><span class="kpi-value">{{ store.summary.totalApplications }}</span></template>
+      <template #content
+        ><span class="kpi-value">{{
+          store.summary.totalApplications
+        }}</span></template
+      >
     </Card>
   </div>
 </template>
@@ -89,9 +127,9 @@ function fmtPct(n: number): string {
   font-weight: 700;
 }
 .kpi-value.profit {
-  color: var(--p-green-500, #22c55e);
+  color: var(--color-success);
 }
 .kpi-value.loss {
-  color: var(--p-red-500, #ef4444);
+  color: var(--color-danger);
 }
 </style>

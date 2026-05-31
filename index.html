@@ -4,10 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ccv-dashboard</title>
+    <title>CCV Dashboard</title>
   </head>
   <body>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
+
+    <!-- Initialize theme BEFORE app mounts to prevent FOUC -->
+    <script>
+      (function () {
+        const saved = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)",
+        ).matches;
+        const isDark = saved === "dark" || (saved !== "light" && prefersDark);
+
+        if (isDark) {
+          document.documentElement.classList.add("app-dark");
+        }
+      })();
+    </script>
   </body>
 </html>

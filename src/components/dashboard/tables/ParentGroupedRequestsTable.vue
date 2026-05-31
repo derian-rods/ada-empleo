@@ -1,44 +1,44 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Tag from 'primevue/tag'
-import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import MultiSelect from 'primevue/multiselect'
-import Dropdown from 'primevue/dropdown'
-import Checkbox from 'primevue/checkbox'
-import type { ParentGroupedTableFilters } from '../../../domain/parentGroupedTable'
+import { ref, computed } from "vue";
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Tag from "primevue/tag";
+import Button from "primevue/button";
+import InputText from "primevue/inputtext";
+import MultiSelect from "primevue/multiselect";
+import Dropdown from "primevue/dropdown";
+import Checkbox from "primevue/checkbox";
+import type { ParentGroupedTableFilters } from "../../../domain/parentGroupedTable";
 import {
   buildParentGroupedTableRows,
   filterParentGroupedRows,
-} from '../../../domain/parentGroupedTable'
+} from "../../../domain/parentGroupedTable";
 import type {
   ParentRequest,
   ChildRequest,
   TimeEntry,
   CalculatedRequest,
-} from '../../../domain/types'
+} from "../../../domain/types";
 
 interface ParentGroupedRequestsTableProps {
-  parents: ParentRequest[]
-  children: ChildRequest[]
-  timeEntries: TimeEntry[]
-  calculatedRequests: CalculatedRequest[]
-  loading?: boolean
-  rows?: number
-  rowsPerPageOptions?: number[]
+  parents: ParentRequest[];
+  children: ChildRequest[];
+  timeEntries: TimeEntry[];
+  calculatedRequests: CalculatedRequest[];
+  loading?: boolean;
+  rows?: number;
+  rowsPerPageOptions?: number[];
 }
 
 const props = withDefaults(defineProps<ParentGroupedRequestsTableProps>(), {
   loading: false,
   rows: 25,
   rowsPerPageOptions: () => [10, 25, 50, 100],
-})
+});
 
 // State
-const expandedRows = ref<string[]>([])
-const filters = ref<ParentGroupedTableFilters>({})
+const expandedRows = ref<string[]>([]);
+const filters = ref<ParentGroupedTableFilters>({});
 
 // Build and filter data
 const groupedRows = computed(() => {
@@ -46,94 +46,96 @@ const groupedRows = computed(() => {
     props.parents,
     props.children,
     props.timeEntries,
-    props.calculatedRequests
-  )
-  return filterParentGroupedRows(rows, filters.value)
-})
+    props.calculatedRequests,
+  );
+  return filterParentGroupedRows(rows, filters.value);
+});
 
 // Unique filter options
 const uniqueUsers = computed(() => {
-  const users = new Set<string>()
+  const users = new Set<string>();
   groupedRows.value.forEach((row) => {
-    row.users.forEach((u) => users.add(u))
-  })
-  return Array.from(users).sort()
-})
+    row.users.forEach((u) => users.add(u));
+  });
+  return Array.from(users).sort();
+});
 
 const uniqueRoles = computed(() => {
-  const roles = new Set<string>()
+  const roles = new Set<string>();
   groupedRows.value.forEach((row) => {
-    row.roles.forEach((r) => roles.add(r))
-  })
-  return Array.from(roles).sort()
-})
+    row.roles.forEach((r) => roles.add(r));
+  });
+  return Array.from(roles).sort();
+});
 
 const uniqueApplications = computed(() => {
-  const apps = new Set<string>()
+  const apps = new Set<string>();
   groupedRows.value.forEach((row) => {
-    row.applications.forEach((a) => apps.add(a))
-  })
-  return Array.from(apps).sort()
-})
+    row.applications.forEach((a) => apps.add(a));
+  });
+  return Array.from(apps).sort();
+});
 
 const uniqueStatuses = computed(() => {
-  const statuses = new Set<string>()
+  const statuses = new Set<string>();
   groupedRows.value.forEach((row) => {
-    if (row.status) statuses.add(row.status)
-  })
-  return Array.from(statuses).sort()
-})
+    if (row.status) statuses.add(row.status);
+  });
+  return Array.from(statuses).sort();
+});
 
 const uniqueProjects = computed(() => {
-  const projects = new Set<string>()
+  const projects = new Set<string>();
   groupedRows.value.forEach((row) => {
-    if (row.project) projects.add(row.project)
-  })
-  return Array.from(projects).sort()
-})
+    if (row.project) projects.add(row.project);
+  });
+  return Array.from(projects).sort();
+});
 
 // Helper functions
-function severityFor(status: string): 'success' | 'danger' | 'secondary' {
-  if (status === 'profit') return 'success'
-  if (status === 'loss') return 'danger'
-  return 'secondary'
+function severityFor(status: string): "success" | "danger" | "secondary" {
+  if (status === "profit") return "success";
+  if (status === "loss") return "danger";
+  return "secondary";
 }
 
 function labelFor(status: string): string {
-  if (status === 'profit') return 'Ganancia'
-  if (status === 'loss') return 'Pérdida'
-  return 'Neutral'
+  if (status === "profit") return "Ganancia";
+  if (status === "loss") return "Pérdida";
+  return "Neutral";
 }
 
-function riskBadge(level: string): 'success' | 'warning' | 'danger' {
-  if (level === 'low') return 'success'
-  if (level === 'medium') return 'warning'
-  return 'danger'
+function riskBadge(level: string): "success" | "warning" | "danger" {
+  if (level === "low") return "success";
+  if (level === "medium") return "warning";
+  return "danger";
 }
 
 function riskLabel(level: string): string {
-  if (level === 'low') return 'Bajo'
-  if (level === 'medium') return 'Medio'
-  return 'Alto'
+  if (level === "low") return "Bajo";
+  if (level === "medium") return "Medio";
+  return "Alto";
 }
 
 function fmt(n: number): string {
-  return n.toLocaleString('es-ES', {
+  return n.toLocaleString("es-ES", {
     maximumFractionDigits: 1,
     minimumFractionDigits: 0,
-  })
+  });
 }
 
 function fmtPct(n: number): string {
-  return n.toLocaleString('es-ES', {
-    maximumFractionDigits: 1,
-    minimumFractionDigits: 0,
-  }) + '%'
+  return (
+    n.toLocaleString("es-ES", {
+      maximumFractionDigits: 1,
+      minimumFractionDigits: 0,
+    }) + "%"
+  );
 }
 
 function clearFilters() {
-  filters.value = {}
-  expandedRows.value = []
+  filters.value = {};
+  expandedRows.value = [];
 }
 </script>
 
@@ -318,17 +320,37 @@ function clearFilters() {
       <Column :expander="true" style="width: 50px" />
 
       <!-- Parent columns -->
-      <Column field="parentCode" header="Código padre" sortable style="width: 120px" />
+      <Column
+        field="parentCode"
+        header="Código padre"
+        sortable
+        style="width: 120px"
+      />
 
-      <Column field="parentSubject" header="Asunto padre" sortable style="min-width: 200px" />
+      <Column
+        field="parentSubject"
+        header="Asunto padre"
+        sortable
+        style="min-width: 200px"
+      />
 
       <Column field="project" header="Proyecto" sortable style="width: 120px" />
 
-      <Column field="application" header="Aplicación" sortable style="width: 120px" />
+      <Column
+        field="application"
+        header="Aplicación"
+        sortable
+        style="width: 120px"
+      />
 
       <Column field="status" header="Estado" sortable style="width: 100px" />
 
-      <Column field="childrenCount" header="Nº hijas" sortable style="width: 80px" />
+      <Column
+        field="childrenCount"
+        header="Nº hijas"
+        sortable
+        style="width: 80px"
+      />
 
       <Column field="users" header="Nº usuarios" sortable style="width: 100px">
         <template #body="{ data }">
@@ -344,18 +366,33 @@ function clearFilters() {
         <template #body="{ data }">{{ fmt(data.actualHours) }}</template>
       </Column>
 
-      <Column field="filteredActualHours" header="Filtradas" sortable style="width: 100px">
+      <Column
+        field="filteredActualHours"
+        header="Filtradas"
+        sortable
+        style="width: 100px"
+      >
         <template #body="{ data }">
-          {{ data.filteredActualHours !== undefined ? fmt(data.filteredActualHours) : '-' }}
+          {{
+            data.filteredActualHours !== undefined
+              ? fmt(data.filteredActualHours)
+              : "-"
+          }}
         </template>
       </Column>
 
-      <Column field="differenceHours" header="Diferencia" sortable style="width: 100px">
+      <Column
+        field="differenceHours"
+        header="Diferencia"
+        sortable
+        style="width: 100px"
+      >
         <template #body="{ data }">
           <span
-            :style="{
-              color: data.differenceHours >= 0 ? '#22c55e' : '#ef4444',
-              fontWeight: 'bold',
+            class="difference-value"
+            :class="{
+              profit: data.differenceHours >= 0,
+              loss: data.differenceHours < 0,
             }"
           >
             {{ fmt(data.differenceHours) }}h
@@ -363,23 +400,48 @@ function clearFilters() {
         </template>
       </Column>
 
-      <Column field="deviationPercent" header="Desv. %" sortable style="width: 90px">
-        <template #body="{ data }">{{ fmtPct(data.deviationPercent) }}</template>
+      <Column
+        field="deviationPercent"
+        header="Desv. %"
+        sortable
+        style="width: 90px"
+      >
+        <template #body="{ data }">{{
+          fmtPct(data.deviationPercent)
+        }}</template>
       </Column>
 
-      <Column field="consumptionPercent" header="Cons. %" sortable style="width: 90px">
-        <template #body="{ data }">{{ fmtPct(data.consumptionPercent) }}</template>
+      <Column
+        field="consumptionPercent"
+        header="Cons. %"
+        sortable
+        style="width: 90px"
+      >
+        <template #body="{ data }">{{
+          fmtPct(data.consumptionPercent)
+        }}</template>
       </Column>
 
-      <Column field="resultStatus" header="Resultado" sortable style="width: 100px">
+      <Column
+        field="resultStatus"
+        header="Resultado"
+        sortable
+        style="width: 100px"
+      >
         <template #body="{ data }">
-          <Tag :severity="severityFor(data.resultStatus)" :value="labelFor(data.resultStatus)" />
+          <Tag
+            :severity="severityFor(data.resultStatus)"
+            :value="labelFor(data.resultStatus)"
+          />
         </template>
       </Column>
 
       <Column field="riskLevel" header="Riesgo" sortable style="width: 90px">
         <template #body="{ data }">
-          <Tag :severity="riskBadge(data.riskLevel)" :value="riskLabel(data.riskLevel)" />
+          <Tag
+            :severity="riskBadge(data.riskLevel)"
+            :value="riskLabel(data.riskLevel)"
+          />
         </template>
       </Column>
 
@@ -387,7 +449,11 @@ function clearFilters() {
       <template #expansion="{ data: parent }">
         <div class="expansion-content">
           <div class="children-grid">
-            <div v-for="child in parent.children" :key="child.childId" class="child-card">
+            <div
+              v-for="child in parent.children"
+              :key="child.childId"
+              class="child-card"
+            >
               <div class="child-header">
                 <h4>{{ child.childCode }} - {{ child.childSubject }}</h4>
               </div>
@@ -398,18 +464,34 @@ function clearFilters() {
                   <span class="value">{{ fmt(child.estimatedHours) }}h</span>
                 </div>
                 <div class="metric">
-                  <span class="label">Reales</span>
-                  <span class="value">{{ fmt(child.actualHours) }}h</span>
+                  <span class="label">Diferencia</span>
+                  <span
+                    class="difference-value"
+                    :class="{
+                      profit: child.differenceHours >= 0,
+                      loss: child.differenceHours < 0,
+                    }"
+                  >
+                    {{ fmt(child.differenceHours) }}h
+                  </span>
                 </div>
                 <div class="metric">
                   <span class="label">Diferencia</span>
-                  <span class="value" :style="{ color: child.differenceHours >= 0 ? '#22c55e' : '#ef4444' }">
+                  <span
+                    class="value difference-value"
+                    :class="{
+                      profit: child.differenceHours >= 0,
+                      loss: child.differenceHours < 0,
+                    }"
+                  >
                     {{ fmt(child.differenceHours) }}h
                   </span>
                 </div>
                 <div class="metric">
                   <span class="label">Desv.</span>
-                  <span class="value">{{ fmtPct(child.deviationPercent) }}</span>
+                  <span class="value">{{
+                    fmtPct(child.deviationPercent)
+                  }}</span>
                 </div>
               </div>
 
@@ -424,7 +506,10 @@ function clearFilters() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(urh, idx) in child.userRoleHours" :key="`${child.childId}-${idx}`">
+                    <tr
+                      v-for="(urh, idx) in child.userRoleHours"
+                      :key="`${child.childId}-${idx}`"
+                    >
                       <td>{{ urh.user }}</td>
                       <td>{{ urh.role }}</td>
                       <td class="text-right">{{ fmt(urh.hours) }}h</td>

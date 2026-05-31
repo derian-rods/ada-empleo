@@ -1,33 +1,62 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
 
-export type Theme = 'dark'
+export type Theme = "light" | "dark";
 
-export const useThemeStore = defineStore('theme', () => {
-  const currentTheme = ref<Theme>('dark')
+export const useThemeStore = defineStore("theme", () => {
+  const isDark = ref(false);
 
-  // Load theme from localStorage on creation
+  /**
+   * Carga el tema guardado o detecta preferencia del sistema
+   */
   const loadTheme = () => {
-    const saved = localStorage.getItem('theme') as Theme | null
-    if (saved === 'dark') {
-      currentTheme.value = saved
+    const saved = localStorage.getItem("theme") as Theme | null;
+
+    if (saved === "dark" || saved === "light") {
+      // Usar preferencia guardada
+      isDark.value = saved === "dark";
     } else {
-      currentTheme.value = 'dark'
+      // Detectar preferencia del sistema
+      const prefersDark = window.matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches;
+      isDark.value = prefersDark;
     }
-    applyTheme(currentTheme.value)
-  }
 
-  const applyTheme = (theme: Theme) => {
-    const html = document.documentElement
-    html.setAttribute('data-theme', theme)
-  }
+    applyTheme();
+  };
 
-  const isDark = computed(() => currentTheme.value === 'dark')
+  /**
+   * Aplica el tema al documento usando clase CSS
+   */
+  const applyTheme = () => {
+    const root = document.documentElement;
+
+    if (isDark.value) {
+      root.classList.add("app-dark");
+    } else {
+      root.classList.remove("app-dark");
+    }
+
+    // Guardar preferencia
+    localStorage.setItem("theme", isDark.value ? "dark" : "light");
+  };
+
+  /**
+   * Alterna entre light y dark mode
+   */
+  const toggleTheme = () => {
+    isDark.value = !isDark.value;
+    applyTheme();
+  };
+
+  const isLight = computed(() => !isDark.value);
 
   return {
-    currentTheme,
     isDark,
+    isLight,
     loadTheme,
+    toggleTheme,
     applyTheme,
-  }
-})
+  };
+});

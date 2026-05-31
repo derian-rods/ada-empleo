@@ -1,70 +1,70 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, nextTick } from 'vue'
-import { use } from 'echarts/core'
-import { BarChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
-import VChart from 'vue-echarts'
-import Card from 'primevue/card'
-import Message from 'primevue/message'
-import type { CalculatedRequest } from '../domain/types'
+import { computed, ref, onMounted, nextTick } from "vue";
+import { use } from "echarts/core";
+import { BarChart } from "echarts/charts";
+import { GridComponent, TooltipComponent } from "echarts/components";
+import { CanvasRenderer } from "echarts/renderers";
+import VChart from "vue-echarts";
+import Card from "primevue/card";
+import Message from "primevue/message";
+import type { CalculatedRequest } from "../domain/types";
 
-use([BarChart, GridComponent, TooltipComponent, CanvasRenderer])
+use([BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
-const props = defineProps<{ data: CalculatedRequest[] }>()
-const chartReady = ref(false)
+const props = defineProps<{ data: CalculatedRequest[] }>();
+const chartReady = ref(false);
 
 onMounted(async () => {
   // Wait for DOM to fully render and be visible
-  await nextTick()
-  await new Promise(resolve => setTimeout(resolve, 50))
-  chartReady.value = true
-})
+  await nextTick();
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  chartReady.value = true;
+});
 
 const chartData = computed(() => {
-  if (!props.data) return null
+  if (!props.data) return null;
 
-  const hoursMap = new Map<string, number>()
+  const hoursMap = new Map<string, number>();
   for (const req of props.data) {
-    const perPerson = req.actualHours / (req.people.length || 1)
+    const perPerson = req.actualHours / (req.people.length || 1);
     for (const person of req.people) {
-      hoursMap.set(person, (hoursMap.get(person) ?? 0) + perPerson)
+      hoursMap.set(person, (hoursMap.get(person) ?? 0) + perPerson);
     }
   }
 
   const sorted = [...hoursMap.entries()]
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 15)
+    .slice(0, 15);
 
-  if (sorted.length === 0) return null
+  if (sorted.length === 0) return null;
 
   return {
     names: sorted.map(([name]) => name).reverse(),
     values: sorted.map(([, h]) => Math.round(h * 10) / 10).reverse(),
-  }
-})
+  };
+});
 
 const option = computed(() => {
-  if (!chartData.value) return {}
+  if (!chartData.value) return {};
 
   return {
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: "axis" },
     grid: { left: 120, right: 20, top: 40, bottom: 20 },
-    xAxis: { type: 'value' },
+    xAxis: { type: "value" },
     yAxis: {
-      type: 'category',
+      type: "category",
       data: chartData.value.names,
       axisLabel: { fontSize: 11 },
     },
     series: [
       {
-        type: 'bar',
+        type: "bar",
         data: chartData.value.values,
-        itemStyle: { color: '#6366f1' },
+        itemStyle: { color: "var(--color-primary)" },
       },
     ],
-  }
-})
+  };
+});
 </script>
 
 <template>
