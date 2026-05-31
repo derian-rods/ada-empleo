@@ -1,18 +1,22 @@
-# CCV Dashboard
+# Empleo Dashboard - ADA
 
-Dashboard de análisis de peticiones y tiempo dedicado usando Vue 3, TypeScript y Vite.
+**Control de Estimaciones e Incurridos - Sistema de Análisis de Peticiones y Tiempo Dedicado**
+
+Dashboard profesional de análisis de peticiones y tiempo dedicado usando Vue 3, TypeScript y Vite.
+
+**Versión**: 1.0.0 | **Estado**: Producción ✅
 
 ## 🎯 Características
 
-- ✅ Carga de CSV con validación automática
-- ✅ Procesamiento asincrónico sin congelación de UI
-- ✅ Sistema de pestañas intuitivo
-- ✅ Tablas interactivas con paginación
-- ✅ Gráficos de análisis con ECharts
-- ✅ Cálculos automáticos de desviaciones y rentabilidad
-- ✅ Identificación de tiempos huérfanos
-- ✅ Temas claro y oscuro profesionales
-- ✅ Toggle automático de tema (con detección de sistema)
+- ✅ **Carga de CSV** con validación automática (Peticiones padre, hijas, Tiempo dedicado)
+- ✅ **Tab Colaboradores** - Visualización de tiempo dedicado agrupado por colaborador
+- ✅ **Tablas Scrollables** - Headers sticky con scroll nativo de PrimeVue
+- ✅ **Gráficos Interactivos** - Análisis visual con ECharts
+- ✅ **Cálculos Automáticos** - Desviaciones, rentabilidad, horas incurridas
+- ✅ **Panel de Huérfanos** - Identificación de tiempos sin estimación
+- ✅ **Temas Profesionales** - Light/Dark mode con toggle automático
+- ✅ **Filtros Dinámicos** - Por fecha, colaborador, código de petición
+- ✅ **Links GPSAE** - Integración con sistema externo de peticiones
 
 ## 🚀 Inicio Rápido
 
@@ -36,59 +40,59 @@ La app abrirá en `http://localhost:5174`
 npm run build
 ```
 
-### Tests
+### Preview Producción
 
 ```bash
-npm run test
+npm run preview
 ```
 
 ## 📊 Estructura del Proyecto
 
 ```
 src/
-├── components/          # Componentes Vue
-│   ├── dashboard/      # Componentes del dashboard
-│   └── *.vue           # Componentes principales
-├── domain/             # Lógica de negocio
-│   ├── calculations.ts # Cálculos de métricas
-│   ├── normalizeCsv.ts # Normalización de datos
-│   ├── relationships.ts # Relaciones entre datos
-│   ├── types.ts        # Tipos TypeScript
-│   └── filters.ts      # Lógica de filtros
-├── stores/             # Pinia store (estado)
-│   ├── dataStore.ts    # Estado de datos
-│   ├── uiStore.ts      # Estado de UI
-│   └── theme.ts        # Estado de tema
-├── theme/              # Configuración de temas
-│   └── preset.ts       # PrimeVue preset (light/dark)
-├── services/           # Servicios
-└── main.ts             # Entry point
+├── components/
+│   ├── dashboard/
+│   │   ├── tables/                     # Tablas principales
+│   │   │   ├── CollaboratorsTable.vue  # 🆕 Tab Colaboradores
+│   │   │   ├── ParentRequestsTable.vue
+│   │   │   ├── ChildRequestsTable.vue
+│   │   │   └── ...
+│   │   ├── DashboardKpis.vue           # Métricas principales
+│   │   └── ChartsPanel.vue             # Gráficos ECharts
+│   ├── GpsaeRequestLink.vue            # Links a peticiones GPSAE
+│   ├── TabsView.vue                    # Gestor de pestañas
+│   └── ...
+├── domain/
+│   ├── types.ts                        # Tipos TypeScript
+│   ├── normalizeCsv.ts                 # Normalización de CSVs
+│   ├── tableAggregations.ts            # Agregaciones de tablas
+│   ├── calculations.ts                 # Cálculos de métricas
+│   ├── collaborators.ts                # 🆕 Lógica de colaboradores
+│   ├── gpsae.ts                        # 🆕 URL builder GPSAE
+│   └── ...
+├── stores/
+│   ├── dashboard.ts                    # Estado del dashboard
+│   └── theme.ts                        # Estado del tema
+├── theme/
+│   └── preset.ts                       # Configuración de temas PrimeVue
+└── main.ts
 ```
-
-### Tema Light y Dark
-
-El proyecto usa **PrimeVue 4.5.5 con Design Tokens nativo**:
-
-- **Light Mode**: Fondo azul claro (#f0f7ff), textos oscuros, colores vibrantes
-- **Dark Mode**: Fondo negro profundo (#030712), textos blancos, colores claros
-- **Toggle**: Botón 🌙/☀️ en la barra superior (persiste en localStorage)
-- **Detección automática**: Si no hay preferencia guardada, usa el tema del sistema
-
-Para personalizar colores, edita `src/theme/preset.ts`
 
 ## 📁 Carga de CSV
 
-El dashboard requiere 3 CSV con delimitador `;`:
+El dashboard requiere 3 CSVs con delimitador `;`:
 
 ### 1. Peticiones Padre
 
 ```
-# | Solicitud | Descripción | Horas estimadas | ...
-1 | SOL-001   | Crear login | 40              | ...
+# | Solicitud | Descripción | Horas estimadas | Proyecto | Aplicación | ...
+1 | SOL-001   | Crear login | 40              | Proyecto A | App X | ...
 ```
 
-- Debe tener columna `#` (ID)
-- Columna `Horas estimadas` para el cálculo de rentabilidad
+**Requerimientos:**
+
+- Columna `#` (ID único)
+- Columna `Horas estimadas` para cálculos
 
 ### 2. Peticiones Hijas
 
@@ -97,94 +101,121 @@ El dashboard requiere 3 CSV con delimitador `;`:
 1 | SOL-001        | Pantalla    | ...
 ```
 
-- Debe tener columna `#` (ID)
-- Columna `Petición padre` para relacionar con padre
+**Requerimientos:**
 
-### 3. Tiempo Dedicado
+- Columna `#` (ID único)
+- Columna `Petición padre` para relación
+
+### 3. Tiempo Dedicado (FUENTE DE VERDAD)
 
 ```
-Petición padre | Petición hija | Persona | Horas | Fecha | ...
-SOL-001        | TSK-001       | Juan    | 5     | ...   | ...
+Petición padre | Petición hija | Usuario | Horas | Fecha | Actividad | ...
+SOL-001        | TSK-001       | Juan    | 5     | ...   | Desarrollo| ...
 ```
 
-- **Fuente de verdad para horas reales**
-- Debe tener columna `Horas`
-- Se relaciona vía `Petición padre` y `Petición hija`
+**Requerimientos:**
 
-## 🔄 Git Workflow
+- Columna `Usuario` o `Autor` (colaborador)
+- Columna `Horas` (horas imputadas)
+- Columna `Fecha` (fecha de imputación)
+- Debe relacionarse vía `Petición padre` y `Petición hija`
 
-### Ver historial
+## ⚙️ Configuración GPSAE
 
-```bash
-git log --oneline
-```
+Para integrar links a peticiones GPSAE:
 
-### Crear rama
+1. **Crear archivo `.env`:**
 
-```bash
-git checkout -b feature/mi-feature
-```
+   ```bash
+   cp .env.example .env
+   ```
 
-### Hacer commit
+2. **Configurar URL base:**
+   ```env
+   VITE_GPSAE_BASE_URL=https://your-gpsae-instance.com/peticion
+   ```
 
-```bash
-git add .
-git commit -m "Descripción clara del cambio"
-```
+Ver [GPSAE_CONFIGURATION.md](./GPSAE_CONFIGURATION.md) para detalles completos.
 
-### Ver cambios
+## 🎨 Temas
 
-```bash
-git status
-git diff
-```
+El proyecto incluye temas Light y Dark profesionales:
 
-### Cambiar de rama
+- **Light Mode**: Fondo azul claro (#f0f7ff), textos oscuros
+- **Dark Mode**: Fondo negro (#030712), textos blancos
+- **Toggle**: Botón 🌙/☀️ en la barra superior
+- **Detección automática**: Usa tema del sistema si no hay preferencia guardada
 
-```bash
-git checkout main
-```
-
-## 📝 Historial de Cambios
-
-- **f2193ad**: Remove debug code from App.vue
-- **31eb2e2**: Initial commit: CCV Dashboard with async CSV processing and tab-based navigation
+Personalizar en `src/theme/preset.ts`
 
 ## 🛠️ Tecnologías
 
-- **Vue 3**: Framework reactivo
-- **TypeScript**: Tipado estricto
-- **Vite**: Build tool rápido
-- **Pinia**: State management
-- **PrimeVue 4.5.5**: Componentes UI profesionales con Design Tokens
-- **PapaParse**: Parsing de CSV
-- **ECharts / vue-echarts**: Gráficos interactivos
-- **Vitest**: Testing
+| Tecnología | Versión | Propósito             |
+| ---------- | ------- | --------------------- |
+| Vue        | 3.5.34  | Framework reactivo    |
+| TypeScript | 6.0.2   | Tipado estricto       |
+| Vite       | 8.0.12  | Build tool rápido     |
+| Pinia      | 3.0.4   | State management      |
+| PrimeVue   | 4.5.5   | Componentes UI        |
+| ECharts    | 6.1.0   | Gráficos interactivos |
+| PapaParse  | 5.5.3   | Parsing CSV           |
 
-## 🎨 Tema y Estilos
+## 📋 Pestañas Principales
 
-El proyecto utiliza el preset personalizado **CCVPreset** basado en Aura:
+1. **Resumen** - Métricas KPI y gráficos de overview
+2. **Tabla de Peticiones** - Vista completa de peticiones padre e hijas
+3. **Gráficas** - Análisis visual con ECharts
+4. **Tabla Agrupada por Padre** - Vista jerárquica expandible
+5. **Colaboradores** 🆕 - Tiempo dedicado agrupado por colaborador
+6. **Sin Estimar con Incurrido** - Peticiones sin estimación pero con horas imputadas
+7. **Tiempos Huérfanos** - Tiempo dedicado sin relación a peticiones
 
-```typescript
-// src/theme/preset.ts
-// Configuración de colores para light y dark mode
-// Personalizable sin tocar CSS
+## 🔗 APIs y Integraciones
+
+### GpsaeRequestLink Component
+
+```vue
+<template>
+  <GpsaeRequestLink :code="requestCode" />
+</template>
+
+<script setup>
+import GpsaeRequestLink from "@/components/GpsaeRequestLink.vue";
+const requestCode = "1234";
+</script>
 ```
 
-Para cambiar colores:
+Genera automáticamente links a GPSAE basados en la configuración de `.env`
 
-1. Edita `src/theme/preset.ts`
-2. Modifica las secciones `light` o `dark` en `colorScheme`
-3. Los cambios se aplican automáticamente en todos los componentes
+## 📊 Cálculos Principales
 
-## 📚 Recursos
+| Métrica             | Cálculo                       | Uso                  |
+| ------------------- | ----------------------------- | -------------------- |
+| **Horas Estimadas** | Del CSV Peticiones padre      | Presupuesto          |
+| **Horas Imputadas** | Suma de CSV Tiempo dedicado   | Costo real           |
+| **Desviación**      | Imputadas - Estimadas         | Análisis de varianza |
+| **% Desviación**    | (Imputadas / Estimadas) × 100 | Varianza relativa    |
+
+## 🔐 Seguridad
+
+- Links GPSAE abren con `target="_blank"` y `rel="noopener noreferrer"`
+- Nunca hardcodear URLs sensibles (usar `.env`)
+- CSVs procesados localmente, sin envío a servidores externos
+- Validación automática de datos de entrada
+
+## 📚 Documentación Adicional
+
+- [GPSAE_CONFIGURATION.md](./GPSAE_CONFIGURATION.md) - Configuración de integración GPSAE
+- [.env.example](./.env.example) - Variables de entorno requeridas
+
+## 🌐 Recursos
 
 - [Vue 3 Docs](https://vuejs.org/)
+- [PrimeVue Docs](https://primevue.org/)
 - [TypeScript](https://www.typescriptlang.org/)
 - [Vite](https://vitejs.dev/)
 - [Pinia](https://pinia.vuejs.org/)
-- [PrimeVue](https://primevue.org/)
 
 ## 📄 Licencia
 
-Propietario - CCV Dashboard
+**Propietario** - Control de Estimaciones e Incurridos ADA
