@@ -7,14 +7,10 @@ import type { UserTableRow } from "../../../domain/tableAggregations";
 interface UsersTableProps {
   rows: UserTableRow[];
   loading?: boolean;
-  rowsPerPage?: number;
-  rowsPerPageOptions?: number[];
 }
 
 withDefaults(defineProps<UsersTableProps>(), {
   loading: false,
-  rowsPerPage: 25,
-  rowsPerPageOptions: () => [10, 25, 50, 100],
 });
 
 function fmt(n: number): string {
@@ -28,16 +24,15 @@ function fmt(n: number): string {
 <template>
   <DataTable
     :value="rows"
-    :paginator="true"
-    :rows="rowsPerPage"
-    :rows-per-page-options="rowsPerPageOptions"
+    :paginator="false"
     :loading="loading"
     striped-rows
     removable-sort
     sort-field="totalHours"
     :sort-order="-1"
     size="small"
-    responsive-layout="scroll"
+    scrollable
+    scrollHeight="600px"
   >
     <Column field="user" header="Usuario" sortable style="width: 120px" />
 

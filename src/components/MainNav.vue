@@ -1,32 +1,47 @@
 <script setup lang="ts">
-import { useRouter, useRoute } from 'vue-router'
-import { nextTick } from 'vue'
-import Button from 'primevue/button'
+import { useRouter, useRoute } from "vue-router";
+import { nextTick } from "vue";
+import Button from "primevue/button";
 
-const router = useRouter()
-const route = useRoute()
+const router = useRouter();
+const route = useRoute();
 
 const tabs = [
-  { label: 'Dashboard', value: 'dashboard', icon: 'pi pi-fw pi-home', path: '/dashboard' },
-  { label: 'Tablas', value: 'tables', icon: 'pi pi-fw pi-table', path: '/tables' },
-  { label: 'Gráficos', value: 'charts', icon: 'pi pi-fw pi-chart-bar', path: '/charts' },
-]
+  {
+    label: "Dashboard",
+    value: "dashboard",
+    icon: "pi pi-fw pi-home",
+    path: "/dashboard",
+  },
+  {
+    label: "Tablas",
+    value: "tables",
+    icon: "pi pi-fw pi-table",
+    path: "/tables",
+  },
+  {
+    label: "Gráficos",
+    value: "charts",
+    icon: "pi pi-fw pi-chart-bar",
+    path: "/charts",
+  },
+];
 
 function getActiveTab() {
-  const path = route.path
-  if (path === '/dashboard' || path === '/') return 'dashboard'
-  if (path === '/tables') return 'tables'
-  if (path === '/charts') return 'charts'
-  return 'dashboard'
+  const path = route.path;
+  if (path === "/dashboard" || path === "/") return "dashboard";
+  if (path === "/tables") return "tables";
+  if (path === "/charts") return "charts";
+  return "dashboard";
 }
 
 async function navigateTo(path: string) {
   // Usar nextTick para asegurar que la navegación sea no-bloqueante
-  await nextTick()
-  router.push(path)
+  await nextTick();
+  router.push(path);
 }
 
-const activeTab = getActiveTab()
+const activeTab = getActiveTab();
 </script>
 
 <template>
@@ -64,5 +79,3 @@ const activeTab = getActiveTab()
   padding: 0.5rem 1rem;
 }
 </style>
-
-

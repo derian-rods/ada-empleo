@@ -7,14 +7,10 @@ import type { ParentProjectGroupTableRow } from "../../../domain/tableAggregatio
 interface ParentProjectGroupTableProps {
   rows: ParentProjectGroupTableRow[];
   loading?: boolean;
-  rowsPerPage?: number;
-  rowsPerPageOptions?: number[];
 }
 
 withDefaults(defineProps<ParentProjectGroupTableProps>(), {
   loading: false,
-  rowsPerPage: 25,
-  rowsPerPageOptions: () => [10, 25, 50, 100],
 });
 
 function severityFor(status: string): "success" | "danger" | "secondary" {
@@ -40,16 +36,15 @@ function fmt(n: number): string {
 <template>
   <DataTable
     :value="rows"
-    :paginator="true"
-    :rows="rowsPerPage"
-    :rows-per-page-options="rowsPerPageOptions"
+    :paginator="false"
     :loading="loading"
     striped-rows
     removable-sort
     sort-field="differenceHours"
     :sort-order="1"
     size="small"
-    responsive-layout="scroll"
+    scrollable
+    scrollHeight="600px"
   >
     <Column
       field="parentProject"
@@ -188,3 +183,5 @@ function fmt(n: number): string {
     </template>
   </DataTable>
 </template>
+
+<style scoped></style>

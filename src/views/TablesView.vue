@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import TabPanel from 'primevue/tabpanel'
-import TabView from 'primevue/tabview'
-import Card from 'primevue/card'
-import { ref } from 'vue'
-import DashboardTablesTabs from '../components/dashboard/tables/DashboardTablesTabs.vue'
-import { useDashboardStore } from '../stores/dashboard'
+import TabPanel from "primevue/tabpanel";
+import TabView from "primevue/tabview";
+import Card from "primevue/card";
+import { ref } from "vue";
+import DashboardTablesTabs from "../components/dashboard/tables/DashboardTablesTabs.vue";
+import CollaboratorsTable from "../components/dashboard/tables/CollaboratorsTable.vue";
+import { useDashboardStore } from "../stores/dashboard";
 
-const store = useDashboardStore()
-const activeTabIndex = ref(0)
+const store = useDashboardStore();
+const activeTabIndex = ref(0);
 </script>
 
 <template>
@@ -16,7 +17,11 @@ const activeTabIndex = ref(0)
     <template #content>
       <div v-if="store.hasData" class="tables-content">
         <TabView v-model:activeIndex="activeTabIndex" class="tables-tabs">
-          <TabPanel header="Peticiones Padre" value="0" :leftIcon="'pi pi-fw pi-briefcase'">
+          <TabPanel
+            header="Peticiones Padre"
+            value="0"
+            :leftIcon="'pi pi-fw pi-briefcase'"
+          >
             <DashboardTablesTabs
               :parents="store.parents"
               :children="store.children"
@@ -26,7 +31,11 @@ const activeTabIndex = ref(0)
             />
           </TabPanel>
 
-          <TabPanel header="Peticiones Hijas" value="1" :leftIcon="'pi pi-fw pi-sitemap'">
+          <TabPanel
+            header="Peticiones Hijas"
+            value="1"
+            :leftIcon="'pi pi-fw pi-sitemap'"
+          >
             <DashboardTablesTabs
               :parents="store.parents"
               :children="store.children"
@@ -53,6 +62,18 @@ const activeTabIndex = ref(0)
               :time-entries="store.timeEntries"
               :calculated-requests="store.calculatedRequests"
               :rows-per-page="25"
+            />
+          </TabPanel>
+
+          <TabPanel
+            header="Colaboradores"
+            value="4"
+            :leftIcon="'pi pi-fw pi-users'"
+          >
+            <CollaboratorsTable
+              :time-entries="store.timeEntries"
+              :children="store.children"
+              :parents="store.parents"
             />
           </TabPanel>
         </TabView>

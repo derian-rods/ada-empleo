@@ -8,6 +8,7 @@ import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
 import Dropdown from "primevue/dropdown";
 import Checkbox from "primevue/checkbox";
+import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
 import type { ParentGroupedTableFilters } from "../../../domain/parentGroupedTable";
 import {
   buildParentGroupedTableRows,
@@ -26,14 +27,10 @@ interface ParentGroupedRequestsTableProps {
   timeEntries: TimeEntry[];
   calculatedRequests: CalculatedRequest[];
   loading?: boolean;
-  rows?: number;
-  rowsPerPageOptions?: number[];
 }
 
 const props = withDefaults(defineProps<ParentGroupedRequestsTableProps>(), {
   loading: false,
-  rows: 25,
-  rowsPerPageOptions: () => [10, 25, 50, 100],
 });
 
 // State
@@ -300,18 +297,17 @@ function clearFilters() {
       </div>
     </div>
 
-    <!-- Tabla -->
+    <!-- Tabla con scroll -->
     <DataTable
       v-model:expanded-rows="expandedRows"
       :value="groupedRows"
-      :paginator="true"
-      :rows="rows"
-      :rows-per-page-options="rowsPerPageOptions"
+      :paginator="false"
       :loading="loading"
       striped-rows
       removable-sort
       size="small"
-      responsive-layout="scroll"
+      scrollable
+      scrollHeight="600px"
       :global-filter-fields="['parentCode', 'parentSubject']"
       class="grouped-table"
       data-key="parentId"
@@ -325,7 +321,11 @@ function clearFilters() {
         header="Código padre"
         sortable
         style="width: 120px"
-      />
+      >
+        <template #body="{ data }">
+          <GpsaeRequestLink :code="data.parentCode" />
+        </template>
+      </Column>
 
       <Column
         field="parentSubject"
@@ -460,7 +460,11 @@ function clearFilters() {
               class="child-card"
             >
               <div class="child-header">
-                <h4>{{ child.childCode }} - {{ child.childSubject }}</h4>
+                <h4>
+                  <GpsaeRequestLink :code="child.childCode" />
+                  -
+                  {{ child.childSubject }}
+                </h4>
               </div>
 
               <div class="child-metrics">
@@ -611,6 +615,33 @@ function clearFilters() {
 .grouped-table {
   width: 100%;
   background: var(--bg-primary);
+}
+
+.grouped-table :deep(.p-datatable-header) {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.grouped-table :deep(.p-datatable-thead > tr > th) {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 0.75rem;
+  border-color: var(--border-color);
+}
+
+.grouped-table :deep(.p-datatable-tbody > tr) {
+  background: var(--bg-primary);
+  border-color: var(--border-color);
+}
+
+.grouped-table :deep(.p-datatable-tbody > tr > td) {
+  padding: 0.5rem 0.75rem;
+  color: var(--text-primary);
+}
+
+.grouped-table :deep(.p-datatable-tbody > tr:hover) {
+  background: var(--bg-secondary);
 }
 
 .expansion-content {

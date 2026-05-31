@@ -1,35 +1,32 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import Tabs from 'primevue/tabs'
-import TabList from 'primevue/tablist'
-import Tab from 'primevue/tab'
-import TabPanels from 'primevue/tabpanels'
-import TabPanel from 'primevue/tabpanel'
-import ParentGroupedRequestsTable from './ParentGroupedRequestsTable.vue'
+import { ref } from "vue";
+import Tabs from "primevue/tabs";
+import TabList from "primevue/tablist";
+import Tab from "primevue/tab";
+import TabPanels from "primevue/tabpanels";
+import TabPanel from "primevue/tabpanel";
+import ParentGroupedRequestsTable from "./ParentGroupedRequestsTable.vue";
+import UnestimatedWithIncurredPanel from "./UnestimatedWithIncurredPanel.vue";
 import type {
   ParentRequest,
   ChildRequest,
   TimeEntry,
   CalculatedRequest,
-} from '../../../domain/types'
+} from "../../../domain/types";
 
 interface DashboardTablesTabsProps {
-  parents: ParentRequest[]
-  children: ChildRequest[]
-  timeEntries: TimeEntry[]
-  calculatedRequests: CalculatedRequest[]
-  loading?: boolean
-  rowsPerPage?: number
-  rowsPerPageOptions?: number[]
+  parents: ParentRequest[];
+  children: ChildRequest[];
+  timeEntries: TimeEntry[];
+  calculatedRequests: CalculatedRequest[];
+  loading?: boolean;
 }
 
 const props = withDefaults(defineProps<DashboardTablesTabsProps>(), {
   loading: false,
-  rowsPerPage: 25,
-  rowsPerPageOptions: () => [10, 25, 50, 100],
-})
+});
 
-const activeTab = ref('grouped')
+const activeTab = ref("grouped");
 </script>
 
 <template>
@@ -38,6 +35,10 @@ const activeTab = ref('grouped')
       <Tab value="grouped" class="flex items-center gap-2">
         <i class="pi pi-fw pi-sitemap"></i>
         <span>Tabla agrupada por padre</span>
+      </Tab>
+      <Tab value="unestimated" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-exclamation-circle"></i>
+        <span>Sin estimar con incurrido</span>
       </Tab>
     </TabList>
     <TabPanels>
@@ -48,8 +49,14 @@ const activeTab = ref('grouped')
           :time-entries="timeEntries"
           :calculated-requests="calculatedRequests"
           :loading="loading"
-          :rows="rowsPerPage"
-          :rows-per-page-options="rowsPerPageOptions"
+        />
+      </TabPanel>
+      <TabPanel value="unestimated">
+        <UnestimatedWithIncurredPanel
+          :calculated-requests="calculatedRequests"
+          :children="children"
+          :time-entries="timeEntries"
+          :loading="loading"
         />
       </TabPanel>
     </TabPanels>
@@ -93,7 +100,7 @@ const activeTab = ref('grouped')
   background: var(--bg-hover);
 }
 
-.tables-tabs :deep(.p-tabs-nav .p-tablist .p-tab[aria-selected='true']) {
+.tables-tabs :deep(.p-tabs-nav .p-tablist .p-tab[aria-selected="true"]) {
   color: var(--color-primary);
   border-bottom: 3px solid var(--color-primary);
 }

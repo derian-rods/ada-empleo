@@ -23,3 +23,5 @@ body {
   min-height: 100vh;
   background-color: var(--bg-primary);
 }
+
+/* DataTable scrollable headers - handled by PrimeVue's scrollable prop */

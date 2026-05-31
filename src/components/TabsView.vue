@@ -1,19 +1,24 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import TabView from 'primevue/tabview'
-import TabPanel from 'primevue/tabpanel'
-import SummaryTab from './SummaryTab.vue'
-import DashboardTablesTabs from './dashboard/tables/DashboardTablesTabs.vue'
-import ChartsTab from './ChartsTab.vue'
-import OrphanTimeEntriesPanel from './OrphanTimeEntriesPanel.vue'
-import { useDashboardStore } from '../stores/dashboard'
+import { ref } from "vue";
+import TabView from "primevue/tabview";
+import TabPanel from "primevue/tabpanel";
+import SummaryTab from "./SummaryTab.vue";
+import DashboardTablesTabs from "./dashboard/tables/DashboardTablesTabs.vue";
+import CollaboratorsTable from "./dashboard/tables/CollaboratorsTable.vue";
+import ChartsTab from "./ChartsTab.vue";
+import OrphanTimeEntriesPanel from "./OrphanTimeEntriesPanel.vue";
+import { useDashboardStore } from "../stores/dashboard";
 
-const store = useDashboardStore()
-const activeTab = ref(0)
+const store = useDashboardStore();
+const activeTab = ref(0);
 </script>
 
 <template>
-  <TabView v-model:activeIndex="activeTab" class="tabs-view" :disabled="store.isProcessing">
+  <TabView
+    v-model:activeIndex="activeTab"
+    class="tabs-view"
+    :disabled="store.isProcessing"
+  >
     <!-- Resumen Tab -->
     <TabPanel header="Resumen" value="resumen" :leftIcon="'pi pi-fw pi-home'">
       <SummaryTab
@@ -25,7 +30,11 @@ const activeTab = ref(0)
     </TabPanel>
 
     <!-- Tabla Tab with subtabs -->
-    <TabPanel header="Tabla de Peticiones" value="tablas" :leftIcon="'pi pi-fw pi-table'">
+    <TabPanel
+      header="Tabla de Peticiones"
+      value="tablas"
+      :leftIcon="'pi pi-fw pi-table'"
+    >
       <DashboardTablesTabs
         :parents="store.parents"
         :children="store.children"
@@ -35,8 +44,25 @@ const activeTab = ref(0)
       />
     </TabPanel>
 
+    <!-- Colaboradores Tab -->
+    <TabPanel
+      header="Colaboradores"
+      value="colaboradores"
+      :leftIcon="'pi pi-fw pi-users'"
+    >
+      <CollaboratorsTable
+        :time-entries="store.timeEntries"
+        :children="store.children"
+        :parents="store.parents"
+      />
+    </TabPanel>
+
     <!-- Gráficas Tab -->
-    <TabPanel header="Gráficas" value="graficos" :leftIcon="'pi pi-fw pi-chart-bar'">
+    <TabPanel
+      header="Gráficas"
+      value="graficos"
+      :leftIcon="'pi pi-fw pi-chart-bar'"
+    >
       <ChartsTab
         :requests="store.calculatedRequests"
         :parents="store.parents"
@@ -46,7 +72,11 @@ const activeTab = ref(0)
     </TabPanel>
 
     <!-- Tiempos Huérfanos Tab -->
-    <TabPanel :header="`Tiempos Huérfanos (${store.orphanTimeEntries.length})`" value="huerfanos" :leftIcon="'pi pi-fw pi-exclamation-circle'">
+    <TabPanel
+      :header="`Tiempos Huérfanos (${store.orphanTimeEntries.length})`"
+      value="huerfanos"
+      :leftIcon="'pi pi-fw pi-exclamation-circle'"
+    >
       <OrphanTimeEntriesPanel :orphans="store.orphanTimeEntries" />
     </TabPanel>
   </TabView>
@@ -82,7 +112,7 @@ const activeTab = ref(0)
   background: var(--bg-hover);
 }
 
-.tabs-view :deep(.p-tabs-nav .p-tablist button[aria-selected='true']) {
+.tabs-view :deep(.p-tabs-nav .p-tablist button[aria-selected="true"]) {
   color: var(--color-primary);
   border-bottom: 3px solid var(--color-primary);
 }
