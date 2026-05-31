@@ -69,9 +69,9 @@ function getDifferenceHbsSign(diff: number): string {
             <span class="kpi-value"
               >{{ fmt(summary.totalEstimatedHours) }}h</span
             >
-            <div class="kpi-label">
+            <!-- <div class="kpi-label">
               HBS: {{ fmt(summary.totalEstimatedHbs) }}
-            </div>
+            </div> -->
           </div>
         </template>
       </Card>
@@ -82,9 +82,9 @@ function getDifferenceHbsSign(diff: number): string {
         <template #content>
           <div class="kpi-content">
             <span class="kpi-value">{{ fmt(summary.totalActualHours) }}h</span>
-            <div class="kpi-label">
+            <!-- <div class="kpi-label">
               HBS: {{ fmt(summary.totalConsumedHbs) }}
-            </div>
+            </div> -->
           </div>
         </template>
       </Card>
