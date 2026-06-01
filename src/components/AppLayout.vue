@@ -27,7 +27,9 @@ function handleThemeToggle() {
   <div class="app-layout">
     <Toolbar class="app-toolbar" :disabled="store.isProcessingCsv">
       <template #start>
-        <h2 style="margin: 0; font-size: 1.25rem">ADA – Empleo</h2>
+        <h2 style="margin: 0; font-size: 1.25rem">
+          Control de estimaciones e incurridos ADA – Empleo
+        </h2>
       </template>
       <template #end>
         <div class="toolbar-end">

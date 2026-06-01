@@ -104,7 +104,8 @@ function fmt(n: number): string {
             loss: data.differenceHours < 0,
           }"
         >
-          {{ fmt(data.differenceHours) }}h
+          {{ data.differenceHours >= 0 ? "+" : ""
+          }}{{ fmt(data.differenceHours) }}h
         </span>
       </template>
     </Column>
@@ -184,4 +185,21 @@ function fmt(n: number): string {
   </DataTable>
 </template>
 
-<style scoped></style>
+<style scoped>
+.difference-value {
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  display: inline-block;
+}
+
+.difference-value.profit {
+  color: #22c55e;
+  background-color: rgba(34, 197, 94, 0.1);
+}
+
+.difference-value.loss {
+  color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.1);
+}
+</style>
