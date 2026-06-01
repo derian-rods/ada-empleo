@@ -115,11 +115,61 @@ function fmt(n: number): string {
 
       <Column
         field="deviationPercent"
-        header="Desviación %"
+        header="Dev. Horas %"
         sortable
         style="width: 100px"
       >
         <template #body="{ data }">{{ fmt(data.deviationPercent) }}%</template>
+      </Column>
+
+      <!-- HBS Columns -->
+      <Column
+        field="estimatedHbs"
+        header="HBS Est."
+        sortable
+        style="width: 100px"
+      >
+        <template #body="{ data }">{{ fmt(data.estimatedHbs) }}</template>
+      </Column>
+
+      <Column
+        field="consumedHbs"
+        header="HBS Real"
+        sortable
+        style="width: 100px"
+      >
+        <template #body="{ data }">{{ fmt(data.consumedHbs) }}</template>
+      </Column>
+
+      <Column
+        field="differenceHbs"
+        header="Dif. HBS"
+        sortable
+        style="width: 100px"
+      >
+        <template #body="{ data }">
+          <span
+            class="difference-value"
+            :class="{
+              profit: data.differenceHbs < 0,
+              loss: data.differenceHbs >= 0,
+            }"
+          >
+            {{ data.differenceHbs >= 0 ? "+" : ""
+            }}{{ fmt(data.differenceHbs) }}
+          </span>
+        </template>
+      </Column>
+
+      <Column
+        field="deviationPercentHbs"
+        header="Dev. HBS %"
+        sortable
+        style="width: 100px"
+      >
+        <template #body="{ data }"
+          >{{ fmt(data.deviationPercentHbs) }}%</template
+        >
       </Column>
 
       <Column

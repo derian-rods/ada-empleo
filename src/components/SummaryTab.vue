@@ -47,70 +47,67 @@ function getDifferenceHbsSign(diff: number): string {
       </Message>
     </div>
 
-    <!-- Warnings -->
-    <div v-if="warnings.length > 0" class="messages">
-      <Message
-        v-for="(warn, i) in warnings"
-        :key="i"
-        severity="warn"
-        :closable="false"
-      >
-        {{ warn }}
-      </Message>
-    </div>
-
-    <!-- Main KPIs: HBS-focused metrics -->
+    <!-- Main KPIs: Hours Summary -->
     <div v-if="summary" class="kpi-grid">
-      <!-- Horas estimadas -->
+      <!-- Horas Estimadas -->
       <Card class="kpi-card">
-        <template #title>Horas estimadas</template>
+        <template #title>Horas Estimadas</template>
         <template #content>
           <div class="kpi-content">
-            <span class="kpi-value"
-              >{{ fmt(summary.totalEstimatedHours) }}h</span
-            >
-            <!-- <div class="kpi-label">
-              HBS: {{ fmt(summary.totalEstimatedHbs) }}
-            </div> -->
+            <div class="kpi-row">
+              <span class="label">Horas:</span>
+              <span class="value">{{ fmt(summary.totalEstimatedHours) }}h</span>
+            </div>
+            <div class="kpi-row">
+              <span class="label">HBS:</span>
+              <span class="value">{{ fmt(summary.totalEstimatedHbs) }}</span>
+            </div>
           </div>
         </template>
       </Card>
 
-      <!-- Horas incurridas -->
+      <!-- Horas Reales (Incurridas) -->
       <Card class="kpi-card">
-        <template #title>Horas incurridas</template>
+        <template #title>Horas Incurridas</template>
         <template #content>
           <div class="kpi-content">
-            <span class="kpi-value">{{ fmt(summary.totalActualHours) }}h</span>
-            <!-- <div class="kpi-label">
-              HBS: {{ fmt(summary.totalConsumedHbs) }}
-            </div> -->
+            <div class="kpi-row">
+              <span class="label">Horas:</span>
+              <span class="value">{{ fmt(summary.totalActualHours) }}h</span>
+            </div>
+            <div class="kpi-row">
+              <span class="label">HBS:</span>
+              <span class="value">{{ fmt(summary.totalConsumedHbs) }}</span>
+            </div>
           </div>
         </template>
       </Card>
 
-      <!-- Diferencia HBS -->
+      <!-- Diferencia en HBS Consumidas vs Estimadas -->
       <Card class="kpi-card">
         <template #title>Diferencia HBS</template>
         <template #content>
-          <span
-            class="kpi-value"
-            :class="getDifferenceHbsClass(summary.totalDifferenceHbs)"
-          >
-            {{ getDifferenceHbsSign(summary.totalDifferenceHbs)
-            }}{{ fmt(Math.abs(summary.totalDifferenceHbs)) }}
-          </span>
+          <div class="kpi-content">
+            <span
+              class="kpi-value-large"
+              :class="getDifferenceHbsClass(summary.totalDifferenceHbs)"
+            >
+              {{ getDifferenceHbsSign(summary.totalDifferenceHbs)
+              }}{{ fmt(Math.abs(summary.totalDifferenceHbs)) }}
+            </span>
+            <div class="kpi-label">Consumidas - Estimadas</div>
+          </div>
         </template>
       </Card>
 
-      <!-- Desviación media -->
+      <!-- Desviación media HBS -->
       <Card class="kpi-card">
-        <template #title>Desviación media</template>
-        <template #content
-          ><span class="kpi-value">{{
+        <template #title>Desviación Media HBS</template>
+        <template #content>
+          <span class="kpi-value-large">{{
             fmtPct(summary.averageDeviationPercentHbs)
-          }}</span></template
-        >
+          }}</span>
+        </template>
       </Card>
     </div>
   </div>
@@ -168,11 +165,38 @@ function getDifferenceHbsSign(diff: number): string {
 .kpi-content {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.75rem;
+}
+
+.kpi-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: var(--bg-secondary);
+  border-radius: 0.25rem;
+}
+
+.kpi-row .label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.kpi-row .value {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 1.25rem;
 }
 
 .kpi-value {
-  font-size: 2rem;
+  font-size: 1.75rem;
+  font-weight: 700;
+  display: block;
+  color: var(--text-primary);
+}
+
+.kpi-value-large {
+  font-size: 2.5rem;
   font-weight: 700;
   display: block;
   color: var(--text-primary);
