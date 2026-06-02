@@ -30,3 +30,14 @@ dist-ssr
 
 # Build outputs
 tsconfig.tsbuildinfo
+
+# Analysis and documentation files (temporary for development)
+ANALISIS_GRAFICAS_Y_DATOS.md
+ARCHIVOS_ANALIZADOS.md
+CONCLUSIONES_ANALISIS.md
+DIAGRAMAS_ARQUITECTURA.md
+EJEMPLOS_CALCULOS_PRACTICOS.md
+GUIA_REFERENCIA_RAPIDA.md
+README_ANALISIS_COMPLETO.md
+RESUMEN_EJECUTIVO.md
+
