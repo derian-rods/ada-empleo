@@ -23,7 +23,7 @@ export type ProfileCode = keyof typeof HBS_PROFILES;
 export const COLLABORATORS: Record<string, ProfileCode> = {
   "Gerardo Manuel García Guillén": "GP",
   "Cristina Domínguez Quirós": "CD",
-  "Enriqueta Gonzalez Pérez": "CD",
+  "Enriqueta González Pérez": "CD",
   "Diego Manovel Alamillo": "CD",
   "José Miguel Morales Ortíz": "CD",
   "Pedro González Mora": "AS",
@@ -31,12 +31,12 @@ export const COLLABORATORS: Record<string, ProfileCode> = {
   "Cándido Iglesias Morato": "AS",
   "Gabriel Díaz Gavira": "AS",
   "Julián Fernández Corimayo": "DE",
-  "José María Serrano Sáez": "DE",
+  "Jose Maria Serrano Sáez": "DE",
   "Fátima Elsayed Torres": "DE",
   "Francisco Rodríguez Espinosa": "DE",
-  "Alfonso Trigueros Benítez": "DE",
+  "Alfonso Trigueros Benitez": "DE",
   "Laia Benavent Ribelles": "DE",
-  "Derian Rodríguez Salazar": "DE",
+  "Derian Rodriguez Salazar": "DE",
   "Kevin Rosales Martínez": "DE",
 };
 
