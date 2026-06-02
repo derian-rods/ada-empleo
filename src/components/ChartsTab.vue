@@ -1,62 +1,62 @@
 <script setup lang="ts">
-import { ref, watch, onMounted, computed } from 'vue'
-import ChartRiskMatrix from './dashboard/charts/ChartRiskMatrix.vue'
-import ChartDeviationDistribution from './dashboard/charts/ChartDeviationDistribution.vue'
-import {
-  buildParentGroupedTableRows,
-} from '../domain/parentGroupedTable'
-import type { CalculatedRequest, ParentRequest, ChildRequest, TimeEntry } from '../domain/types'
+import { ref, watch, onMounted } from "vue";
+// import ChartRiskMatrix from './dashboard/charts/ChartRiskMatrix.vue'
+// import ChartDeviationDistribution from './dashboard/charts/ChartDeviationDistribution.vue'
+import ChartEstimatedVsDedicated from "./dashboard/charts/ChartEstimatedVsDedicated.vue";
+import ChartHbsConsumption from "./dashboard/charts/ChartHbsConsumption.vue";
+// import { buildParentGroupedTableRows } from "../domain/parentGroupedTable";
+import type {
+  CalculatedRequest,
+  ParentRequest,
+  ChildRequest,
+  TimeEntry,
+} from "../domain/types";
 
 interface ChartsTabProps {
-  requests: CalculatedRequest[]
-  parents?: ParentRequest[]
-  children?: ChildRequest[]
-  timeEntries?: TimeEntry[]
+  requests: CalculatedRequest[];
+  parents?: ParentRequest[];
+  children?: ChildRequest[];
+  timeEntries?: TimeEntry[];
 }
 
 const props = withDefaults(defineProps<ChartsTabProps>(), {
   parents: () => [],
   children: () => [],
   timeEntries: () => [],
-})
+});
 
-const renderCharts = ref(false)
-
-// Build grouped rows for charts
-const groupedRows = computed(() => {
-  if (!props.parents || !props.children || !props.timeEntries) {
-    return []
-  }
-  return buildParentGroupedTableRows(
-    props.parents,
-    props.children,
-    props.timeEntries,
-    props.requests
-  )
-})
+const renderCharts = ref(false);
 
 onMounted(() => {
-  renderCharts.value = true
-})
+  renderCharts.value = true;
+});
 
 watch(
   () => props.requests,
   () => {
-    renderCharts.value = false
+    renderCharts.value = false;
     setTimeout(() => {
-      renderCharts.value = true
-    }, 0)
-  }
-)
+      renderCharts.value = true;
+    }, 0);
+  },
+);
 </script>
 
 <template>
   <div class="charts-tab">
+    <!-- Hidden: Old charts (commented for future restoration)
     <div v-if="renderCharts && groupedRows.length > 0" class="charts-grid">
       <ChartRiskMatrix :rows="groupedRows" />
       <ChartDeviationDistribution :rows="groupedRows" />
     </div>
-    <div v-else-if="groupedRows.length === 0" class="no-data">
+    -->
+
+    <!-- New charts: Estimated vs Dedicated and HBS Consumption -->
+    <div v-if="renderCharts && requests.length > 0" class="charts-grid">
+      <ChartEstimatedVsDedicated :requests="requests" />
+      <ChartHbsConsumption :requests="requests" />
+    </div>
+    <div v-else-if="requests.length === 0" class="no-data">
       <p>No hay datos para mostrar gráficos</p>
     </div>
   </div>
