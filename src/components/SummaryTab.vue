@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Card from "primevue/card";
-import Message from "primevue/message";
 import type { DashboardSummary, CalculatedRequest } from "../domain/types";
 
 interface SummaryTabProps {
@@ -35,18 +34,6 @@ function getDifferenceHbsSign(diff: number): string {
 
 <template>
   <div class="summary-tab">
-    <!-- Errors -->
-    <div v-if="errors.length > 0" class="messages">
-      <Message
-        v-for="(err, i) in errors"
-        :key="i"
-        severity="error"
-        :closable="false"
-      >
-        {{ err }}
-      </Message>
-    </div>
-
     <!-- Main KPIs: Hours Summary -->
     <div v-if="summary" class="kpi-grid">
       <!-- Horas Estimadas -->

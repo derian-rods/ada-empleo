@@ -66,6 +66,7 @@ export interface TimeEntry {
   profiledRole?: string;
   cauRole?: string;
   application?: string;
+  companyName?: string; // Empresa asignada (ej. "Sopra Steria")
 }
 
 export interface OrphanTimeEntry extends TimeEntry {
