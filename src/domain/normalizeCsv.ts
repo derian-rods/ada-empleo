@@ -76,6 +76,13 @@ export function normalizeChildRequests(rows: Row[]): ChildRequest[] {
       version: cleanText(row["Versión prevista"]),
       application: cleanText(row["Aplicación"]),
       estimatedHours: getEstimatedHours(row, true),
+      // Profile-based hours
+      estimatedHoursJp: parseCsvNumber(row["Horas JP"]) || undefined,
+      estimatedHoursCs: parseCsvNumber(row["Horas CS"]) || undefined,
+      estimatedHoursAf: parseCsvNumber(row["Horas AF"]) || undefined,
+      estimatedHoursAsEs: parseCsvNumber(row["Horas AS / ES"]) || undefined,
+      estimatedHoursApTs: parseCsvNumber(row["Horas AP / TS"]) || undefined,
+      estimatedHoursP: parseCsvNumber(row["Horas P"]) || undefined,
       dedicatedHoursFromExport:
         parseCsvNumber(row["Tiempo dedicado"]) || undefined,
       totalDedicatedHoursFromExport:

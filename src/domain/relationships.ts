@@ -72,6 +72,22 @@ export function buildCalculatedRequests(
     const estimatedHours =
       childrenEstimated > 0 ? childrenEstimated : parent.estimatedHours;
 
+    // Profile-based estimated hours (JP, CS, AF from children)
+    const estimatedHoursJp = parentChildren.reduce(
+      (sum, c) => sum + (c.estimatedHoursJp ?? 0),
+      0,
+    );
+    const estimatedHoursCs = parentChildren.reduce(
+      (sum, c) => sum + (c.estimatedHoursCs ?? 0),
+      0,
+    );
+    const estimatedHoursAf = parentChildren.reduce(
+      (sum, c) => sum + (c.estimatedHoursAf ?? 0),
+      0,
+    );
+    const estimatedHoursTotal =
+      estimatedHoursJp + estimatedHoursCs + estimatedHoursAf;
+
     // Actual hours: always from time entries
     const actualHours = entries.reduce((sum, te) => sum + te.hours, 0);
 
@@ -148,6 +164,10 @@ export function buildCalculatedRequests(
       status: parent.status,
       application: parent.application,
       estimatedHours,
+      estimatedHoursJp,
+      estimatedHoursCs,
+      estimatedHoursAf,
+      estimatedHoursTotal,
       actualHours,
       differenceHours,
       deviationPercent,

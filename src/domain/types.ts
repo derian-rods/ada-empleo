@@ -37,6 +37,13 @@ export interface ChildRequest {
   version?: string;
   application?: string;
   estimatedHours: number;
+  // Profile-based hours (from peticiones hijas CSV)
+  estimatedHoursJp?: number;
+  estimatedHoursCs?: number;
+  estimatedHoursAf?: number;
+  estimatedHoursAsEs?: number;
+  estimatedHoursApTs?: number;
+  estimatedHoursP?: number;
   dedicatedHoursFromExport?: number;
   totalDedicatedHoursFromExport?: number;
   costWithoutVat?: number;
@@ -82,6 +89,11 @@ export interface CalculatedRequest {
   status?: string;
   application?: string;
   estimatedHours: number;
+  // Profile-based estimated hours (JP, CS, AF)
+  estimatedHoursJp?: number;
+  estimatedHoursCs?: number;
+  estimatedHoursAf?: number;
+  estimatedHoursTotal?: number; // JP + CS + AF
   actualHours: number;
   differenceHours: number;
   deviationPercent: number;
