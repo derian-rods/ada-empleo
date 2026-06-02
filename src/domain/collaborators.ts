@@ -6,6 +6,7 @@
  */
 
 import type { TimeEntry, ChildRequest, ParentRequest } from "./types";
+import type { CompanyCollaborator } from "./companies";
 
 /**
  * Detalle de una imputación de un colaborador
@@ -374,6 +375,37 @@ export interface CollaboratorFilters {
   petitionCode?: string; // búsqueda parcial, case-insensitive
 }
 
+/**
+ * Enriquecer resumen de colaboradores con colaboradores sin datos
+ *
+ * Si un colaborador está en la lista companyCollaborators pero no en el resumen,
+ * se añade con 0 horas
+ */
+export function enrichCollaboratorsSummaryWithAllCompanyCollaborators(
+  summaries: CollaboratorMonthlySummary[],
+  companyCollaborators: CompanyCollaborator[],
+): CollaboratorMonthlySummary[] {
+  const existingNames = new Set(summaries.map((s) => s.collaboratorName));
+
+  const missingCollaborators: CollaboratorMonthlySummary[] =
+    companyCollaborators
+      .filter((cc) => !existingNames.has(cc.name))
+      .map((cc) => ({
+        collaboratorName: cc.name,
+        totalHours: 0,
+        uniqueRequestCount: 0,
+        months: {},
+        monthsList: [],
+        entries: [],
+      }));
+
+  // Combinar y ordenar alfabéticamente
+  const combined = [...summaries, ...missingCollaborators];
+  combined.sort((a, b) => a.collaboratorName.localeCompare(b.collaboratorName));
+
+  return combined;
+}
+
 export function filterCollaborators(
   summaries: CollaboratorMonthlySummary[],
   filters: CollaboratorFilters,
@@ -425,8 +457,10 @@ export function filterCollaborators(
         );
       }
 
-      if (filteredEntries.length === 0) {
-        return null; // No hay entradas después de filtrar
+      // Si hay filtro de petición y no hay entradas, excluir colaborador
+      // Si no hay filtro de petición, permitir colaborador incluso sin entradas
+      if (filters.petitionCode && filteredEntries.length === 0) {
+        return null;
       }
 
       // Recalcular meses y totales basado en entradas filtradas

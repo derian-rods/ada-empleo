@@ -7,11 +7,13 @@ import Dropdown from "primevue/dropdown";
 import Calendar from "primevue/calendar";
 import Tag from "primevue/tag";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
+import CollaboratorManagementModal from "../modals/CollaboratorManagementModal.vue";
 import {
   buildCollaboratorsSummary,
   buildCollaboratorsPageSummary,
   filterCollaborators,
   formatHours,
+  enrichCollaboratorsSummaryWithAllCompanyCollaborators,
   type CollaboratorFilters,
 } from "../../../domain/collaborators";
 import type {
@@ -19,6 +21,7 @@ import type {
   ChildRequest,
   ParentRequest,
 } from "../../../domain/types";
+import { useDashboardStore } from "../../../stores/dashboard";
 
 interface Props {
   timeEntries: TimeEntry[];
@@ -27,6 +30,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const dashboardStore = useDashboardStore();
 
 // State
 const filters = ref<{
@@ -36,19 +40,37 @@ const filters = ref<{
   petitionCode?: string;
 }>({});
 const expandedRows = ref<string[]>([]);
+const showCollaboratorModal = ref(false);
 
-// Computed: Colaboradores agrupados
+// Computed: TimeEntries filtrados por empresa seleccionada
+const filteredByCompanyTimeEntries = computed(() => {
+  return dashboardStore.filteredTimeEntries;
+});
+
+// Computed: Colaboradores agrupados (basado en TimeEntries filtrados por empresa)
 const collaboratorsSummary = computed(() => {
   return buildCollaboratorsSummary(
-    props.timeEntries,
+    filteredByCompanyTimeEntries.value,
     props.children,
     props.parents,
   );
 });
 
+// Computed: Enriquecer resumen con todos los colaboradores de la empresa seleccionada
+const enrichedCollaboratorsSummary = computed(() => {
+  if (!dashboardStore.selectedCompanyFilter) {
+    return collaboratorsSummary.value;
+  }
+
+  return enrichCollaboratorsSummaryWithAllCompanyCollaborators(
+    collaboratorsSummary.value,
+    dashboardStore.companyCollaborators,
+  );
+});
+
 // Computed: Resumen de página
 const pageSummary = computed(() => {
-  return buildCollaboratorsPageSummary(collaboratorsSummary.value);
+  return buildCollaboratorsPageSummary(enrichedCollaboratorsSummary.value);
 });
 
 // Computed: Filtros aplicados
@@ -63,12 +85,12 @@ const filteredCollaborators = computed(() => {
       ? new Date(filters.value.dateTo).toISOString().split("T")[0]
       : undefined,
   };
-  return filterCollaborators(collaboratorsSummary.value, filterParams);
+  return filterCollaborators(enrichedCollaboratorsSummary.value, filterParams);
 });
 
 // Opciones para dropdown de colaboradores (multiple)
 const collaboratorOptions = computed(() => {
-  return collaboratorsSummary.value.map((c) => ({
+  return enrichedCollaboratorsSummary.value.map((c) => ({
     label: c.collaboratorName,
     value: c.collaboratorName,
   }));
@@ -77,7 +99,7 @@ const collaboratorOptions = computed(() => {
 // Opciones para dropdown de peticiones (de todos los colaboradores)
 const petitionOptions = computed(() => {
   const petitions = new Set<string>();
-  for (const summary of collaboratorsSummary.value) {
+  for (const summary of enrichedCollaboratorsSummary.value) {
     for (const entry of summary.entries) {
       if (entry.petitionCode) {
         petitions.add(entry.petitionCode);
@@ -92,37 +114,56 @@ function clearFilters() {
   filters.value = {};
   expandedRows.value = [];
 }
+
+// Guardar colaboradores actualizados
+function onSaveCollaborators(collaborators: any[]) {
+  dashboardStore.setCompanyCollaborators(collaborators);
+}
 </script>
 
 <template>
   <div class="collaborators-table-container">
     <!-- Resumen de página -->
     <div v-if="collaboratorsSummary.length > 0" class="summary-section">
-      <div class="summary-cards">
-        <div class="summary-card">
-          <div class="card-label">Colaboradores</div>
-          <div class="card-value">{{ pageSummary.totalCollaborators }}</div>
-        </div>
+      <!-- Fila superior: Cards + Botón Gestionar -->
+      <div class="summary-header">
+        <div class="summary-cards">
+          <div class="summary-card">
+            <div class="card-label">Colaboradores</div>
+            <div class="card-value">{{ pageSummary.totalCollaborators }}</div>
+          </div>
 
-        <div class="summary-card">
-          <div class="card-label">Total imputado</div>
-          <div class="card-value">
-            {{ formatHours(pageSummary.totalHours) }}
+          <div class="summary-card">
+            <div class="card-label">Total imputado</div>
+            <div class="card-value">
+              {{ formatHours(pageSummary.totalHours) }}
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-label">Peticiones distintas</div>
+            <div class="card-value">
+              {{ pageSummary.totalUniqueRequests }}
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="card-label">Período</div>
+            <div class="card-value-small">
+              {{ pageSummary.monthRange.displayRange || "Sin datos" }}
+            </div>
           </div>
         </div>
 
-        <div class="summary-card">
-          <div class="card-label">Peticiones distintas</div>
-          <div class="card-value">
-            {{ pageSummary.totalUniqueRequests }}
-          </div>
-        </div>
-
-        <div class="summary-card">
-          <div class="card-label">Período</div>
-          <div class="card-value-small">
-            {{ pageSummary.monthRange.displayRange || "Sin datos" }}
-          </div>
+        <!-- Botón Gestionar Colaboradores -->
+        <div class="summary-actions">
+          <Button
+            label="Gestionar colaboradores"
+            icon="pi pi-users"
+            severity="info"
+            size="small"
+            @click="showCollaboratorModal = true"
+          />
         </div>
       </div>
 
@@ -355,6 +396,14 @@ function clearFilters() {
         </template>
       </DataTable>
     </div>
+
+    <!-- Modal de gestión de colaboradores -->
+    <CollaboratorManagementModal
+      :visible="showCollaboratorModal"
+      :collaborators="dashboardStore.companyCollaborators"
+      @update:visible="showCollaboratorModal = $event"
+      @save="onSaveCollaborators"
+    />
   </div>
 </template>
 
@@ -373,10 +422,24 @@ function clearFilters() {
   gap: 1.5rem;
 }
 
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
 .summary-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1rem;
+  flex: 1;
+}
+
+.summary-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
 }
 
 .summary-card {

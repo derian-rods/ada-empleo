@@ -22,8 +22,8 @@ const activeTab = ref(0);
     <!-- Resumen Tab -->
     <TabPanel header="Resumen" value="resumen" :leftIcon="'pi pi-fw pi-home'">
       <SummaryTab
-        :summary="store.summary"
-        :requests="store.calculatedRequests"
+        :summary="store.filteredSummary"
+        :requests="store.filteredCalculatedRequests"
         :warnings="store.warnings"
         :errors="store.errors"
       />
@@ -38,8 +38,8 @@ const activeTab = ref(0);
       <DashboardTablesTabs
         :parents="store.parents"
         :children="store.children"
-        :time-entries="store.timeEntries"
-        :calculated-requests="store.calculatedRequests"
+        :time-entries="store.filteredTimeEntries"
+        :calculated-requests="store.filteredCalculatedRequests"
         :rows-per-page="25"
       />
     </TabPanel>
@@ -64,10 +64,10 @@ const activeTab = ref(0);
       :leftIcon="'pi pi-fw pi-chart-bar'"
     >
       <ChartsTab
-        :requests="store.calculatedRequests"
+        :requests="store.filteredCalculatedRequests"
         :parents="store.parents"
         :children="store.children"
-        :time-entries="store.timeEntries"
+        :time-entries="store.filteredTimeEntries"
       />
     </TabPanel>
 

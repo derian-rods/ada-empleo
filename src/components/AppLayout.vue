@@ -3,6 +3,7 @@ import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
+import Dropdown from "primevue/dropdown";
 import { useDashboardStore } from "../stores/dashboard";
 import { useThemeStore } from "../stores/theme";
 
@@ -21,6 +22,12 @@ function handleReset() {
 function handleThemeToggle() {
   themeStore.toggleTheme();
 }
+
+// Opciones para dropdown de empresa
+const companyFilterOptions = [
+  { label: "Todos", value: null },
+  { label: "Sopra Steria", value: "Sopra Steria" },
+];
 </script>
 
 <template>
@@ -30,6 +37,18 @@ function handleThemeToggle() {
         <h2 style="margin: 0; font-size: 1.25rem">
           Control de estimaciones e incurridos ADA – Empleo
         </h2>
+        <div class="toolbar-center" v-if="store.hasData">
+          <Dropdown
+            :model-value="store.selectedCompanyFilter"
+            :options="companyFilterOptions"
+            option-label="label"
+            option-value="value"
+            placeholder="Seleccionar"
+            size="small"
+            @update:model-value="store.setCompanyFilter"
+            class="company-dropdown"
+          />
+        </div>
       </template>
       <template #end>
         <div class="toolbar-end">
@@ -81,6 +100,24 @@ function handleThemeToggle() {
   color: var(--text-primary);
   font-size: 1.25rem;
   font-weight: 700;
+}
+
+.toolbar-center {
+  display: flex;
+  align-items: center;
+  margin-left: 2rem;
+  gap: 0.75rem;
+}
+
+.filter-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.company-dropdown {
+  min-width: 150px;
 }
 
 .toolbar-end {

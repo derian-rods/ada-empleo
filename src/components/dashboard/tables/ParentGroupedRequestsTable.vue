@@ -20,6 +20,7 @@ import type {
   TimeEntry,
   CalculatedRequest,
 } from "../../../domain/types";
+import { useDashboardStore } from "../../../stores/dashboard";
 
 interface ParentGroupedRequestsTableProps {
   parents: ParentRequest[];
@@ -33,16 +34,19 @@ const props = withDefaults(defineProps<ParentGroupedRequestsTableProps>(), {
   loading: false,
 });
 
+const dashboardStore = useDashboardStore();
+
 // State
 const expandedRows = ref<string[]>([]);
 const filters = ref<ParentGroupedTableFilters>({});
 
 // Build and filter data
 const groupedRows = computed(() => {
+  // Usar TimeEntries filtrados por empresa desde el store
   const rows = buildParentGroupedTableRows(
     props.parents,
     props.children,
-    props.timeEntries,
+    dashboardStore.filteredTimeEntries, // TimeEntries filtrados por empresa
     props.calculatedRequests,
   );
   return filterParentGroupedRows(rows, filters.value);

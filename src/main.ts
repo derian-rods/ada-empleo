@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 import PrimeVue from "primevue/config";
 import ToastService from "primevue/toastservice";
+import ConfirmationService from "primevue/confirmationservice";
 import { CCVPreset } from "./theme/preset";
 import VChart from "vue-echarts";
 import "primeicons/primeicons.css";
@@ -23,6 +24,7 @@ app.use(PrimeVue, {
   },
 });
 app.use(ToastService);
+app.use(ConfirmationService);
 app.component("VChart", VChart);
 
 app.mount("#app");
