@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
+import ChartTotalSummary from "./dashboard/charts/ChartTotalSummary.vue";
+import ChartDeviationRanges from "./dashboard/charts/ChartDeviationRanges.vue";
 // import ChartRiskMatrix from './dashboard/charts/ChartRiskMatrix.vue'
 // import ChartDeviationDistribution from './dashboard/charts/ChartDeviationDistribution.vue'
-import ChartEstimatedVsDedicated from "./dashboard/charts/ChartEstimatedVsDedicated.vue";
-import ChartHbsConsumption from "./dashboard/charts/ChartHbsConsumption.vue";
+// import ChartEstimatedVsDedicated from "./dashboard/charts/ChartEstimatedVsDedicated.vue";
+// import ChartHbsConsumption from "./dashboard/charts/ChartHbsConsumption.vue";
 // import { buildParentGroupedTableRows } from "../domain/parentGroupedTable";
 import type {
   CalculatedRequest,
@@ -44,17 +46,10 @@ watch(
 
 <template>
   <div class="charts-tab">
-    <!-- Hidden: Old charts (commented for future restoration)
-    <div v-if="renderCharts && groupedRows.length > 0" class="charts-grid">
-      <ChartRiskMatrix :rows="groupedRows" />
-      <ChartDeviationDistribution :rows="groupedRows" />
-    </div>
-    -->
-
-    <!-- New charts: Estimated vs Dedicated and HBS Consumption -->
-    <div v-if="renderCharts && requests.length > 0" class="charts-grid">
-      <ChartEstimatedVsDedicated :requests="requests" />
-      <ChartHbsConsumption :requests="requests" />
+    <!-- New summary charts: Total Summary and Deviation Ranges -->
+    <div v-if="renderCharts && requests.length > 0" class="charts-wrapper">
+      <ChartTotalSummary :requests="requests" />
+      <ChartDeviationRanges :requests="requests" />
     </div>
     <div v-else-if="requests.length === 0" class="no-data">
       <p>No hay datos para mostrar gráficos</p>
@@ -67,14 +62,14 @@ watch(
   width: 100%;
   background: var(--bg-primary);
   color: var(--text-primary);
+  padding: 1.5rem;
 }
 
-.charts-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: var(--bg-primary);
+.charts-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
 .no-data {
@@ -84,6 +79,6 @@ watch(
   background: var(--bg-primary);
   border: 2px dashed var(--border-color);
   border-radius: 0.5rem;
-  margin: 1.5rem;
+  margin: 0;
 }
 </style>
