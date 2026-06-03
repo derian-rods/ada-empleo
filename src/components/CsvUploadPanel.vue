@@ -8,7 +8,7 @@ import Button from "primevue/button";
 import { useDashboardStore } from "../stores/dashboard";
 
 const store = useDashboardStore();
-const isExpanded = ref(false);
+const showUploadPanel = ref(true);
 
 function onParentSelect(event: FileUploadSelectEvent) {
   const file = event.files[0];
@@ -49,17 +49,54 @@ function getStatusLabel(loaded: boolean): string {
   return loaded ? "OK" : "Pendiente";
 }
 
-// Show errors/warnings even when collapsed
+// Check if all CSVs are loaded
+const allCsvsLoaded = computed(
+  () => store.parentsLoaded && store.childrenLoaded && store.timeEntriesLoaded,
+);
+
+// Show errors/warnings even when panel is hidden
 const hasIssues = computed(
   () => store.errors.length > 0 || store.warnings.length > 0,
 );
+
+// Watch for data clearing to show panel again
+const handleShowUploadPanel = () => {
+  showUploadPanel.value = true;
+};
+
+// Expose function for external calls
+defineExpose({
+  showUploadPanel: handleShowUploadPanel,
+});
 </script>
 
 <template>
   <div class="csv-panel">
-    <!-- Compact Header / Status Bar -->
-    <div class="compact-header">
+    <!-- When all CSVs are loaded: Show compact status bar with action buttons -->
+    <div v-if="allCsvsLoaded && !showUploadPanel" class="compact-status-bar">
       <div class="status-info">
+        <div class="loaded-badge">
+          <i class="pi pi-check-circle"></i>
+          <span>Datos cargados correctamente</span>
+        </div>
+      </div>
+
+      <div class="status-actions">
+        <Button
+          icon="pi pi-upload"
+          label="Cargar nuevos datos"
+          severity="info"
+          text
+          rounded
+          @click="showUploadPanel = true"
+          class="action-btn"
+        />
+      </div>
+    </div>
+
+    <!-- Upload Panel: Show when loading or not all CSVs are loaded -->
+    <div v-if="!allCsvsLoaded || showUploadPanel" class="upload-panel">
+      <div class="panel-header">
         <h3>Gestión de CSVs</h3>
         <div class="status-badges">
           <span
@@ -81,22 +118,6 @@ const hasIssues = computed(
         </div>
       </div>
 
-      <!-- Toggle and Action Buttons -->
-      <div class="header-actions">
-        <Button
-          :icon="isExpanded ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-          severity="secondary"
-          text
-          rounded
-          @click="isExpanded = !isExpanded"
-          class="toggle-btn"
-          v-tooltip="isExpanded ? 'Cerrar' : 'Expandir'"
-        />
-      </div>
-    </div>
-
-    <!-- Expanded Content -->
-    <div v-show="isExpanded" class="expanded-content">
       <div class="upload-grid">
         <div class="upload-item">
           <label>
@@ -158,6 +179,19 @@ const hasIssues = computed(
           />
         </div>
       </div>
+
+      <!-- Close button when panel is shown after data loaded -->
+      <div v-if="allCsvsLoaded && showUploadPanel" class="panel-footer">
+        <Button
+          icon="pi pi-times"
+          label="Cerrar"
+          severity="secondary"
+          text
+          rounded
+          @click="showUploadPanel = false"
+          class="close-btn"
+        />
+      </div>
     </div>
 
     <!-- Alerts Section (Always Visible if there are issues) -->
@@ -205,19 +239,23 @@ const hasIssues = computed(
 <style scoped>
 .csv-panel {
   background: var(--bg-primary);
-  border: 1px solid var(--border-color);
   border-radius: 0.5rem;
   overflow: hidden;
 }
 
-/* Compact Header */
-.compact-header {
+/* Compact Status Bar (when all CSVs are loaded) */
+.compact-status-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.75rem 1rem;
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(
+    135deg,
+    var(--bg-secondary) 0%,
+    var(--bg-primary) 100%
+  );
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
   gap: 1rem;
 }
 
@@ -229,9 +267,63 @@ const hasIssues = computed(
   min-width: 0;
 }
 
-.status-info h3 {
-  margin: 0;
+.loaded-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.loaded-badge i {
+  color: #22c55e;
+  font-size: 1.2rem;
+}
+
+.status-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  white-space: nowrap;
+}
+
+/* Upload Panel */
+.upload-panel {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.panel-header h3 {
+  margin: 0;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
   white-space: nowrap;
@@ -257,37 +349,12 @@ const hasIssues = computed(
   font-weight: 500;
 }
 
-.header-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.toggle-btn {
-  flex-shrink: 0;
-}
-
-/* Expanded Content */
-.expanded-content {
-  padding: 1rem;
-  animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 500px;
-  }
-}
-
+/* Upload Grid */
 .upload-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 1rem;
-  margin-bottom: 1rem;
+  padding: 1rem;
 }
 
 .upload-item {
@@ -306,11 +373,26 @@ const hasIssues = computed(
   flex-wrap: wrap;
 }
 
+/* Panel Footer */
+.panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem 1rem;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+}
+
+.close-btn {
+  white-space: nowrap;
+}
+
 /* Alerts Section */
 .alerts-section {
   padding: 0.75rem 1rem;
   background: var(--bg-secondary);
-  border-top: 1px solid var(--border-color);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .messages {
@@ -372,15 +454,14 @@ const hasIssues = computed(
 
 /* Responsive */
 @media (max-width: 768px) {
-  .compact-header {
+  .compact-status-bar {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .status-info {
+  .panel-header {
     flex-direction: column;
-    gap: 0.5rem;
-    width: 100%;
+    align-items: flex-start;
   }
 
   .upload-grid {
