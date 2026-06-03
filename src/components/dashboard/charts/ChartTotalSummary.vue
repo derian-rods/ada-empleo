@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { use } from "echarts";
-import { BarChart, PieChart } from "echarts/charts";
+import { BarChart, PieChart, LineChart } from "echarts/charts";
 import {
   TitleComponent,
   TooltipComponent,
@@ -15,6 +15,7 @@ import type { CalculatedRequest } from "../../../domain/types";
 use([
   BarChart,
   PieChart,
+  LineChart,
   TitleComponent,
   TooltipComponent,
   GridComponent,
@@ -30,10 +31,10 @@ const props = defineProps<ChartTotalSummaryProps>();
 
 const chartRef = ref();
 
-// Calculate totals
+// Calculate comprehensive totals
 const totals = computed(() => {
   const totalEstimated = props.requests.reduce(
-    (sum, r) => sum + (r.estimatedHoursTotal || 0),
+    (sum, r) => sum + (r.estimatedHoursTotal || r.estimatedHours || 0),
     0,
   );
   const totalActual = props.requests.reduce(
@@ -56,6 +57,26 @@ const totals = computed(() => {
     (r) => r.resultStatus === "neutral",
   ).length;
 
+  // Calculate HBS totals
+  const totalEstimatedHbs = props.requests.reduce(
+    (sum, r) => sum + (r.estimatedHbs || 0),
+    0,
+  );
+  const totalConsumedHbs = props.requests.reduce(
+    (sum, r) => sum + (r.consumedHbs || 0),
+    0,
+  );
+  const totalDifferenceHbs = totalEstimatedHbs - totalConsumedHbs;
+
+  // Count applications and people
+  const uniqueApplications = new Set<string>();
+  const uniquePeople = new Set<string>();
+  props.requests.forEach((r) => {
+    if (r.applications)
+      r.applications.forEach((a) => uniqueApplications.add(a));
+    if (r.people) r.people.forEach((p) => uniquePeople.add(p));
+  });
+
   return {
     totalEstimated,
     totalActual,
@@ -65,15 +86,24 @@ const totals = computed(() => {
     lossCount,
     neutralCount,
     totalRequests: props.requests.length,
+    totalEstimatedHbs,
+    totalConsumedHbs,
+    totalDifferenceHbs,
+    totalApplications: uniqueApplications.size,
+    totalPeople: uniquePeople.size,
+    childrenCount: props.requests.reduce(
+      (sum, r) => sum + (r.childrenCount || 0),
+      0,
+    ),
   };
 });
 
 const option = computed(() => ({
   title: {
-    text: "Resumen Total de Horas",
+    text: "Comparativa Total: Estimado vs Dedicado",
     left: "center",
     textStyle: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: "bold",
     },
   },
@@ -85,13 +115,13 @@ const option = computed(() => ({
     borderWidth: 1,
     textStyle: {
       color: "var(--tooltip-text)",
-      fontSize: 13,
+      fontSize: 12,
     },
-    padding: [12, 16],
+    padding: [8, 12],
   },
   legend: {
-    data: ["Estimado Total", "Dedicado Total"],
-    bottom: 10,
+    data: ["Estimado Total", "Dedicado Total", "Diferencia"],
+    bottom: 0,
   },
   grid: {
     left: "10%",
@@ -104,14 +134,14 @@ const option = computed(() => ({
     type: "category",
     data: ["Horas"],
     axisLabel: {
-      fontSize: 12,
+      fontSize: 11,
     },
   },
   yAxis: {
     type: "value",
     name: "Horas",
     axisLabel: {
-      fontSize: 11,
+      fontSize: 10,
     },
   },
   series: [
@@ -131,6 +161,14 @@ const option = computed(() => ({
         color: "#10b981",
       },
     },
+    {
+      name: "Diferencia",
+      type: "bar",
+      data: [totals.value.totalDifference],
+      itemStyle: {
+        color: totals.value.totalDifference > 0 ? "#22c55e" : "#ef4444",
+      },
+    },
   ],
 }));
 
@@ -139,7 +177,7 @@ const statusPieOption = computed(() => ({
     text: "Estado de Peticiones",
     left: "center",
     textStyle: {
-      fontSize: 16,
+      fontSize: 14,
       fontWeight: "bold",
     },
   },
@@ -151,9 +189,9 @@ const statusPieOption = computed(() => ({
     borderWidth: 1,
     textStyle: {
       color: "var(--tooltip-text)",
-      fontSize: 13,
+      fontSize: 12,
     },
-    padding: [12, 16],
+    padding: [8, 12],
     formatter: (params: any) => {
       if (!params) return "";
       const pct = ((params.value / totals.value.totalRequests) * 100).toFixed(
@@ -163,27 +201,27 @@ const statusPieOption = computed(() => ({
     },
   },
   legend: {
-    bottom: 10,
+    bottom: 0,
   },
   series: [
     {
       name: "Peticiones",
       type: "pie",
-      radius: "50%",
+      radius: ["30%", "70%"],
       data: [
         {
           value: totals.value.profitCount,
-          name: "Ganancia",
+          name: `Ganancia (${totals.value.profitCount})`,
           itemStyle: { color: "#22c55e" },
         },
         {
           value: totals.value.lossCount,
-          name: "Pérdida",
+          name: `Pérdida (${totals.value.lossCount})`,
           itemStyle: { color: "#ef4444" },
         },
         {
           value: totals.value.neutralCount,
-          name: "Neutral",
+          name: `Neutral (${totals.value.neutralCount})`,
           itemStyle: { color: "#6b7280" },
         },
       ],
@@ -198,6 +236,72 @@ const statusPieOption = computed(() => ({
   ],
 }));
 
+const hbsOption = computed(() => ({
+  title: {
+    text: "Comparativa HBS: Estimado vs Consumido",
+    left: "center",
+    textStyle: {
+      fontSize: 14,
+      fontWeight: "bold",
+    },
+  },
+  tooltip: {
+    trigger: "axis",
+    confine: true,
+    backgroundColor: "var(--tooltip-bg)",
+    borderColor: "var(--tooltip-border)",
+    borderWidth: 1,
+    textStyle: {
+      color: "var(--tooltip-text)",
+      fontSize: 12,
+    },
+    padding: [8, 12],
+  },
+  legend: {
+    data: ["HBS Estimado", "HBS Consumido"],
+    bottom: 0,
+  },
+  grid: {
+    left: "10%",
+    right: "10%",
+    top: "20%",
+    bottom: "15%",
+    containLabel: true,
+  },
+  xAxis: {
+    type: "category",
+    data: ["HBS"],
+    axisLabel: {
+      fontSize: 11,
+    },
+  },
+  yAxis: {
+    type: "value",
+    name: "Horas",
+    axisLabel: {
+      fontSize: 10,
+    },
+  },
+  series: [
+    {
+      name: "HBS Estimado",
+      type: "bar",
+      data: [totals.value.totalEstimatedHbs],
+      itemStyle: {
+        color: "#8b5cf6",
+      },
+    },
+    {
+      name: "HBS Consumido",
+      type: "bar",
+      data: [totals.value.totalConsumedHbs],
+      itemStyle: {
+        color: "#ec4899",
+      },
+    },
+  ],
+}));
+
 onMounted(() => {
   if (chartRef.value) {
     chartRef.value.resize();
@@ -207,41 +311,127 @@ onMounted(() => {
 
 <template>
   <div class="charts-wrapper">
-    <div class="summary-stats">
-      <div class="stat-card">
-        <div class="stat-label">Horas Estimadas (JP+CS+AF)</div>
-        <div class="stat-value">{{ totals.totalEstimated.toFixed(1) }}h</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Horas Dedicadas</div>
-        <div class="stat-value">{{ totals.totalActual.toFixed(1) }}h</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Diferencia</div>
-        <div
-          class="stat-value"
-          :class="totals.totalDifference > 0 ? 'profit' : 'loss'"
-        >
-          {{ totals.totalDifference.toFixed(1) }}h
+    <!-- Main Stats Cards -->
+    <div class="stats-grid">
+      <div class="stat-card primary">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-label">Total Peticiones</div>
+          <div class="stat-value">{{ totals.totalRequests }}</div>
         </div>
       </div>
+
       <div class="stat-card">
-        <div class="stat-label">Desviación %</div>
-        <div
-          class="stat-value"
-          :class="totals.deviationPercent > 0 ? 'profit' : 'loss'"
-        >
-          {{ totals.deviationPercent.toFixed(1) }}%
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <div class="stat-label">Personas</div>
+          <div class="stat-value">{{ totals.totalPeople }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">🗂️</div>
+        <div class="stat-content">
+          <div class="stat-label">Aplicaciones</div>
+          <div class="stat-value">{{ totals.totalApplications }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📁</div>
+        <div class="stat-content">
+          <div class="stat-label">Peticiones Hijas</div>
+          <div class="stat-value">{{ totals.childrenCount }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-content">
+          <div class="stat-label">Horas Estimadas</div>
+          <div class="stat-value">{{ totals.totalEstimated.toFixed(0) }}h</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-content">
+          <div class="stat-label">Horas Dedicadas</div>
+          <div class="stat-value">{{ totals.totalActual.toFixed(0) }}h</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-content">
+          <div class="stat-label">Diferencia</div>
+          <div
+            class="stat-value"
+            :class="totals.totalDifference > 0 ? 'profit' : 'loss'"
+          >
+            {{ totals.totalDifference.toFixed(0) }}h
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📉</div>
+        <div class="stat-content">
+          <div class="stat-label">Desviación %</div>
+          <div
+            class="stat-value"
+            :class="totals.deviationPercent > 0 ? 'profit' : 'loss'"
+          >
+            {{ totals.deviationPercent.toFixed(1) }}%
+          </div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">💚</div>
+        <div class="stat-content">
+          <div class="stat-label">Ganancia</div>
+          <div class="stat-value profit">{{ totals.profitCount }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-content">
+          <div class="stat-label">Pérdida</div>
+          <div class="stat-value loss">{{ totals.lossCount }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">⚪</div>
+        <div class="stat-content">
+          <div class="stat-label">Neutral</div>
+          <div class="stat-value">{{ totals.neutralCount }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-content">
+          <div class="stat-label">HBS Estimado</div>
+          <div class="stat-value">
+            {{ totals.totalEstimatedHbs.toFixed(0) }}h
+          </div>
         </div>
       </div>
     </div>
 
+    <!-- Charts Grid -->
     <div class="charts-grid">
       <div class="chart-container">
         <VChart ref="chartRef" :option="option" autoresize />
       </div>
       <div class="chart-container">
         <VChart :option="statusPieOption" autoresize />
+      </div>
+      <div class="chart-container">
+        <VChart :option="hbsOption" autoresize />
       </div>
     </div>
   </div>
@@ -252,34 +442,58 @@ onMounted(() => {
   width: 100%;
 }
 
-.summary-stats {
+.stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
   margin-bottom: 2rem;
   padding: 0 1rem;
 }
 
 .stat-card {
   background: var(--bg-secondary);
-  padding: 1.5rem;
+  padding: 1rem;
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  border-left: 4px solid var(--border-color);
+}
+
+.stat-card.primary {
+  border-left-color: var(--color-primary);
+  background: linear-gradient(
+    135deg,
+    var(--bg-secondary) 0%,
+    rgba(59, 130, 246, 0.05) 100%
+  );
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .stat-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   font-weight: 500;
-  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .stat-value {
-  font-size: 1.75rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -301,7 +515,7 @@ onMounted(() => {
 
 .chart-container {
   width: 100%;
-  height: 400px;
+  height: 350px;
   background: var(--bg-secondary);
   border-radius: 0.5rem;
   padding: 1rem;
