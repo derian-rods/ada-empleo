@@ -400,6 +400,13 @@ function handleClearFilters() {
   width: 100%;
 }
 
+:deep(.p-inputgroup-addon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+}
+
 :deep(.p-inputtext) {
   font-size: 0.875rem;
 }
