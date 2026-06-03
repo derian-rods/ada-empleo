@@ -32,7 +32,7 @@ function fmt(n: number): string {
     :sort-order="-1"
     size="small"
     scrollable
-    scrollHeight="600px"
+    scrollHeight="950px"
   >
     <Column field="user" header="Usuario" sortable style="width: 120px" />
 

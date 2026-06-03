@@ -5,7 +5,7 @@ import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Sidebar from "primevue/sidebar";
-import MainNavigationSidebar from "./MainNavigationSidebar.vue";
+import DashboardSidebar from "./dashboard/DashboardSidebar.vue";
 import { useDashboardStore } from "../stores/dashboard";
 import { useThemeStore } from "../stores/theme";
 
@@ -13,6 +13,10 @@ const store = useDashboardStore();
 const themeStore = useThemeStore();
 const showAlertsPanel = ref(false);
 const currentMainView = ref("dashboard");
+
+const emit = defineEmits<{
+  "select-item": [viewId: string];
+}>();
 
 // Inicializar tema
 themeStore.loadTheme();
@@ -23,6 +27,7 @@ function handleThemeToggle() {
 
 function handleNavigationSelect(viewId: string) {
   currentMainView.value = viewId;
+  emit("select-item", viewId);
 }
 
 // Compute alerts info
@@ -39,21 +44,35 @@ const companyFilterOptions = [
   { label: "Sopra Steria", value: "Sopra Steria" },
 ];
 
-// Navigation items
-const navigationItems = [
-  { id: "dashboard", label: "Dashboard", icon: "pi-chart-bar" },
-  { id: "tables", label: "Tablas", icon: "pi-table" },
-  { id: "analytics", label: "Análisis", icon: "pi-chart-pie" },
-  { id: "settings", label: "Configuración", icon: "pi-cog" },
+// Navigation items con estructura de DashboardSidebar
+const sidebarItems = [
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    icon: "pi-chart-bar",
+    description: "Panel principal",
+  },
+  {
+    id: "tables",
+    label: "Tablas",
+    icon: "pi-table",
+    description: "Vistas de datos",
+  },
+  {
+    id: "analytics",
+    label: "Análisis",
+    icon: "pi-chart-pie",
+    description: "Gráficas",
+  },
 ];
 </script>
 
 <template>
   <div class="app-layout">
     <!-- Main Navigation Sidebar (Left) -->
-    <MainNavigationSidebar
-      :active-id="currentMainView"
-      :items="navigationItems"
+    <DashboardSidebar
+      :active-item-id="currentMainView"
+      :items="sidebarItems"
       @select-item="handleNavigationSelect"
     />
 
@@ -145,9 +164,10 @@ const navigationItems = [
 .app-layout {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 80px 1fr;
+  grid-template-columns: auto 1fr;
   grid-template-rows: 60px 1fr;
   background-color: var(--bg-primary);
+  position: relative;
 }
 
 .app-toolbar {
@@ -212,6 +232,23 @@ const navigationItems = [
   text-align: center;
   line-height: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* App Content Area */
+.app-content {
+  grid-column: 2;
+  grid-row: 2;
+  background-color: var(--surface-ground);
+  padding: 1.5rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.app-content :deep(> *) {
+  flex: 1;
+  min-height: 0;
 }
 
 /* MainNavigationSidebar positioning in grid */
@@ -285,15 +322,12 @@ const navigationItems = [
   color: #d97706;
 }
 
-.app-content {
-  grid-column: 2;
-  grid-row: 2;
-  padding: 1.5rem;
-  overflow-y: auto;
-  transition:
-    opacity 0.2s ease,
-    background-color 0.3s ease;
-  background-color: var(--bg-primary);
+/* DashboardSidebar positioning in grid */
+:deep(.dashboard-sidebar) {
+  grid-column: 1;
+  grid-row: 1 / 3;
+  z-index: 50;
+  overflow: visible;
 }
 
 .app-content.is-processing {

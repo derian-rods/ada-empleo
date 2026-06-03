@@ -186,7 +186,7 @@ function onSaveCollaborators(collaborators: any[]) {
         :sort-order="-1"
         size="small"
         scrollable
-        scrollHeight="600px"
+        scrollHeight="950px"
         class="collaborators-table"
         v-model:expanded-rows="expandedRows"
         :data-key="(row) => row.collaboratorName"
@@ -246,7 +246,7 @@ function onSaveCollaborators(collaborators: any[]) {
               :sort-order="-1"
               size="small"
               scrollable
-              scrollHeight="400px"
+              scrollHeight="950px"
               class="detail-table"
             >
               <!-- Petición -->
@@ -464,7 +464,7 @@ function onSaveCollaborators(collaborators: any[]) {
 
 /* Table Styles */
 .table-scroll-container {
-  max-height: 600px;
+  max-height: 950px;
   overflow-y: auto;
   border: 1px solid var(--surface-border);
   border-radius: 4px;
@@ -480,6 +480,10 @@ function onSaveCollaborators(collaborators: any[]) {
 
 .collaborators-table {
   width: 100%;
+}
+
+.collaborators-table :deep(.p-datatable-table-container) {
+  height: 950px;
 }
 
 .month-badge {

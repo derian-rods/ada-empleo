@@ -197,7 +197,7 @@ function clearFilters() {
       removable-sort
       size="small"
       scrollable
-      scrollHeight="600px"
+      scrollHeight="950px"
       :global-filter-fields="['parentCode', 'parentSubject']"
       class="grouped-table"
       data-key="parentId"
@@ -499,6 +499,8 @@ function clearFilters() {
   flex-direction: column;
   gap: 1rem;
   width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .table-header {
@@ -506,6 +508,7 @@ function clearFilters() {
   justify-content: flex-end;
   align-items: center;
   padding: 0.5rem 0;
+  flex-shrink: 0;
 }
 
 .filter-toggle-btn {
@@ -514,12 +517,22 @@ function clearFilters() {
 
 .grouped-table {
   width: 100%;
+  height: 100%;
   background: var(--bg-primary);
+  flex: 1;
+  min-height: 0;
+}
+
+.grouped-table :deep(.p-datatable) {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .grouped-table :deep(.p-datatable-header) {
   background: var(--bg-secondary);
   border-color: var(--border-color);
+  flex-shrink: 0;
 }
 
 .grouped-table :deep(.p-datatable-thead > tr > th) {
@@ -528,6 +541,11 @@ function clearFilters() {
   font-weight: 600;
   padding: 0.75rem;
   border-color: var(--border-color);
+}
+
+.grouped-table :deep(.p-datatable-tbody) {
+  flex: 1;
+  overflow: auto;
 }
 
 .grouped-table :deep(.p-datatable-tbody > tr) {
@@ -542,6 +560,10 @@ function clearFilters() {
 
 .grouped-table :deep(.p-datatable-tbody > tr:hover) {
   background: var(--bg-secondary);
+}
+
+.grouped-table :deep(.p-datatable-table-container) {
+  height: 950px;
 }
 
 .expansion-content {

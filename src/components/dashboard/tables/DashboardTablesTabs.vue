@@ -66,16 +66,23 @@ const activeTab = ref("grouped");
 <style scoped>
 .tables-tabs {
   width: 100%;
+  height: 100%;
   background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
 }
 
 .tables-tabs :deep(.p-tabs) {
   background: var(--bg-primary);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .tables-tabs :deep(.p-tabs-nav) {
   background: var(--bg-secondary);
   border-bottom: 2px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .tables-tabs :deep(.p-tabs-nav .p-tablist) {
@@ -107,11 +114,17 @@ const activeTab = ref("grouped");
 
 .tables-tabs :deep(.p-tabs-panels) {
   background: var(--bg-primary);
-  padding: 1rem;
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .tables-tabs :deep(.p-tabs-panel) {
   color: var(--text-primary);
   background: var(--bg-primary);
+  height: 100%;
+  overflow: auto;
 }
 </style>

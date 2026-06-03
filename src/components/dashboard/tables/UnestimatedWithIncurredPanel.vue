@@ -210,7 +210,7 @@ function clearFilters() {
           :sort-order="-1"
           size="small"
           scrollable
-          scrollHeight="600px"
+          scrollHeight="950px"
           class="table-wrapper"
           v-model:expanded-rows="expandedRows"
           data-key="parentId"
@@ -477,6 +477,10 @@ function clearFilters() {
 
 .table-wrapper :deep(.p-datatable-tbody > tr:hover) {
   background: var(--bg-secondary);
+}
+
+.table-wrapper :deep(.p-datatable-table-container) {
+  height: 950px;
 }
 
 .empty-state-text {

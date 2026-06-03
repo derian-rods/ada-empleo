@@ -27,25 +27,32 @@ const emit = defineEmits<{
 }>();
 
 // State
-const isExpanded = ref(false);
+const isHoveredOnSidebar = ref(false);
 const hoveredItemId = ref<string | null>(null);
 
 // Computed
-const isHovering = computed(() => hoveredItemId.value !== null);
+const isHovering = computed(() => isHoveredOnSidebar.value);
 const expandedWidth = computed(() => (isHovering.value ? "280px" : "80px"));
 
 function handleItemClick(itemId: string) {
   emit("select-item", itemId);
 }
 
-function handleMouseEnter(itemId: string) {
-  hoveredItemId.value = itemId;
-  isExpanded.value = true;
+function handleSidebarMouseEnter() {
+  isHoveredOnSidebar.value = true;
 }
 
-function handleMouseLeave() {
+function handleSidebarMouseLeave() {
+  isHoveredOnSidebar.value = false;
   hoveredItemId.value = null;
-  isExpanded.value = false;
+}
+
+function handleItemMouseEnter(itemId: string) {
+  hoveredItemId.value = itemId;
+}
+
+function handleItemMouseLeave() {
+  hoveredItemId.value = null;
 }
 
 function isItemActive(itemId: string): boolean {
@@ -56,8 +63,10 @@ function isItemActive(itemId: string): boolean {
 <template>
   <div
     class="dashboard-sidebar"
-    :class="{ 'is-expanded': isExpanded }"
-    :style="{ width: isExpanded ? expandedWidth : '80px' }"
+    :class="{ 'is-expanded': isHovering }"
+    :style="{ width: expandedWidth }"
+    @mouseenter="handleSidebarMouseEnter"
+    @mouseleave="handleSidebarMouseLeave"
   >
     <!-- Logo/Header -->
     <div class="sidebar-header">
@@ -70,8 +79,8 @@ function isItemActive(itemId: string): boolean {
         v-for="item in items"
         :key="item.id"
         class="sidebar-item-wrapper"
-        @mouseenter="handleMouseEnter(item.id)"
-        @mouseleave="handleMouseLeave"
+        @mouseenter="handleItemMouseEnter(item.id)"
+        @mouseleave="handleItemMouseLeave"
       >
         <!-- Main item button -->
         <div
@@ -85,7 +94,7 @@ function isItemActive(itemId: string): boolean {
           <div class="item-icon">
             <i :class="`pi ${item.icon}`"></i>
           </div>
-          <div v-if="isExpanded" class="item-content">
+          <div v-if="isHovering" class="item-content">
             <div class="item-label">{{ item.label }}</div>
             <div v-if="item.description" class="item-description">
               {{ item.description }}
@@ -96,7 +105,7 @@ function isItemActive(itemId: string): boolean {
         <!-- Expanded submenu (only show on hover) -->
         <transition name="expand">
           <div
-            v-if="isExpanded && hoveredItemId === item.id && item.children"
+            v-if="isHovering && hoveredItemId === item.id && item.children"
             class="submenu"
           >
             <div

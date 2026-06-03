@@ -46,7 +46,7 @@ function fmt(n: number): string {
       :sort-order="-1"
       size="small"
       scrollable
-      scrollHeight="600px"
+      scrollHeight="950px"
       class="data-table"
     >
       <Column
