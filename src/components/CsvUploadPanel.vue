@@ -11,8 +11,6 @@ const store = useDashboardStore();
 const toast = useToast();
 const showUploadPanel = ref(true);
 const hasLoadedBefore = ref(false); // Track if CSVs have been loaded before
-const showAlerts = ref(false); // Toggle to show/hide alerts
-const alertAutoHideTimer = ref<NodeJS.Timeout | null>(null);
 
 function onParentSelect(event: FileUploadSelectEvent) {
   const file = event.files[0];
@@ -55,42 +53,6 @@ function getProcessingMessage(): string {
 const allCsvsLoaded = computed(
   () => store.parentsLoaded && store.childrenLoaded && store.timeEntriesLoaded,
 );
-
-// Show errors/warnings even when panel is hidden
-const hasIssues = computed(
-  () => store.errors.length > 0 || store.warnings.length > 0,
-);
-
-// All messages combined
-const allMessages = computed(() => [
-  ...store.errors.map((e) => ({ text: e, type: "error" })),
-  ...store.warnings.map((w) => ({ text: w, type: "warning" })),
-]);
-
-// Count of issues
-const issueCount = computed(() => allMessages.value.length);
-
-// Auto-close alerts after 5 seconds when they appear
-watch(hasIssues, (newVal) => {
-  if (newVal) {
-    showAlerts.value = true;
-
-    // Clear existing timer
-    if (alertAutoHideTimer.value) {
-      clearTimeout(alertAutoHideTimer.value);
-    }
-
-    // Set new timer to hide after 5 seconds
-    alertAutoHideTimer.value = setTimeout(() => {
-      showAlerts.value = false;
-    }, 5000);
-  } else {
-    showAlerts.value = false;
-    if (alertAutoHideTimer.value) {
-      clearTimeout(alertAutoHideTimer.value);
-    }
-  }
-});
 
 // Auto-close panel when all CSVs are loaded for the first time
 watch(allCsvsLoaded, (newVal) => {
@@ -224,46 +186,6 @@ defineExpose({
           rounded
           @click="showUploadPanel = false"
           class="close-btn"
-        />
-      </div>
-    </div>
-
-    <!-- Alerts Section: Compact inline with toggle button -->
-    <div v-if="hasIssues" class="alerts-container">
-      <!-- Alert Icon and Badge Button -->
-      <div class="alert-header">
-        <i class="pi pi-exclamation-triangle alert-icon"></i>
-        <Button
-          :icon="showAlerts ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
-          :label="`${issueCount} alerta${issueCount !== 1 ? 's' : ''}`"
-          severity="warning"
-          text
-          rounded
-          size="small"
-          @click="showAlerts = !showAlerts"
-          class="alert-badge-btn"
-        />
-      </div>
-
-      <!-- Inline Alert Messages (Single line) -->
-      <div v-if="showAlerts" class="inline-alerts">
-        <div class="alert-messages">
-          <span v-for="(msg, idx) in allMessages" :key="idx" class="alert-item">
-            <i
-              :class="`pi ${msg.type === 'error' ? 'pi-exclamation-circle' : 'pi-exclamation-triangle'}`"
-            ></i>
-            <span>{{ msg.text }}</span>
-            <span v-if="idx < allMessages.length - 1" class="separator">•</span>
-          </span>
-        </div>
-        <Button
-          icon="pi pi-times"
-          text
-          rounded
-          size="small"
-          @click="showAlerts = false"
-          class="close-alerts-btn"
-          v-tooltip="'Cerrar alertas'"
         />
       </div>
     </div>
@@ -417,87 +339,6 @@ defineExpose({
 
 .close-btn {
   white-space: nowrap;
-}
-
-/* Alerts Section - Compact inline design */
-.alerts-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-  border: 1px solid #fcd34d;
-  border-radius: 0.5rem;
-  margin-top: 0.5rem;
-  animation: slideDown 0.2s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.alert-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.alert-icon {
-  font-size: 1.25rem;
-  color: #d97706;
-  flex-shrink: 0;
-}
-
-.alert-badge-btn {
-  flex-shrink: 0;
-  font-weight: 600;
-  color: #92400e;
-}
-
-.inline-alerts {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex: 1;
-  min-width: 0;
-}
-
-.alert-messages {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  font-size: 0.9rem;
-  color: #92400e;
-}
-
-.alert-item {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  white-space: nowrap;
-}
-
-.alert-item i {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.separator {
-  color: #d97706;
-  margin: 0 0.25rem;
-}
-
-.close-alerts-btn {
-  flex-shrink: 0;
-  color: #92400e;
 }
 
 /* Processing Overlay */
