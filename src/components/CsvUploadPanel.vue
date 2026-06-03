@@ -2,7 +2,6 @@
 import { ref, computed, watch } from "vue";
 import FileUpload, { type FileUploadSelectEvent } from "primevue/fileupload";
 import Tag from "primevue/tag";
-import Message from "primevue/message";
 import ProgressSpinner from "primevue/progressspinner";
 import Button from "primevue/button";
 import { useDashboardStore } from "../stores/dashboard";
@@ -10,6 +9,8 @@ import { useDashboardStore } from "../stores/dashboard";
 const store = useDashboardStore();
 const showUploadPanel = ref(true);
 const hasLoadedBefore = ref(false); // Track if CSVs have been loaded before
+const showAlerts = ref(false); // Toggle to show/hide alerts
+const alertAutoHideTimer = ref<NodeJS.Timeout | null>(null);
 
 function onParentSelect(event: FileUploadSelectEvent) {
   const file = event.files[0];
@@ -51,6 +52,37 @@ const allCsvsLoaded = computed(
 const hasIssues = computed(
   () => store.errors.length > 0 || store.warnings.length > 0,
 );
+
+// All messages combined
+const allMessages = computed(() => [
+  ...store.errors.map((e) => ({ text: e, type: "error" })),
+  ...store.warnings.map((w) => ({ text: w, type: "warning" })),
+]);
+
+// Count of issues
+const issueCount = computed(() => allMessages.value.length);
+
+// Auto-close alerts after 5 seconds when they appear
+watch(hasIssues, (newVal) => {
+  if (newVal) {
+    showAlerts.value = true;
+
+    // Clear existing timer
+    if (alertAutoHideTimer.value) {
+      clearTimeout(alertAutoHideTimer.value);
+    }
+
+    // Set new timer to hide after 5 seconds
+    alertAutoHideTimer.value = setTimeout(() => {
+      showAlerts.value = false;
+    }, 5000);
+  } else {
+    showAlerts.value = false;
+    if (alertAutoHideTimer.value) {
+      clearTimeout(alertAutoHideTimer.value);
+    }
+  }
+});
 
 // Auto-close panel when all CSVs are loaded for the first time
 watch(allCsvsLoaded, (newVal) => {
@@ -177,28 +209,40 @@ defineExpose({
       </div>
     </div>
 
-    <!-- Alerts Section (Always Visible if there are issues) -->
-    <div v-if="hasIssues" class="alerts-section">
-      <div v-if="store.errors.length" class="messages">
-        <Message
-          v-for="(err, i) in store.errors"
-          :key="`error-${i}`"
-          severity="error"
-          :closable="false"
-        >
-          {{ err }}
-        </Message>
-      </div>
+    <!-- Alerts Section: Compact inline with toggle button -->
+    <div v-if="hasIssues" class="alerts-container">
+      <!-- Alert Badge Button -->
+      <Button
+        :icon="showAlerts ? 'pi pi-bell-slash' : 'pi pi-bell'"
+        :label="`${issueCount} alerta${issueCount !== 1 ? 's' : ''}`"
+        severity="warning"
+        text
+        rounded
+        size="small"
+        @click="showAlerts = !showAlerts"
+        class="alert-badge-btn"
+      />
 
-      <div v-if="store.warnings.length" class="messages">
-        <Message
-          v-for="(warn, i) in store.warnings"
-          :key="`warn-${i}`"
-          severity="warn"
-          :closable="false"
-        >
-          {{ warn }}
-        </Message>
+      <!-- Inline Alert Messages (Single line) -->
+      <div v-if="showAlerts" class="inline-alerts">
+        <div class="alert-messages">
+          <span v-for="(msg, idx) in allMessages" :key="idx" class="alert-item">
+            <i
+              :class="`pi ${msg.type === 'error' ? 'pi-exclamation-circle' : 'pi-exclamation-triangle'}`"
+            ></i>
+            <span>{{ msg.text }}</span>
+            <span v-if="idx < allMessages.length - 1" class="separator">•</span>
+          </span>
+        </div>
+        <Button
+          icon="pi pi-times"
+          text
+          rounded
+          size="small"
+          @click="showAlerts = false"
+          class="close-alerts-btn"
+          v-tooltip="'Cerrar alertas'"
+        />
       </div>
     </div>
 
@@ -369,25 +413,73 @@ defineExpose({
   white-space: nowrap;
 }
 
-/* Alerts Section */
-.alerts-section {
-  padding: 0.75rem 1rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+/* Alerts Section - Compact inline design */
+.alerts-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 1px solid #fcd34d;
   border-radius: 0.5rem;
   margin-top: 0.5rem;
+  animation: slideDown 0.2s ease-out;
 }
 
-.messages {
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.alert-badge-btn {
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.inline-alerts {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
 }
 
-.messages :deep(.p-message) {
-  margin: 0;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.85rem;
+.alert-messages {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: #92400e;
+}
+
+.alert-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+}
+
+.alert-item i {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.separator {
+  color: #d97706;
+  margin: 0 0.25rem;
+}
+
+.close-alerts-btn {
+  flex-shrink: 0;
+  color: #92400e;
 }
 
 /* Processing Overlay */
