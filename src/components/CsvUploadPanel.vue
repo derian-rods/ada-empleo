@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import FileUpload, { type FileUploadSelectEvent } from "primevue/fileupload";
 import Tag from "primevue/tag";
 import Message from "primevue/message";
@@ -9,6 +9,7 @@ import { useDashboardStore } from "../stores/dashboard";
 
 const store = useDashboardStore();
 const showUploadPanel = ref(true);
+const hasLoadedBefore = ref(false); // Track if CSVs have been loaded before
 
 function onParentSelect(event: FileUploadSelectEvent) {
   const file = event.files[0];
@@ -41,14 +42,6 @@ function getProcessingMessage(): string {
   return "";
 }
 
-function getStatusSeverity(loaded: boolean): "success" | "secondary" {
-  return loaded ? "success" : "secondary";
-}
-
-function getStatusLabel(loaded: boolean): string {
-  return loaded ? "OK" : "Pendiente";
-}
-
 // Check if all CSVs are loaded
 const allCsvsLoaded = computed(
   () => store.parentsLoaded && store.childrenLoaded && store.timeEntriesLoaded,
@@ -58,6 +51,14 @@ const allCsvsLoaded = computed(
 const hasIssues = computed(
   () => store.errors.length > 0 || store.warnings.length > 0,
 );
+
+// Auto-close panel when all CSVs are loaded for the first time
+watch(allCsvsLoaded, (newVal) => {
+  if (newVal && !hasLoadedBefore.value) {
+    hasLoadedBefore.value = true;
+    showUploadPanel.value = false;
+  }
+});
 
 // Watch for data clearing to show panel again
 const handleShowUploadPanel = () => {
@@ -98,24 +99,6 @@ defineExpose({
     <div v-if="!allCsvsLoaded || showUploadPanel" class="upload-panel">
       <div class="panel-header">
         <h3>Gestión de CSVs</h3>
-        <div class="status-badges">
-          <span
-            v-for="(item, idx) in [
-              { name: 'Padres', loaded: store.parentsLoaded },
-              { name: 'Hijas', loaded: store.childrenLoaded },
-              { name: 'Tiempo', loaded: store.timeEntriesLoaded },
-            ]"
-            :key="idx"
-            class="status-item"
-          >
-            <span class="status-text">{{ item.name }}</span>
-            <Tag
-              :severity="getStatusSeverity(item.loaded)"
-              :value="getStatusLabel(item.loaded)"
-              style="font-size: 0.75rem; padding: 0.25rem 0.5rem"
-            />
-          </span>
-        </div>
       </div>
 
       <div class="upload-grid">
