@@ -6,7 +6,7 @@ import Tag from "primevue/tag";
 import Button from "primevue/button";
 import InputGroup from "primevue/inputgroup";
 import InputText from "primevue/inputtext";
-import MultiSelect from "primevue/multiselect";
+import GSPFiltersModal from "./GSPFiltersModal.vue";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
 import type { ChildRequest, TimeEntry } from "../../../domain/types";
 
@@ -38,6 +38,7 @@ const props = withDefaults(defineProps<GSPProfilesTableProps>(), {
 // State
 const filters = ref<Filters>({});
 const globalFilter = ref("");
+const showFiltersModal = ref(false);
 
 // Get unique profiles for a child request
 function getProfilesForChild(childCode: string): string[] {
@@ -130,18 +131,37 @@ function severityFor(
   return "info";
 }
 
+// Check if any filter is active
+const hasActiveFilters = computed(() => {
+  return (
+    filters.value.code ||
+    filters.value.assignedUser ||
+    (filters.value.profile && filters.value.profile.length > 0) ||
+    globalFilter.value
+  );
+});
+
 // Clear all filters
 function clearFilters() {
   filters.value = {};
   globalFilter.value = "";
 }
+
+// Handle filters modal updates
+function handleFiltersUpdate(newFilters: Filters) {
+  filters.value = newFilters;
+}
+
+function handleClearFilters() {
+  filters.value = {};
+}
 </script>
 
 <template>
   <div class="gsp-profiles-table-container">
-    <!-- Filters Section -->
-    <div class="filters-section">
-      <div class="filter-row">
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="toolbar-left">
         <InputGroup>
           <span class="p-inputgroup-addon">
             <i class="pi pi-search"></i>
@@ -150,57 +170,36 @@ function clearFilters() {
             v-model="globalFilter"
             type="text"
             placeholder="Buscar en todas las columnas..."
+            class="global-search"
           />
         </InputGroup>
       </div>
 
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>Código:</label>
-          <InputText
-            v-model="filters.code"
-            type="text"
-            placeholder="Buscar código..."
-            class="filter-input"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Usuario Asignado:</label>
-          <InputText
-            v-model="filters.assignedUser"
-            type="text"
-            placeholder="Buscar usuario..."
-            class="filter-input"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Perfil/Rol:</label>
-          <MultiSelect
-            v-model="filters.profile"
-            :options="profileOptions"
-            placeholder="Seleccionar perfiles..."
-            class="filter-input"
-            :max-selected-labels="2"
-          />
-        </div>
-
+      <div class="toolbar-right">
         <Button
+          icon="pi pi-filter"
+          :label="`Filtros${hasActiveFilters ? ' (' + Object.keys(filters).filter((k) => filters[k as keyof Filters]).length + ')' : ''}`"
+          @click="showFiltersModal = true"
+          :severity="hasActiveFilters ? 'warning' : 'secondary'"
+          text
+        />
+        <Button
+          v-if="hasActiveFilters"
           icon="pi pi-times"
           label="Limpiar"
           severity="secondary"
           text
-          size="small"
           @click="clearFilters"
-          class="clear-button"
         />
       </div>
+    </div>
 
-      <div class="filter-stats">
+    <!-- Info bar -->
+    <div class="info-bar">
+      <span class="record-count">
         Mostrando {{ filteredProfiles.length }} de {{ gspProfiles.length }}
         registros
-      </div>
+      </span>
     </div>
 
     <!-- Table -->
@@ -273,6 +272,16 @@ function clearFilters() {
         </div>
       </template>
     </DataTable>
+
+    <!-- Filters Modal -->
+    <GSPFiltersModal
+      :visible="showFiltersModal"
+      :filters="filters"
+      :profile-options="profileOptions"
+      @update:visible="showFiltersModal = $event"
+      @update:filters="handleFiltersUpdate"
+      @clear-filters="handleClearFilters"
+    />
   </div>
 </template>
 
@@ -280,57 +289,45 @@ function clearFilters() {
 .gsp-profiles-table-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
   width: 100%;
   height: 100%;
   min-height: 0;
 }
 
-.filters-section {
+.toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0;
 }
 
-.filter-row {
+.toolbar-left {
+  flex: 1;
+  max-width: 400px;
+}
+
+.toolbar-right {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-end;
-  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
 }
 
-.filter-row:first-child {
-  margin-bottom: 0.5rem;
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  min-width: 150px;
-}
-
-.filter-item label {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.filter-input {
+.global-search {
   font-size: 0.875rem;
 }
 
-.clear-button {
-  margin-top: 0.25rem;
-}
-
-.filter-stats {
+.info-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
   font-size: 0.875rem;
   color: var(--text-secondary);
+}
+
+.record-count {
   font-style: italic;
 }
 
