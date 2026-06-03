@@ -5,7 +5,7 @@ import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Button from "primevue/button";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
-import TableFiltersPanel from "./TableFiltersPanel.vue";
+import TableFiltersModal from "./TableFiltersModal.vue";
 import type { ParentGroupedTableFilters } from "../../../domain/parentGroupedTable";
 import {
   buildParentGroupedTableRows,
@@ -36,7 +36,7 @@ const dashboardStore = useDashboardStore();
 // State
 const expandedRows = ref<string[]>([]);
 const filters = ref<ParentGroupedTableFilters>({});
-const showFiltersPanel = ref(false); // Filters hidden by default
+const showFiltersModal = ref(false); // Modal hidden by default
 
 // Build and filter data
 const groupedRows = computed(() => {
@@ -160,16 +160,16 @@ function clearFilters() {
 
 <template>
   <div class="parent-grouped-table">
-    <!-- Filters Modal (Right side) -->
-    <TableFiltersPanel
-      :visible="showFiltersPanel"
+    <!-- Filters Modal -->
+    <TableFiltersModal
+      :visible="showFiltersModal"
       :filters="filters"
       :unique-users="uniqueUsers"
       :unique-roles="uniqueRoles"
       :unique-applications="uniqueApplications"
       :unique-statuses="uniqueStatuses"
       :unique-projects="uniqueProjects"
-      @update:visible="showFiltersPanel = $event"
+      @update:visible="showFiltersModal = $event"
       @update:filters="filters = $event"
       @clear-filters="clearFilters"
     />
@@ -181,7 +181,7 @@ function clearFilters() {
         :label="`Filtros ${getActiveFilterCount() > 0 ? '(' + getActiveFilterCount() + ')' : ''}`"
         severity="secondary"
         size="small"
-        @click="showFiltersPanel = true"
+        @click="showFiltersModal = true"
         class="filter-toggle-btn"
       />
     </div>

@@ -6,10 +6,8 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Button from "primevue/button";
-import InputText from "primevue/inputtext";
-import MultiSelect from "primevue/multiselect";
-import Dropdown from "primevue/dropdown";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
+import UnestimatedFiltersModal from "./UnestimatedFiltersModal.vue";
 import type {
   CalculatedRequest,
   ChildRequest,
@@ -47,6 +45,7 @@ const props = withDefaults(defineProps<UnestimatedWithIncurredProps>(), {
 // State
 const filters = ref<Filters>({});
 const expandedRows = ref<string[]>([]);
+const showFiltersModal = ref(false);
 
 // Calcular horas reales para cada hijo
 const childrenWithActualHours = computed(() => {
@@ -166,83 +165,6 @@ function clearFilters() {
 
 <template>
   <div class="unestimated-panel">
-    <!-- Filtros -->
-    <div class="filters-section">
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>Código</label>
-          <InputText
-            v-model="filters.code"
-            placeholder="Buscar código..."
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Asunto</label>
-          <InputText
-            v-model="filters.subject"
-            placeholder="Buscar asunto..."
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Proyecto</label>
-          <Dropdown
-            v-model="filters.project"
-            :options="uniqueProjects"
-            placeholder="Todos"
-            show-clear
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Aplicación</label>
-          <Dropdown
-            v-model="filters.application"
-            :options="uniqueApplications"
-            placeholder="Todos"
-            show-clear
-            size="small"
-          />
-        </div>
-      </div>
-
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>Estado</label>
-          <Dropdown
-            v-model="filters.status"
-            :options="uniqueStatuses"
-            placeholder="Todos"
-            show-clear
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Usuario</label>
-          <MultiSelect
-            v-model="filters.user"
-            :options="uniqueUsers"
-            placeholder="Seleccionar..."
-            :max-selected-labels="1"
-            :show-toggle-all="false"
-            size="small"
-          />
-        </div>
-
-        <Button
-          label="Limpiar filtros"
-          severity="secondary"
-          size="small"
-          @click="clearFilters"
-        />
-      </div>
-    </div>
-
     <!-- Card con tabla -->
     <Card>
       <template #title>
@@ -259,6 +181,14 @@ function clearFilters() {
             value="Sin datos"
             severity="success"
             class="count-badge"
+          />
+          <Button
+            label="Filtros"
+            icon="pi pi-sliders-v"
+            severity="secondary"
+            size="small"
+            class="filters-button"
+            @click="showFiltersModal = true"
           />
         </div>
       </template>
@@ -429,6 +359,19 @@ function clearFilters() {
         </DataTable>
       </template>
     </Card>
+
+    <!-- Modal de filtros -->
+    <UnestimatedFiltersModal
+      :visible="showFiltersModal"
+      :filters="filters"
+      :unique-projects="uniqueProjects"
+      :unique-applications="uniqueApplications"
+      :unique-statuses="uniqueStatuses"
+      :unique-users="uniqueUsers"
+      @update:visible="showFiltersModal = $event"
+      @update:filters="filters = $event"
+      @clear-filters="clearFilters"
+    />
   </div>
 </template>
 
@@ -490,6 +433,10 @@ function clearFilters() {
 }
 
 .count-badge {
+  margin-left: auto;
+}
+
+.filters-button {
   margin-left: auto;
 }
 

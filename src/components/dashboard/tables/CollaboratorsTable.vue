@@ -3,11 +3,10 @@ import { computed, ref } from "vue";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Button from "primevue/button";
-import Dropdown from "primevue/dropdown";
-import Calendar from "primevue/calendar";
 import Tag from "primevue/tag";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
 import CollaboratorManagementModal from "../modals/CollaboratorManagementModal.vue";
+import CollaboratorsFiltersModal from "./CollaboratorsFiltersModal.vue";
 import {
   buildCollaboratorsSummary,
   buildCollaboratorsPageSummary,
@@ -41,6 +40,7 @@ const filters = ref<{
 }>({});
 const expandedRows = ref<string[]>([]);
 const showCollaboratorModal = ref(false);
+const showFiltersModal = ref(false);
 
 // Computed: TimeEntries filtrados por empresa seleccionada
 const filteredByCompanyTimeEntries = computed(() => {
@@ -155,74 +155,21 @@ function onSaveCollaborators(collaborators: any[]) {
           </div>
         </div>
 
-        <!-- Botón Gestionar Colaboradores -->
+        <!-- Botón Gestionar Colaboradores y Botón Filtros -->
         <div class="summary-actions">
+          <Button
+            label="Filtros"
+            icon="pi pi-sliders-v"
+            severity="secondary"
+            size="small"
+            @click="showFiltersModal = true"
+          />
           <Button
             label="Gestionar colaboradores"
             icon="pi pi-users"
             severity="info"
             size="small"
             @click="showCollaboratorModal = true"
-          />
-        </div>
-      </div>
-
-      <!-- Filtros -->
-      <div class="filters-section">
-        <div class="filter-row">
-          <div class="filter-item">
-            <label>Colaboradores</label>
-            <Dropdown
-              v-model="filters.collaboratorNames"
-              :options="collaboratorOptions"
-              option-label="label"
-              option-value="value"
-              placeholder="Todos"
-              show-clear
-              :max-selected-labels="3"
-              size="small"
-              multiple
-            />
-          </div>
-
-          <div class="filter-item">
-            <label>Desde</label>
-            <Calendar
-              v-model="filters.dateFrom"
-              date-format="dd/mm/yy"
-              placeholder="Fecha inicio"
-              size="small"
-              :show-icon="true"
-            />
-          </div>
-
-          <div class="filter-item">
-            <label>Hasta</label>
-            <Calendar
-              v-model="filters.dateTo"
-              date-format="dd/mm/yy"
-              placeholder="Fecha fin"
-              size="small"
-              :show-icon="true"
-            />
-          </div>
-
-          <div class="filter-item">
-            <label>Petición</label>
-            <Dropdown
-              v-model="filters.petitionCode"
-              :options="petitionOptions"
-              placeholder="Todas"
-              show-clear
-              size="small"
-            />
-          </div>
-
-          <Button
-            label="Limpiar filtros"
-            severity="secondary"
-            size="small"
-            @click="clearFilters"
           />
         </div>
       </div>
@@ -403,6 +350,17 @@ function onSaveCollaborators(collaborators: any[]) {
       :collaborators="dashboardStore.companyCollaborators"
       @update:visible="showCollaboratorModal = $event"
       @save="onSaveCollaborators"
+    />
+
+    <!-- Modal de filtros -->
+    <CollaboratorsFiltersModal
+      :visible="showFiltersModal"
+      :filters="filters"
+      :collaborator-options="collaboratorOptions"
+      :petition-options="petitionOptions"
+      @update:visible="showFiltersModal = $event"
+      @update:filters="filters = $event"
+      @clear-filters="clearFilters"
     />
   </div>
 </template>
