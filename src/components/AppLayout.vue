@@ -5,18 +5,24 @@ import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
 import Sidebar from "primevue/sidebar";
+import MainNavigationSidebar from "./MainNavigationSidebar.vue";
 import { useDashboardStore } from "../stores/dashboard";
 import { useThemeStore } from "../stores/theme";
 
 const store = useDashboardStore();
 const themeStore = useThemeStore();
 const showAlertsPanel = ref(false);
+const currentMainView = ref("dashboard");
 
 // Inicializar tema
 themeStore.loadTheme();
 
 function handleThemeToggle() {
   themeStore.toggleTheme();
+}
+
+function handleNavigationSelect(viewId: string) {
+  currentMainView.value = viewId;
 }
 
 // Compute alerts info
@@ -32,10 +38,25 @@ const companyFilterOptions = [
   { label: "Todos", value: null },
   { label: "Sopra Steria", value: "Sopra Steria" },
 ];
+
+// Navigation items
+const navigationItems = [
+  { id: "dashboard", label: "Dashboard", icon: "pi-chart-bar" },
+  { id: "tables", label: "Tablas", icon: "pi-table" },
+  { id: "analytics", label: "Análisis", icon: "pi-chart-pie" },
+  { id: "settings", label: "Configuración", icon: "pi-cog" },
+];
 </script>
 
 <template>
   <div class="app-layout">
+    <!-- Main Navigation Sidebar (Left) -->
+    <MainNavigationSidebar
+      :active-id="currentMainView"
+      :items="navigationItems"
+      @select-item="handleNavigationSelect"
+    />
+
     <Toolbar class="app-toolbar" :disabled="store.isProcessingCsv">
       <template #start>
         <h2 style="margin: 0; font-size: 1.25rem">
@@ -123,12 +144,15 @@ const companyFilterOptions = [
 <style scoped>
 .app-layout {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  grid-template-rows: 60px 1fr;
   background-color: var(--bg-primary);
 }
 
 .app-toolbar {
+  grid-column: 2;
+  grid-row: 1;
   border-radius: 0;
   background-color: var(--bg-surface);
   border-bottom: 1px solid var(--border-color);
@@ -188,6 +212,12 @@ const companyFilterOptions = [
   text-align: center;
   line-height: 1;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* MainNavigationSidebar positioning in grid */
+.main-navigation-sidebar {
+  grid-column: 1 !important;
+  grid-row: 1 / 3 !important;
 }
 
 /* Alerts Sidebar */
@@ -256,10 +286,10 @@ const companyFilterOptions = [
 }
 
 .app-content {
-  flex: 1;
+  grid-column: 2;
+  grid-row: 2;
   padding: 1.5rem;
-  margin: 0 auto;
-  width: 100%;
+  overflow-y: auto;
   transition:
     opacity 0.2s ease,
     background-color 0.3s ease;
