@@ -10,6 +10,7 @@ import {
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import VChart from "vue-echarts";
+import * as echarts from "echarts";
 import type { CalculatedRequest } from "../../../domain/types";
 
 use([
@@ -136,7 +137,7 @@ const option = computed(() => ({
       type: "bar",
       data: Object.values(deviationStats.value).map((v) => v.count),
       itemStyle: {
-        color: new (window as any).echarts.graphic.LinearGradient(0, 0, 0, 1, [
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
           { offset: 0, color: "#3b82f6" },
           { offset: 1, color: "#1e40af" },
         ]),
