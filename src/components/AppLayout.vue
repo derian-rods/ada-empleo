@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
@@ -9,15 +8,9 @@ import { useThemeStore } from "../stores/theme";
 
 const store = useDashboardStore();
 const themeStore = useThemeStore();
-const toast = useToast();
 
 // Inicializar tema
 themeStore.loadTheme();
-
-function handleReset() {
-  store.reset();
-  toast.add({ severity: "info", summary: "Datos vaciados", life: 3000 });
-}
 
 function handleThemeToggle() {
   themeStore.toggleTheme();
@@ -58,14 +51,6 @@ const companyFilterOptions = [
             size="small"
             @click="handleThemeToggle"
             :title="`Cambiar a tema ${themeStore.isDark ? 'claro' : 'oscuro'}`"
-          />
-          <Button
-            label="Vaciar datos"
-            icon="pi pi-trash"
-            severity="danger"
-            size="small"
-            :disabled="!store.hasData || store.isProcessingCsv"
-            @click="handleReset"
           />
         </div>
       </template>

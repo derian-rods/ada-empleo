@@ -27,6 +27,11 @@ function onTimeSelect(event: FileUploadSelectEvent) {
   if (file) store.loadTimeEntries(file);
 }
 
+function handleReset() {
+  store.reset();
+  showUploadPanel.value = true; // Re-show panel when clearing data
+}
+
 function getProcessingMessage(): string {
   if (store.csvLoadStatus.parents.status === "loading") {
     return "Peticiones padre";
@@ -131,6 +136,17 @@ defineExpose({
     <div v-if="!allCsvsLoaded || showUploadPanel" class="upload-panel">
       <div class="panel-header">
         <h3>Gestión de CSVs</h3>
+        <Button
+          icon="pi pi-trash"
+          severity="danger"
+          text
+          rounded
+          size="small"
+          :disabled="!store.hasData"
+          @click="handleReset"
+          v-tooltip="'Vaciar datos'"
+          class="clear-data-btn"
+        />
       </div>
 
       <div class="upload-grid">
@@ -211,17 +227,20 @@ defineExpose({
 
     <!-- Alerts Section: Compact inline with toggle button -->
     <div v-if="hasIssues" class="alerts-container">
-      <!-- Alert Badge Button -->
-      <Button
-        :icon="showAlerts ? 'pi pi-bell-slash' : 'pi pi-bell'"
-        :label="`${issueCount} alerta${issueCount !== 1 ? 's' : ''}`"
-        severity="warning"
-        text
-        rounded
-        size="small"
-        @click="showAlerts = !showAlerts"
-        class="alert-badge-btn"
-      />
+      <!-- Alert Icon and Badge Button -->
+      <div class="alert-header">
+        <i class="pi pi-exclamation-triangle alert-icon"></i>
+        <Button
+          :icon="showAlerts ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+          :label="`${issueCount} alerta${issueCount !== 1 ? 's' : ''}`"
+          severity="warning"
+          text
+          rounded
+          size="small"
+          @click="showAlerts = !showAlerts"
+          class="alert-badge-btn"
+        />
+      </div>
 
       <!-- Inline Alert Messages (Single line) -->
       <div v-if="showAlerts" class="inline-alerts">
@@ -345,7 +364,6 @@ defineExpose({
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   gap: 1rem;
-  flex-wrap: wrap;
 }
 
 .panel-header h3 {
@@ -356,24 +374,9 @@ defineExpose({
   white-space: nowrap;
 }
 
-.status-badges {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.status-item {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.status-text {
-  font-weight: 500;
+.clear-data-btn {
+  flex-shrink: 0;
+  min-width: auto;
 }
 
 /* Upload Grid */
@@ -416,8 +419,8 @@ defineExpose({
 /* Alerts Section - Compact inline design */
 .alerts-container {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.5rem;
   padding: 0.5rem 1rem;
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   border: 1px solid #fcd34d;
@@ -435,6 +438,18 @@ defineExpose({
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.alert-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alert-icon {
+  font-size: 1.25rem;
+  color: #d97706;
+  flex-shrink: 0;
 }
 
 .alert-badge-btn {
