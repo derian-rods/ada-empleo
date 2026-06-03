@@ -43,7 +43,7 @@ const activeTab = ref("grouped");
       </Tab>
       <Tab value="gsp" class="flex items-center gap-2">
         <i class="pi pi-fw pi-users"></i>
-        <span>GSP - Perfiles</span>
+        <span>GP-SAE</span>
       </Tab>
     </TabList>
     <TabPanels>

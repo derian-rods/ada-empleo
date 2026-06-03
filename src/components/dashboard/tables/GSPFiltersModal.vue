@@ -50,7 +50,7 @@ const handleClearFilters = () => {
   <Dialog
     :visible="visible"
     @update:visible="(val: boolean) => emit('update:visible', val)"
-    header="Filtros - GSP Perfiles"
+    header="Filtros - GP-SAE"
     modal
     :style="{ width: '80vw' }"
     class="filters-modal"

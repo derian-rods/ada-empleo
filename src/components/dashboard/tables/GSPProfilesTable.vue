@@ -8,6 +8,7 @@ import InputGroup from "primevue/inputgroup";
 import InputText from "primevue/inputtext";
 import GSPFiltersModal from "./GSPFiltersModal.vue";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
+import { SOPRA_STERIA_COLLABORATORS } from "../../../domain/companies";
 import type { ChildRequest, TimeEntry } from "../../../domain/types";
 
 interface GSPProfilesTableProps {
@@ -21,8 +22,7 @@ interface GSPProfile {
   code: string;
   status: string;
   assignedUser: string;
-  profiles: string[]; // Array of unique profiles
-  profilesDisplay: string; // Display string for profiles
+  profile: string; // Single profile from collaborators JSON
 }
 
 interface Filters {
@@ -40,44 +40,44 @@ const filters = ref<Filters>({});
 const globalFilter = ref("");
 const showFiltersModal = ref(false);
 
-// Get unique profiles for a child request
-function getProfilesForChild(childCode: string): string[] {
-  const profiles = props.timeEntries
-    .filter((te) => te.petitionId === childCode)
-    .map((te) => te.profiledRole || te.cauRole)
-    .filter((p): p is string => Boolean(p && p.trim() !== ""));
+// Get profile from collaborators JSON by user name
+function getProfileForUser(userName: string | undefined): string {
+  if (!userName) return "";
 
-  return Array.from(new Set(profiles));
+  const normalizedUserName = userName.toLowerCase().trim();
+  const collaborator = SOPRA_STERIA_COLLABORATORS.find(
+    (c) => c.name.toLowerCase().trim() === normalizedUserName,
+  );
+
+  return collaborator?.profile || "";
 }
 
 // Build GSP data from children requests
 const gspProfiles = computed(() => {
   return props.children
-    .filter((child) => child.code && (child.assignedUser || child.status))
+    .filter((child) => child.code && child.assignedUser)
     .map((child) => {
-      const profiles = getProfilesForChild(child.code);
+      const profile = getProfileForUser(child.assignedUser);
 
       return {
         id: child.id,
         code: child.code,
         status: child.status || "Sin datos",
         assignedUser: child.assignedUser || "-",
-        profiles,
-        profilesDisplay: profiles.length > 0 ? profiles.join(", ") : "-",
+        profile: profile || "-",
       } as GSPProfile;
     });
 });
 
 // Get unique profile options for filter
 const profileOptions = computed(() => {
-  const allProfiles = new Set<string>();
-  props.timeEntries.forEach((te) => {
-    if (te.profiledRole) allProfiles.add(te.profiledRole);
-    if (te.cauRole) allProfiles.add(te.cauRole);
+  const profiles = new Set<string>();
+  SOPRA_STERIA_COLLABORATORS.forEach((collab) => {
+    if (collab.profile) {
+      profiles.add(collab.profile);
+    }
   });
-  return Array.from(allProfiles)
-    .filter((p) => p && p.trim() !== "")
-    .sort();
+  return Array.from(profiles).sort();
 });
 
 // Apply filters
@@ -90,7 +90,7 @@ const filteredProfiles = computed(() => {
       (p) =>
         p.code.toLowerCase().includes(searchTerm) ||
         p.assignedUser.toLowerCase().includes(searchTerm) ||
-        p.profilesDisplay.toLowerCase().includes(searchTerm) ||
+        p.profile.toLowerCase().includes(searchTerm) ||
         p.status.toLowerCase().includes(searchTerm),
     );
   }
@@ -110,9 +110,7 @@ const filteredProfiles = computed(() => {
   }
 
   if (filters.value.profile && filters.value.profile.length > 0) {
-    result = result.filter((p) =>
-      p.profiles.some((profile) => filters.value.profile?.includes(profile)),
-    );
+    result = result.filter((p) => filters.value.profile?.includes(p.profile));
   }
 
   return result;
@@ -248,20 +246,15 @@ function handleClearFilters() {
 
       <!-- Perfil / Rol -->
       <Column
-        field="profilesDisplay"
+        field="profile"
         header="Perfil / Rol"
         sortable
         style="width: 250px"
       >
         <template #body="{ data }">
-          <div v-if="data.profiles.length > 0" class="profiles-container">
-            <Tag
-              v-for="profile in data.profiles"
-              :key="profile"
-              :value="profile"
-              class="profile-tag"
-            />
-          </div>
+          <span v-if="data.profile !== '-'" class="profile-badge">
+            {{ data.profile }}
+          </span>
           <span v-else class="text-secondary">-</span>
         </template>
       </Column>
@@ -390,6 +383,16 @@ function handleClearFilters() {
 
 .profile-tag {
   font-size: 0.8rem;
+}
+
+.profile-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-primary);
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .text-secondary {
