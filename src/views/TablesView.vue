@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
+// @ts-expect-error - Used in template
 import Card from "primevue/card";
+// @ts-expect-error - Used in template
 import DashboardSidebar from "../components/dashboard/DashboardSidebar.vue";
 import DashboardTablesTabs from "../components/dashboard/tables/DashboardTablesTabs.vue";
+// @ts-expect-error - Used in template
+import UnestimatedWithIncurredPanel from "../components/dashboard/tables/UnestimatedWithIncurredPanel.vue";
 import CollaboratorsTable from "../components/dashboard/tables/CollaboratorsTable.vue";
 import { useDashboardStore } from "../stores/dashboard";
 
@@ -10,6 +14,7 @@ const store = useDashboardStore();
 const activeTab = ref("summary");
 
 // Sidebar items with submenu
+// @ts-expect-error - Used in template
 const sidebarItems = [
   {
     id: "summary",
@@ -95,6 +100,7 @@ const sidebarItems = [
   },
 ];
 
+// @ts-expect-error - Used in template
 function handleSidebarSelect(itemId: string) {
   activeTab.value = itemId;
 }
@@ -115,12 +121,144 @@ function handleSidebarSelect(itemId: string) {
       <Card class="content-card">
         <template #title>
           <div class="card-title">
-            {{
-              sidebarItems.find((item) => item.id === activeTab)?.label ||
-              "Seleccionar opción"
-            }}
+            {{ sidebarItems.find((item) => item.id === activeTab)?.label || "Seleccionar opción" }}
           </div>
         </template>
+        <template #content>
+          <!-- RESUMEN SECTION -->
+          
+          <!-- Summary: General -->
+          <div v-if="activeTab === 'summary-general'" class="content-wrapper">
+            <div class="content-placeholder">
+              <p>📊 Dashboard General - Resumen de métricas principales</p>
+            </div>
+          </div>
+
+          <!-- Summary: Financial -->
+          <div v-else-if="activeTab === 'summary-financial'" class="content-wrapper">
+            <div class="content-placeholder">
+              <p>💰 Análisis Financiero - Ganancias, pérdidas y desviaciones</p>
+            </div>
+          </div>
+
+          <!-- Summary: Timeline -->
+          <div v-else-if="activeTab === 'summary-timeline'" class="content-wrapper">
+            <div class="content-placeholder">
+              <p>📅 Timeline - Evolución temporal de métricas</p>
+            </div>
+          </div>
+
+          <!-- PETICIONES SECTION -->
+
+          <!-- Peticiones Padre -->
+          <div v-else-if="activeTab === 'parents'" class="content-wrapper">
+            <DashboardTablesTabs
+              :parents="store.parents"
+              :children="store.children"
+              :time-entries="store.timeEntries"
+              :calculated-requests="store.calculatedRequests"
+              :rows-per-page="25"
+            />
+          </div>
+
+          <!-- Peticiones Hijas -->
+          <div v-else-if="activeTab === 'children'" class="content-wrapper">
+            <p style="color: var(--text-secondary); text-align: center;">
+              Tabla de Peticiones Hijas - Derivadas
+            </p>
+            <!-- TODO: Implement children table -->
+          </div>
+
+          <!-- COLABORADORES SECTION -->
+
+          <!-- Usuarios -->
+          <div v-else-if="activeTab === 'users'" class="content-wrapper">
+            <p style="color: var(--text-secondary); text-align: center;">
+              Tabla de Usuarios
+            </p>
+            <!-- TODO: Implement users table -->
+          </div>
+
+          <!-- Colaboradores Table -->
+          <div v-else-if="activeTab === 'collaborators-table'" class="content-wrapper">
+            <CollaboratorsTable
+              :time-entries="store.timeEntries"
+              :children="store.children"
+              :parents="store.parents"
+            />
+          </div>
+
+          <!-- ANALYTICS SECTION -->
+
+          <!-- Analytics: Requests -->
+          <div v-else-if="activeTab === 'analytics-requests'" class="content-wrapper">
+            <div class="content-placeholder">
+              <p>📈 Gráficas por Peticiones - Análisis detallado</p>
+            </div>
+          </div>
+
+          <!-- Analytics: Collaborators -->
+          <div v-else-if="activeTab === 'analytics-collaborators'" class="content-wrapper">
+            <div class="content-placeholder">
+              <p>📊 Gráficas por Colaboradores - Productividad</p>
+            </div>
+          </div>
+
+          <!-- Analytics: Projects -->
+          <div v-else-if="activeTab === 'analytics-projects'" class="content-wrapper">
+            <div class="content-placeholder">
+              <p>🎯 Gráficas por Proyectos - Performance</p>
+            </div>
+          </div>
+
+          <!-- ORPHAN TIME SECTION -->
+
+          <!-- Orphan Time Overview -->
+          <div v-else-if="activeTab === 'orphan-overview'" class="content-wrapper">
+            <div class="content-placeholder">
+              <p>⏱️ Tiempo Huérfano - Overview general</p>
+            </div>
+          </div>
+
+          <!-- Orphan Time Unestimated -->
+          <div v-else-if="activeTab === 'orphan-unestimated'" class="content-wrapper">
+            <UnestimatedWithIncurredPanel
+              :calculated-requests="store.calculatedRequests"
+              :children="store.children"
+              :time-entries="store.timeEntries"
+            />
+          </div>
+
+          <!-- PROYECTOS SECTION -->
+
+          <!-- Proyectos -->
+          <div v-else-if="activeTab === 'projects'" class="content-wrapper">
+            <p style="color: var(--text-secondary); text-align: center;">
+              Tabla de Proyectos - Iniciativas
+            </p>
+            <!-- TODO: Implement projects table -->
+          </div>
+
+          <!-- Default -->
+          <div v-else class="content-wrapper">
+            <div class="content-placeholder">
+              <p>👈 Selecciona una opción del menú lateral para ver el contenido</p>
+            </div>
+          </div>
+        </template>
+      </Card>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div v-else class="empty-state">
+    <Card>
+      <template #content>
+        <p>Carga los tres CSV en la vista de Dashboard para ver las tablas</p>
+      </template>
+    </Card>
+  </div>
+</template>
         <template #content>
           <!-- Summary: General -->
           <div
@@ -286,11 +424,26 @@ function handleSidebarSelect(itemId: string) {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+}
+
+.content-card :deep(.p-card) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.content-card :deep(.p-card-body) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .content-card :deep(.p-card-content) {
   flex: 1;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .card-title {
@@ -299,13 +452,21 @@ function handleSidebarSelect(itemId: string) {
   color: var(--text-primary);
 }
 
+.content-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .content-placeholder {
-  min-height: 200px;
+  min-height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
   text-align: center;
+  flex: 1;
 }
 
 .content-placeholder p {
