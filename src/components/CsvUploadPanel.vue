@@ -4,9 +4,11 @@ import FileUpload, { type FileUploadSelectEvent } from "primevue/fileupload";
 import Tag from "primevue/tag";
 import ProgressSpinner from "primevue/progressspinner";
 import Button from "primevue/button";
+import { useToast } from "primevue/usetoast";
 import { useDashboardStore } from "../stores/dashboard";
 
 const store = useDashboardStore();
+const toast = useToast();
 const showUploadPanel = ref(true);
 const hasLoadedBefore = ref(false); // Track if CSVs have been loaded before
 const showAlerts = ref(false); // Toggle to show/hide alerts
@@ -29,6 +31,7 @@ function onTimeSelect(event: FileUploadSelectEvent) {
 
 function handleReset() {
   store.reset();
+  toast.add({ severity: "info", summary: "Datos vaciados", life: 3000 });
   showUploadPanel.value = true; // Re-show panel when clearing data
 }
 

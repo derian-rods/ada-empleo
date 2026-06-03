@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import { ref, computed } from "vue";
 import Toast from "primevue/toast";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
 import Dropdown from "primevue/dropdown";
+import Sidebar from "primevue/sidebar";
 import { useDashboardStore } from "../stores/dashboard";
 import { useThemeStore } from "../stores/theme";
 
 const store = useDashboardStore();
 const themeStore = useThemeStore();
+const showAlertsPanel = ref(false);
 
 // Inicializar tema
 themeStore.loadTheme();
@@ -15,6 +18,14 @@ themeStore.loadTheme();
 function handleThemeToggle() {
   themeStore.toggleTheme();
 }
+
+// Compute alerts info
+const allAlerts = computed(() => [
+  ...store.errors.map((e) => ({ text: e, type: "error" })),
+  ...store.warnings.map((w) => ({ text: w, type: "warning" })),
+]);
+
+const alertCount = computed(() => allAlerts.value.length);
 
 // Opciones para dropdown de empresa
 const companyFilterOptions = [
@@ -45,6 +56,21 @@ const companyFilterOptions = [
       </template>
       <template #end>
         <div class="toolbar-end">
+          <!-- Alert Badge -->
+          <div v-if="alertCount > 0" class="alert-badge">
+            <Button
+              :label="alertCount.toString()"
+              severity="warning"
+              text
+              rounded
+              size="small"
+              @click="showAlertsPanel = true"
+              class="badge-btn"
+              v-tooltip="'Ver alertas'"
+            />
+          </div>
+
+          <!-- Theme Toggle -->
           <Button
             :icon="themeStore.isDark ? 'pi pi-sun' : 'pi pi-moon'"
             text
@@ -55,6 +81,32 @@ const companyFilterOptions = [
         </div>
       </template>
     </Toolbar>
+
+    <!-- Alerts Sidebar -->
+    <Sidebar
+      v-model:visible="showAlertsPanel"
+      position="right"
+      class="alerts-sidebar"
+      header="Alertas"
+    >
+      <div class="alerts-list">
+        <div v-if="allAlerts.length === 0" class="no-alerts">
+          <i class="pi pi-check-circle"></i>
+          <p>No hay alertas</p>
+        </div>
+        <div
+          v-for="(alert, idx) in allAlerts"
+          :key="idx"
+          class="alert-item"
+          :class="`alert-${alert.type}`"
+        >
+          <i
+            :class="`pi ${alert.type === 'error' ? 'pi-exclamation-circle' : 'pi-exclamation-triangle'}`"
+          ></i>
+          <span>{{ alert.text }}</span>
+        </div>
+      </div>
+    </Sidebar>
 
     <main
       class="app-content"
@@ -108,7 +160,83 @@ const companyFilterOptions = [
 .toolbar-end {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
+}
+
+.alert-badge {
+  display: flex;
+  align-items: center;
+}
+
+.badge-btn {
+  font-weight: 600;
+  min-width: 32px;
+  padding: 0 !important;
+}
+
+/* Alerts Sidebar */
+.alerts-sidebar :deep(.p-sidebar-header) {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.alerts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.no-alerts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.no-alerts i {
+  font-size: 2rem;
+  color: #22c55e;
+}
+
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.9rem;
+  border-left: 3px solid;
+}
+
+.alert-item i {
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+  font-size: 1rem;
+}
+
+.alert-error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-left-color: #ef4444;
+  color: #991b1b;
+}
+
+.alert-error i {
+  color: #ef4444;
+}
+
+.alert-warning {
+  background-color: rgba(217, 119, 6, 0.1);
+  border-left-color: #d97706;
+  color: #92400e;
+}
+
+.alert-warning i {
+  color: #d97706;
 }
 
 .app-content {
