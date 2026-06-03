@@ -160,7 +160,7 @@ function clearFilters() {
 
 <template>
   <div class="parent-grouped-table">
-    <!-- Filters Modal/Sidebar (Right side) -->
+    <!-- Filters Modal (Right side) -->
     <TableFiltersPanel
       :visible="showFiltersPanel"
       :filters="filters"
@@ -174,8 +174,8 @@ function clearFilters() {
       @clear-filters="clearFilters"
     />
 
-    <!-- Filter Toggle Button -->
-    <div class="table-toolbar">
+    <!-- Filter Toggle Button (Top Right) -->
+    <div class="table-header">
       <Button
         icon="pi pi-filter"
         :label="`Filtros ${getActiveFilterCount() > 0 ? '(' + getActiveFilterCount() + ')' : ''}`"
@@ -500,11 +500,11 @@ function clearFilters() {
   width: 100%;
 }
 
-.table-toolbar {
+.table-header {
   display: flex;
+  justify-content: flex-end;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.5rem 0;
 }
 
 .filter-toggle-btn {
