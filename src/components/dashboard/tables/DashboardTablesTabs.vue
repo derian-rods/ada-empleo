@@ -65,11 +65,7 @@ const activeTab = ref("grouped");
         />
       </TabPanel>
       <TabPanel value="gsp">
-        <GSPProfilesTable
-          :children="children"
-          :time-entries="timeEntries"
-          :loading="loading"
-        />
+        <GSPProfilesTable :children="children" :loading="loading" />
       </TabPanel>
     </TabPanels>
   </Tabs>

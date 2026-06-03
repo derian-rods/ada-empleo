@@ -9,11 +9,10 @@ import InputText from "primevue/inputtext";
 import GSPFiltersModal from "./GSPFiltersModal.vue";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
 import { SOPRA_STERIA_COLLABORATORS } from "../../../domain/companies";
-import type { ChildRequest, TimeEntry } from "../../../domain/types";
+import type { ChildRequest } from "../../../domain/types";
 
 interface GSPProfilesTableProps {
   children: ChildRequest[];
-  timeEntries: TimeEntry[];
   loading?: boolean;
 }
 
