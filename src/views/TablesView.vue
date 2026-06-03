@@ -1,152 +1,256 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import Sidebar from "primevue/sidebar";
-import Button from "primevue/button";
 import Card from "primevue/card";
+import DashboardSidebar from "../components/dashboard/DashboardSidebar.vue";
 import DashboardTablesTabs from "../components/dashboard/tables/DashboardTablesTabs.vue";
 import CollaboratorsTable from "../components/dashboard/tables/CollaboratorsTable.vue";
 import { useDashboardStore } from "../stores/dashboard";
 
 const store = useDashboardStore();
-const activeTab = ref("parents");
-const showSidebar = ref(true);
+const activeTab = ref("summary");
 
-// Tab configuration
-const tabs = [
+// Sidebar items with submenu
+const sidebarItems = [
   {
-    id: "parents",
-    label: "Peticiones Padre",
-    icon: "pi pi-briefcase",
-    description: "Principales",
+    id: "summary",
+    label: "Resumen",
+    icon: "pi-chart-bar",
+    description: "Panel de control",
+    children: [
+      { id: "summary-general", label: "General", icon: "pi-chart-line" },
+      { id: "summary-financial", label: "Financiero", icon: "pi-dollar" },
+      { id: "summary-timeline", label: "Timeline", icon: "pi-calendar" },
+    ],
   },
   {
-    id: "children",
-    label: "Peticiones Hijas",
-    icon: "pi pi-sitemap",
-    description: "Derivadas",
-  },
-  {
-    id: "users",
-    label: "Usuarios",
-    icon: "pi pi-users",
-    description: "Colaboradores",
-  },
-  {
-    id: "projects",
-    label: "Proyectos",
-    icon: "pi pi-map",
-    description: "Iniciativas",
+    id: "requests",
+    label: "Peticiones",
+    icon: "pi-briefcase",
+    description: "Gestión",
+    children: [
+      { id: "parents", label: "Peticiones Padre", icon: "pi-briefcase" },
+      { id: "children", label: "Peticiones Hijas", icon: "pi-sitemap" },
+    ],
   },
   {
     id: "collaborators",
     label: "Colaboradores",
-    icon: "pi pi-user-group",
+    icon: "pi-users",
     description: "Equipo",
+    children: [
+      {
+        id: "collaborators-table",
+        label: "Tabla de Colaboradores",
+        icon: "pi-table",
+      },
+      { id: "users", label: "Usuarios", icon: "pi-user" },
+    ],
+  },
+  {
+    id: "analytics",
+    label: "Gráficas",
+    icon: "pi-chart-pie",
+    description: "Análisis",
+    children: [
+      {
+        id: "analytics-requests",
+        label: "Por Peticiones",
+        icon: "pi-chart-line",
+      },
+      {
+        id: "analytics-collaborators",
+        label: "Por Colaboradores",
+        icon: "pi-chart-bar",
+      },
+      {
+        id: "analytics-projects",
+        label: "Por Proyectos",
+        icon: "pi-chart-pie",
+      },
+    ],
+  },
+  {
+    id: "orphan-time",
+    label: "Tiempo Huérfano",
+    icon: "pi-exclamation-triangle",
+    description: "Sin estimar",
+    children: [
+      {
+        id: "orphan-overview",
+        label: "Overview",
+        icon: "pi-eye",
+      },
+      {
+        id: "orphan-unestimated",
+        label: "Sin estimar c/ incurrido",
+        icon: "pi-alert",
+      },
+    ],
+  },
+  {
+    id: "projects",
+    label: "Proyectos",
+    icon: "pi-map",
+    description: "Iniciativas",
   },
 ];
 
-function selectTab(tabId: string) {
-  activeTab.value = tabId;
-  showSidebar.value = false; // Auto-close sidebar on mobile
+function handleSidebarSelect(itemId: string) {
+  activeTab.value = itemId;
 }
 </script>
 
 <template>
   <div v-if="store.hasData" class="tables-layout">
-    <!-- Sidebar with tabs -->
-    <Sidebar
-      v-model:visible="showSidebar"
-      position="left"
-      class="tabs-sidebar"
-      header="Tablas"
-    >
-      <div class="tabs-menu">
-        <div
-          v-for="tab in tabs"
-          :key="tab.id"
-          :class="['tab-item', { active: activeTab === tab.id }]"
-          @click="selectTab(tab.id)"
-        >
-          <div class="tab-icon">
-            <i :class="`pi ${tab.icon}`"></i>
-          </div>
-          <div class="tab-label">
-            <div class="tab-title">{{ tab.label }}</div>
-            <div class="tab-description">{{ tab.description }}</div>
-          </div>
-          <div v-if="activeTab === tab.id" class="tab-indicator"></div>
-        </div>
-      </div>
-    </Sidebar>
+    <!-- New collapsible sidebar with icons -->
+    <DashboardSidebar
+      :items="sidebarItems"
+      :active-item-id="activeTab"
+      @select-item="handleSidebarSelect"
+    />
 
-    <!-- Main content -->
-    <div class="tables-container">
-      <!-- Toggle button (visible on mobile/small screens) -->
-      <div class="toggle-button">
-        <Button
-          icon="pi pi-bars"
-          severity="secondary"
-          text
-          rounded
-          size="small"
-          @click="showSidebar = true"
-          v-tooltip="'Mostrar menú'"
-        />
-      </div>
-
+    <!-- Main content area -->
+    <div class="main-content">
       <!-- Content Card -->
-      <Card>
+      <Card class="content-card">
         <template #title>
-          {{ tabs.find((t) => t.id === activeTab)?.label }}
+          <div class="card-title">
+            {{
+              sidebarItems.find((item) => item.id === activeTab)?.label ||
+              "Seleccionar opción"
+            }}
+          </div>
         </template>
         <template #content>
+          <!-- Summary: General -->
+          <div
+            v-if="activeTab === 'summary-general'"
+            class="content-placeholder"
+          >
+            <p>📊 Dashboard General - Resumen de métricas principales</p>
+          </div>
+
+          <!-- Summary: Financial -->
+          <div
+            v-else-if="activeTab === 'summary-financial'"
+            class="content-placeholder"
+          >
+            <p>💰 Análisis Financiero - Ganancias, pérdidas y desviaciones</p>
+          </div>
+
+          <!-- Summary: Timeline -->
+          <div
+            v-else-if="activeTab === 'summary-timeline'"
+            class="content-placeholder"
+          >
+            <p>📅 Timeline - Evolución temporal de métricas</p>
+          </div>
+
           <!-- Peticiones Padre -->
-          <DashboardTablesTabs
-            v-if="activeTab === 'parents'"
-            :parents="store.parents"
-            :children="store.children"
-            :time-entries="store.timeEntries"
-            :calculated-requests="store.calculatedRequests"
-            :rows-per-page="25"
-          />
+          <div v-else-if="activeTab === 'parents'" class="content-placeholder">
+            <p>📋 Tabla de Peticiones Padre - Principales</p>
+            <DashboardTablesTabs
+              :parents="store.parents"
+              :children="store.children"
+              :time-entries="store.timeEntries"
+              :calculated-requests="store.calculatedRequests"
+              :rows-per-page="25"
+            />
+          </div>
 
           <!-- Peticiones Hijas -->
-          <DashboardTablesTabs
-            v-else-if="activeTab === 'children'"
-            :parents="store.parents"
-            :children="store.children"
-            :time-entries="store.timeEntries"
-            :calculated-requests="store.calculatedRequests"
-            :rows-per-page="25"
-          />
+          <div v-else-if="activeTab === 'children'" class="content-placeholder">
+            <p>🔗 Tabla de Peticiones Hijas - Derivadas</p>
+            <DashboardTablesTabs
+              :parents="store.parents"
+              :children="store.children"
+              :time-entries="store.timeEntries"
+              :calculated-requests="store.calculatedRequests"
+              :rows-per-page="25"
+            />
+          </div>
 
           <!-- Usuarios -->
-          <DashboardTablesTabs
-            v-else-if="activeTab === 'users'"
-            :parents="store.parents"
-            :children="store.children"
-            :time-entries="store.timeEntries"
-            :calculated-requests="store.calculatedRequests"
-            :rows-per-page="25"
-          />
+          <div v-else-if="activeTab === 'users'" class="content-placeholder">
+            <p>👥 Tabla de Usuarios</p>
+            <DashboardTablesTabs
+              :parents="store.parents"
+              :children="store.children"
+              :time-entries="store.timeEntries"
+              :calculated-requests="store.calculatedRequests"
+              :rows-per-page="25"
+            />
+          </div>
+
+          <!-- Colaboradores Table -->
+          <div
+            v-else-if="activeTab === 'collaborators-table'"
+            class="content-placeholder"
+          >
+            <p>👨‍💼 Tabla de Colaboradores - Equipo</p>
+            <CollaboratorsTable
+              :time-entries="store.timeEntries"
+              :children="store.children"
+              :parents="store.parents"
+            />
+          </div>
 
           <!-- Proyectos -->
-          <DashboardTablesTabs
-            v-else-if="activeTab === 'projects'"
-            :parents="store.parents"
-            :children="store.children"
-            :time-entries="store.timeEntries"
-            :calculated-requests="store.calculatedRequests"
-            :rows-per-page="25"
-          />
+          <div v-else-if="activeTab === 'projects'" class="content-placeholder">
+            <p>🗺️ Tabla de Proyectos - Iniciativas</p>
+            <DashboardTablesTabs
+              :parents="store.parents"
+              :children="store.children"
+              :time-entries="store.timeEntries"
+              :calculated-requests="store.calculatedRequests"
+              :rows-per-page="25"
+            />
+          </div>
 
-          <!-- Colaboradores -->
-          <CollaboratorsTable
-            v-else-if="activeTab === 'collaborators'"
-            :time-entries="store.timeEntries"
-            :children="store.children"
-            :parents="store.parents"
-          />
+          <!-- Analytics: Requests -->
+          <div
+            v-else-if="activeTab === 'analytics-requests'"
+            class="content-placeholder"
+          >
+            <p>📈 Gráficas por Peticiones - Análisis detallado</p>
+          </div>
+
+          <!-- Analytics: Collaborators -->
+          <div
+            v-else-if="activeTab === 'analytics-collaborators'"
+            class="content-placeholder"
+          >
+            <p>📊 Gráficas por Colaboradores - Productividad</p>
+          </div>
+
+          <!-- Analytics: Projects -->
+          <div
+            v-else-if="activeTab === 'analytics-projects'"
+            class="content-placeholder"
+          >
+            <p>🎯 Gráficas por Proyectos - Performance</p>
+          </div>
+
+          <!-- Orphan Time Overview -->
+          <div
+            v-else-if="activeTab === 'orphan-overview'"
+            class="content-placeholder"
+          >
+            <p>⏱️ Tiempo Huérfano - Overview general</p>
+          </div>
+
+          <!-- Orphan Time Unestimated -->
+          <div
+            v-else-if="activeTab === 'orphan-unestimated'"
+            class="content-placeholder"
+          >
+            <p>⚠️ Sin Estimar con Incurrido - Detalle</p>
+          </div>
+
+          <!-- Default summary -->
+          <div v-else class="content-placeholder">
+            <p>Selecciona una opción del menú lateral para ver el contenido</p>
+          </div>
         </template>
       </Card>
     </div>
@@ -165,179 +269,71 @@ function selectTab(tabId: string) {
 <style scoped>
 .tables-layout {
   display: flex;
-  gap: 1rem;
-  width: 100%;
   height: 100%;
+  width: 100%;
+  gap: 0;
 }
 
-.tabs-sidebar :deep(.p-sidebar-header) {
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.tabs-sidebar :deep(.p-sidebar-content) {
-  padding: 0;
-}
-
-.tabs-menu {
+.main-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.5rem;
+  overflow-y: auto;
+  padding: 1.5rem;
 }
 
-.tab-item {
+.content-card {
+  flex: 1;
   display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: var(--text-secondary);
-  position: relative;
-  border-left: 3px solid transparent;
+  flex-direction: column;
 }
 
-.tab-item:hover {
-  background: var(--bg-secondary);
+.content-card :deep(.p-card-content) {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
   color: var(--text-primary);
 }
 
-.tab-item.active {
-  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
-  color: var(--color-primary);
-  border-left-color: var(--color-primary);
-}
-
-.tab-icon {
-  font-size: 1.5rem;
+.content-placeholder {
+  min-height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  flex-shrink: 0;
+  color: var(--text-secondary);
+  text-align: center;
 }
 
-.tab-label {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  flex: 1;
-}
-
-.tab-title {
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.tab-description {
-  font-size: 0.8rem;
+.content-placeholder p {
+  font-size: 1rem;
   opacity: 0.7;
-}
-
-.tab-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-primary);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.tables-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  flex: 1;
-  min-width: 0;
-}
-
-.toggle-button {
-  display: none;
 }
 
 .empty-state {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 400px;
-  text-align: center;
+  height: 100%;
+  width: 100%;
+  padding: 2rem;
 }
 
-.empty-state p {
-  color: var(--text-secondary);
-  font-size: 1rem;
+.empty-state :deep(.p-card) {
+  max-width: 500px;
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
-  .tabs-sidebar {
-    width: 280px !important;
-  }
-
-  .tab-description {
-    display: none;
-  }
-
-  .tab-label {
-    gap: 0;
-  }
-}
-
 @media (max-width: 768px) {
   .tables-layout {
     flex-direction: column;
-    gap: 0;
   }
 
-  .tabs-sidebar {
-    width: 100% !important;
-    max-height: 50vh;
-  }
-
-  .tabs-menu {
-    flex-direction: row;
-    overflow-x: auto;
-    padding: 0.5rem;
-    gap: 0.5rem;
-  }
-
-  .tab-item {
-    flex: 0 0 auto;
-    flex-direction: column;
-    padding: 0.75rem;
-    gap: 0.5rem;
-    border-left: none;
-    border-bottom: 3px solid transparent;
-    border-radius: 0 0 0.5rem 0.5rem;
-  }
-
-  .tab-item.active {
-    border-left: none;
-    border-bottom-color: var(--color-primary);
-  }
-
-  .tab-icon {
-    width: auto;
-  }
-
-  .toggle-button {
-    display: flex;
-    align-items: center;
-  }
-
-  .tables-container {
-    gap: 0.5rem;
+  .main-content {
+    padding: 1rem;
   }
 }
 </style>
