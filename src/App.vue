@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import AppLayout from './components/AppLayout.vue'
-import CsvUploadPanel from './components/CsvUploadPanel.vue'
-import TabsView from './components/TabsView.vue'
-import { useDashboardStore } from './stores/dashboard'
-import { useThemeStore } from './stores/theme'
-import { onMounted } from 'vue'
+import AppLayout from "./components/AppLayout.vue";
+import CsvUploadPanel from "./components/CsvUploadPanel.vue";
+import DashboardView from "./views/DashboardView.vue";
+import { useDashboardStore } from "./stores/dashboard";
+import { useThemeStore } from "./stores/theme";
+import { onMounted } from "vue";
 
-const store = useDashboardStore()
-const themeStore = useThemeStore()
+const store = useDashboardStore();
+const themeStore = useThemeStore();
 
 onMounted(() => {
-  themeStore.loadTheme()
-})
+  themeStore.loadTheme();
+});
 </script>
 
 <template>
@@ -19,7 +19,7 @@ onMounted(() => {
     <div class="app-content">
       <CsvUploadPanel />
 
-      <TabsView v-if="store.hasData" />
+      <DashboardView v-if="store.hasData" />
 
       <div v-if="!store.hasData" class="empty-state">
         <p>Carga los tres CSV para empezar el análisis</p>
