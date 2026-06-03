@@ -132,7 +132,8 @@ function fmtPct(n: number): string {
   );
 }
 
-function getActiveFilterCount(): number {
+// Computed: Active filter count
+const activeFilterCount = computed(() => {
   let count = 0;
   const f = filters.value;
   if (f.parentCode) count++;
@@ -150,7 +151,7 @@ function getActiveFilterCount(): number {
   if (f.onlyConsumptionOver100) count++;
   if (f.onlyDeviationOver20) count++;
   return count;
-}
+});
 
 function clearFilters() {
   filters.value = {};
@@ -178,7 +179,7 @@ function clearFilters() {
     <div class="table-header">
       <Button
         icon="pi pi-filter"
-        :label="`Filtros ${getActiveFilterCount() > 0 ? '(' + getActiveFilterCount() + ')' : ''}`"
+        :label="`Filtros ${activeFilterCount > 0 ? '(' + activeFilterCount + ')' : ''}`"
         severity="secondary"
         size="small"
         @click="showFiltersModal = true"
