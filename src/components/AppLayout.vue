@@ -56,18 +56,19 @@ const companyFilterOptions = [
       </template>
       <template #end>
         <div class="toolbar-end">
-          <!-- Alert Badge -->
-          <div v-if="alertCount > 0" class="alert-badge">
+          <!-- Alert Badge with Bell Icon -->
+          <div v-if="alertCount > 0" class="alert-badge-container">
             <Button
-              :label="alertCount.toString()"
+              icon="pi pi-bell"
               severity="warning"
               text
               rounded
               size="small"
               @click="showAlertsPanel = true"
-              class="badge-btn"
+              class="bell-btn"
               v-tooltip="'Ver alertas'"
             />
+            <span class="alert-count-badge">{{ alertCount }}</span>
           </div>
 
           <!-- Theme Toggle -->
@@ -163,15 +164,30 @@ const companyFilterOptions = [
   gap: 0.75rem;
 }
 
-.alert-badge {
+.alert-badge-container {
+  position: relative;
   display: flex;
   align-items: center;
 }
 
-.badge-btn {
-  font-weight: 600;
-  min-width: 32px;
-  padding: 0 !important;
+.bell-btn {
+  color: #d97706;
+}
+
+.alert-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  min-width: 20px;
+  text-align: center;
+  line-height: 1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Alerts Sidebar */
