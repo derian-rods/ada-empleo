@@ -7,6 +7,7 @@ import TabPanels from "primevue/tabpanels";
 import TabPanel from "primevue/tabpanel";
 import ParentGroupedRequestsTable from "./ParentGroupedRequestsTable.vue";
 import UnestimatedWithIncurredPanel from "./UnestimatedWithIncurredPanel.vue";
+import GSPProfilesTable from "./GSPProfilesTable.vue";
 import type {
   ParentRequest,
   ChildRequest,
@@ -40,6 +41,10 @@ const activeTab = ref("grouped");
         <i class="pi pi-fw pi-exclamation-circle"></i>
         <span>Sin estimar con incurrido</span>
       </Tab>
+      <Tab value="gsp" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-users"></i>
+        <span>GSP - Perfiles</span>
+      </Tab>
     </TabList>
     <TabPanels>
       <TabPanel value="grouped">
@@ -54,6 +59,13 @@ const activeTab = ref("grouped");
       <TabPanel value="unestimated">
         <UnestimatedWithIncurredPanel
           :calculated-requests="calculatedRequests"
+          :children="children"
+          :time-entries="timeEntries"
+          :loading="loading"
+        />
+      </TabPanel>
+      <TabPanel value="gsp">
+        <GSPProfilesTable
           :children="children"
           :time-entries="timeEntries"
           :loading="loading"

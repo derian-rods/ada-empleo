@@ -72,6 +72,8 @@ export function normalizeChildRequests(rows: Row[]): ChildRequest[] {
       priority: cleanText(row["Prioridad"]),
       author: cleanText(row["Autor"]),
       assignee: cleanText(row["Asignado a"]),
+      assignedUser: cleanText(row["Asignado a"]), // For GSP table
+      profile: cleanText(row["Perfil TiC"]), // For GSP table
       category: cleanText(row["Categoría"]),
       version: cleanText(row["Versión prevista"]),
       application: cleanText(row["Aplicación"]),

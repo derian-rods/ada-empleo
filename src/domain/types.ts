@@ -33,6 +33,8 @@ export interface ChildRequest {
   priority?: string;
   author?: string;
   assignee?: string;
+  assignedUser?: string; // Mapped from "Asignado a" for GSP table
+  profile?: string; // Mapped from "Perfil TiC" for GSP table
   category?: string;
   version?: string;
   application?: string;
