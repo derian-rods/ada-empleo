@@ -4,11 +4,8 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import Tag from "primevue/tag";
 import Button from "primevue/button";
-import InputText from "primevue/inputtext";
-import MultiSelect from "primevue/multiselect";
-import Dropdown from "primevue/dropdown";
-import Checkbox from "primevue/checkbox";
 import GpsaeRequestLink from "../../GpsaeRequestLink.vue";
+import TableFiltersPanel from "./TableFiltersPanel.vue";
 import type { ParentGroupedTableFilters } from "../../../domain/parentGroupedTable";
 import {
   buildParentGroupedTableRows,
@@ -39,6 +36,7 @@ const dashboardStore = useDashboardStore();
 // State
 const expandedRows = ref<string[]>([]);
 const filters = ref<ParentGroupedTableFilters>({});
+const showFiltersPanel = ref(false); // Filters hidden by default
 
 // Build and filter data
 const groupedRows = computed(() => {
@@ -134,6 +132,26 @@ function fmtPct(n: number): string {
   );
 }
 
+function getActiveFilterCount(): number {
+  let count = 0;
+  const f = filters.value;
+  if (f.parentCode) count++;
+  if (f.parentSubject) count++;
+  if (f.childCode) count++;
+  if (f.childSubject) count++;
+  if (f.user?.length) count++;
+  if (f.role?.length) count++;
+  if (f.application?.length) count++;
+  if (f.status) count++;
+  if (f.project) count++;
+  if (f.resultStatus) count++;
+  if (f.riskLevel) count++;
+  if (f.onlyLosses) count++;
+  if (f.onlyConsumptionOver100) count++;
+  if (f.onlyDeviationOver20) count++;
+  return count;
+}
+
 function clearFilters() {
   filters.value = {};
   expandedRows.value = [];
@@ -142,163 +160,30 @@ function clearFilters() {
 
 <template>
   <div class="parent-grouped-table">
-    <!-- Filtros -->
-    <div class="filters-section">
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>Código padre</label>
-          <InputText
-            v-model="filters.parentCode"
-            placeholder="Buscar código..."
-            size="small"
-          />
-        </div>
+    <!-- Filters Modal/Sidebar (Right side) -->
+    <TableFiltersPanel
+      :visible="showFiltersPanel"
+      :filters="filters"
+      :unique-users="uniqueUsers"
+      :unique-roles="uniqueRoles"
+      :unique-applications="uniqueApplications"
+      :unique-statuses="uniqueStatuses"
+      :unique-projects="uniqueProjects"
+      @update:visible="showFiltersPanel = $event"
+      @update:filters="filters = $event"
+      @clear-filters="clearFilters"
+    />
 
-        <div class="filter-item">
-          <label>Asunto padre</label>
-          <InputText
-            v-model="filters.parentSubject"
-            placeholder="Buscar asunto..."
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Código hija</label>
-          <InputText
-            v-model="filters.childCode"
-            placeholder="Buscar código..."
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Asunto hija</label>
-          <InputText
-            v-model="filters.childSubject"
-            placeholder="Buscar asunto..."
-            size="small"
-          />
-        </div>
-      </div>
-
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>Usuario</label>
-          <MultiSelect
-            v-model="filters.user"
-            :options="uniqueUsers"
-            placeholder="Seleccionar..."
-            :max-selected-labels="1"
-            :show-toggle-all="false"
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Rol/Perfil</label>
-          <MultiSelect
-            v-model="filters.role"
-            :options="uniqueRoles"
-            placeholder="Seleccionar..."
-            :max-selected-labels="1"
-            :show-toggle-all="false"
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Aplicación</label>
-          <MultiSelect
-            v-model="filters.application"
-            :options="uniqueApplications"
-            placeholder="Seleccionar..."
-            :max-selected-labels="1"
-            :show-toggle-all="false"
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Estado</label>
-          <Dropdown
-            v-model="filters.status"
-            :options="uniqueStatuses"
-            placeholder="Todos"
-            show-clear
-            size="small"
-          />
-        </div>
-      </div>
-
-      <div class="filter-row">
-        <div class="filter-item">
-          <label>Proyecto</label>
-          <Dropdown
-            v-model="filters.project"
-            :options="uniqueProjects"
-            placeholder="Todos"
-            show-clear
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Resultado</label>
-          <Dropdown
-            v-model="filters.resultStatus"
-            :options="[
-              { label: 'Ganancia', value: 'profit' },
-              { label: 'Pérdida', value: 'loss' },
-              { label: 'Neutral', value: 'neutral' },
-            ]"
-            option-label="label"
-            option-value="value"
-            placeholder="Todos"
-            show-clear
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item">
-          <label>Riesgo</label>
-          <Dropdown
-            v-model="filters.riskLevel"
-            :options="[
-              { label: 'Bajo', value: 'low' },
-              { label: 'Medio', value: 'medium' },
-              { label: 'Alto', value: 'high' },
-            ]"
-            option-label="label"
-            option-value="value"
-            placeholder="Todos"
-            show-clear
-            size="small"
-          />
-        </div>
-
-        <div class="filter-item checkbox-item">
-          <label>Solo pérdidas</label>
-          <Checkbox v-model="filters.onlyLosses" binary />
-        </div>
-
-        <div class="filter-item checkbox-item">
-          <label>Consumo &gt; 100%</label>
-          <Checkbox v-model="filters.onlyConsumptionOver100" binary />
-        </div>
-
-        <div class="filter-item checkbox-item">
-          <label>Desviación &gt; 20%</label>
-          <Checkbox v-model="filters.onlyDeviationOver20" binary />
-        </div>
-
-        <Button
-          label="Limpiar filtros"
-          severity="secondary"
-          size="small"
-          @click="clearFilters"
-        />
-      </div>
+    <!-- Filter Toggle Button -->
+    <div class="table-toolbar">
+      <Button
+        icon="pi pi-filter"
+        :label="`Filtros ${getActiveFilterCount() > 0 ? '(' + getActiveFilterCount() + ')' : ''}`"
+        severity="secondary"
+        size="small"
+        @click="showFiltersPanel = true"
+        class="filter-toggle-btn"
+      />
     </div>
 
     <!-- Tabla con scroll -->
@@ -611,62 +496,19 @@ function clearFilters() {
 .parent-grouped-table {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-}
-
-.filters-section {
-  display: flex;
-  flex-direction: column;
   gap: 1rem;
-  padding: 1rem;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 0.5rem;
+  width: 100%;
 }
 
-.filter-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  align-items: end;
-}
-
-.filter-item {
+.table-toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-item label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.filter-item.checkbox-item {
-  flex-direction: row;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.5rem;
 }
 
-.filter-item.checkbox-item label {
-  margin: 0;
-  color: var(--text-primary);
-}
-
-:deep(.p-inputtext-sm),
-:deep(.p-multiselect-sm),
-:deep(.p-dropdown-sm) {
-  font-size: 0.875rem;
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-:deep(.p-inputtext-sm:focus),
-:deep(.p-multiselect-sm:focus),
-:deep(.p-dropdown-sm:focus) {
-  border-color: var(--color-primary);
+.filter-toggle-btn {
+  white-space: nowrap;
 }
 
 .grouped-table {
