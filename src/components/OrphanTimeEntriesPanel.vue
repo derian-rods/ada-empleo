@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import DataTable from 'primevue/datatable'
-import Column from 'primevue/column'
-import Card from 'primevue/card'
-import Tag from 'primevue/tag'
-import Message from 'primevue/message'
-import type { OrphanTimeEntry } from '../domain/types'
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import Card from "primevue/card";
+import Tag from "primevue/tag";
+import Message from "primevue/message";
+import type { OrphanTimeEntry } from "../domain/types";
 
 interface OrphanTimeEntriesPanelProps {
-  orphans: OrphanTimeEntry[]
+  orphans: OrphanTimeEntry[];
 }
 
-defineProps<OrphanTimeEntriesPanelProps>()
+defineProps<OrphanTimeEntriesPanelProps>();
 
 function fmt(n: number): string {
-  return n.toLocaleString('es-ES', { maximumFractionDigits: 1 })
+  return n.toLocaleString("es-ES", { maximumFractionDigits: 1 });
 }
 </script>
 
@@ -24,7 +24,10 @@ function fmt(n: number): string {
     </template>
     <template #content>
       <Message severity="warn" :closable="false">
-        <span>{{ orphans.length }} entradas no pudieron vincularse a una petición padre.</span>
+        <span
+          >{{ orphans.length }} entradas no pudieron vincularse a una
+          demanda.</span
+        >
       </Message>
 
       <DataTable
@@ -42,7 +45,7 @@ function fmt(n: number): string {
         <Column field="user" header="Usuario" style="width: 100px" />
         <Column field="activity" header="Actividad" style="width: 120px" />
         <Column field="petitionId" header="Petición ID" style="width: 100px" />
-        <Column field="parentTaskId" header="Tarea Padre ID" style="width: 120px" />
+        <Column field="parentTaskId" header="Demanda ID" style="width: 120px" />
         <Column field="hours" header="Horas" style="width: 80px">
           <template #body="{ data }">{{ fmt(data.hours) }}</template>
         </Column>
@@ -58,7 +61,11 @@ function fmt(n: number): string {
   <Card v-else>
     <template #title>Entradas de Tiempo Huérfanas</template>
     <template #content>
-      <Message severity="success" :closable="false" text="✓ Todas las entradas están vinculadas" />
+      <Message
+        severity="success"
+        :closable="false"
+        text="✓ Todas las entradas están vinculadas"
+      />
     </template>
   </Card>
 </template>

@@ -119,7 +119,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     try {
       const rows = await parseCsvFile(file);
       if (!rows.length || !("#" in rows[0])) {
-        const error = "Peticiones padre: falta columna #";
+        const error = "Demandas: falta columna #";
         errors.value.push(error);
         updateCsvStatus("parents", { status: "error", error, rowsCount: 0 });
         parentsLoaded.value = false;
@@ -138,7 +138,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
       await recalculate();
     } catch (e) {
-      const error = `Error al cargar peticiones padre: ${e}`;
+      const error = `Error al cargar demandas: ${e}`;
       errors.value.push(error);
       updateCsvStatus("parents", { status: "error", error, rowsCount: 0 });
       parentsLoaded.value = false;
@@ -151,7 +151,9 @@ export const useDashboardStore = defineStore("dashboard", () => {
       fileName: file.name,
       error: undefined,
     });
-    errors.value = errors.value.filter((e) => !e.includes("hijas"));
+    errors.value = errors.value.filter(
+      (e) => !e.includes("Órdenes de Trabajo"),
+    );
 
     // Permitir que la UI se actualice antes de procesar
     await allowUIUpdate();
@@ -159,7 +161,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     try {
       const rows = await parseCsvFile(file);
       if (!rows.length || !("#" in rows[0])) {
-        const error = "Peticiones hijas: falta columna #";
+        const error = "Órdenes de Trabajo: falta columna #";
         errors.value.push(error);
         updateCsvStatus("children", { status: "error", error, rowsCount: 0 });
         childrenLoaded.value = false;
@@ -181,7 +183,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
       await recalculate();
     } catch (e) {
-      const error = `Error al cargar peticiones hijas: ${e}`;
+      const error = `Error al cargar órdenes de trabajo: ${e}`;
       errors.value.push(error);
       updateCsvStatus("children", { status: "error", error, rowsCount: 0 });
       childrenLoaded.value = false;
@@ -291,7 +293,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
       );
       if (zeroEstWithActual.length > 0) {
         warnings.value.push(
-          `${zeroEstWithActual.length} peticiones con 0h estimadas pero horas incurridas > 0`,
+          `${zeroEstWithActual.length} demandas con 0h estimadas pero horas incurridas > 0`,
         );
       }
     } finally {

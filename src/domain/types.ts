@@ -39,7 +39,7 @@ export interface ChildRequest {
   version?: string;
   application?: string;
   estimatedHours: number;
-  // Profile-based hours (from peticiones hijas CSV)
+  // Profile-based hours (from órdenes de trabajo CSV)
   estimatedHoursJp?: number;
   estimatedHoursCs?: number;
   estimatedHoursAf?: number;

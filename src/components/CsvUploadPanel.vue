@@ -35,10 +35,10 @@ function handleReset() {
 
 function getProcessingMessage(): string {
   if (store.csvLoadStatus.parents.status === "loading") {
-    return "Peticiones padre";
+    return "Demandas";
   }
   if (store.csvLoadStatus.children.status === "loading") {
-    return "Peticiones hijas";
+    return "Órdenes de Trabajo";
   }
   if (store.csvLoadStatus.timeEntries.status === "loading") {
     return "Tiempo dedicado";
@@ -117,7 +117,7 @@ defineExpose({
       <div class="upload-grid">
         <div class="upload-item">
           <label>
-            Peticiones padre
+            Demandas
             <Tag
               v-if="store.parentsLoaded"
               severity="success"
@@ -137,7 +137,7 @@ defineExpose({
 
         <div class="upload-item">
           <label>
-            Peticiones hijas
+            Órdenes de Trabajo
             <Tag
               v-if="store.childrenLoaded"
               severity="success"

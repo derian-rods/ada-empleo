@@ -145,7 +145,12 @@ function fmtPct(n: number): string {
       </template>
     </Column>
 
-    <Column field="childrenCount" header="Hijas" sortable style="width: 80px" />
+    <Column
+      field="childrenCount"
+      header="Órdenes"
+      sortable
+      style="width: 80px"
+    />
     <Column
       field="timeEntriesCount"
       header="Imputaciones"

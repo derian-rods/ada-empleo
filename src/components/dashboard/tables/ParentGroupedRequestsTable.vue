@@ -205,7 +205,7 @@ function clearFilters() {
       <!-- Parent columns -->
       <Column
         field="parentCode"
-        header="Código padre"
+        header="Código Demanda"
         sortable
         style="width: 120px"
       >
@@ -216,7 +216,7 @@ function clearFilters() {
 
       <Column
         field="parentSubject"
-        header="Asunto padre"
+        header="Asunto Demanda"
         sortable
         style="min-width: 200px"
       />
@@ -234,7 +234,7 @@ function clearFilters() {
 
       <Column
         field="childrenCount"
-        header="Nº hijas"
+        header="Nº órdenes"
         sortable
         style="width: 80px"
       />
