@@ -38,7 +38,7 @@ const chartData = computed(() => {
       code: r.code,
       subject: r.subject,
       estimadoTotal: r.estimatedHoursTotal || 0,
-      dedicado: r.actualHours || 0,
+      incurridas: r.actualHours || 0,
       diferencia: (r.estimatedHoursTotal || 0) - (r.actualHours || 0),
       desviaciónPct:
         ((r.actualHours - (r.estimatedHoursTotal || 0)) /
@@ -49,14 +49,14 @@ const chartData = computed(() => {
   return {
     categories: data.map((d) => d.code),
     estimado: data.map((d) => d.estimadoTotal),
-    dedicado: data.map((d) => d.dedicado),
+    incurridas: data.map((d) => d.incurridas),
     data,
   };
 });
 
 const option = computed(() => ({
   title: {
-    text: "Horas Estimadas vs Dedicadas (JP+CS+AF)",
+    text: "Comparación Global: Estimado (JP+CS+AF) vs Incurridas",
     left: "center",
     textStyle: {
       fontSize: 16,
@@ -89,7 +89,7 @@ const option = computed(() => ({
           <div style="font-size: 12px; margin-bottom: 8px; color: var(--text-soft); word-break: break-word;">${dataItem.subject}</div>
           <div style="border-top: 1px solid var(--border-color-dark); margin: 8px 0; padding-top: 8px;"></div>
           <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Estimado (JP+CS+AF):</span> <strong>${dataItem.estimadoTotal.toFixed(1)}h</strong></div>
-          <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Dedicado:</span> <strong>${dataItem.dedicado.toFixed(1)}h</strong></div>
+          <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Incurridas:</span> <strong>${dataItem.incurridas.toFixed(1)}h</strong></div>
           <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Diferencia:</span> <strong>${dataItem.diferencia.toFixed(1)}h</strong></div>
           <div style="margin-bottom: 6px;"><span style="color: var(--text-secondary);">Desviación:</span> <strong>${dataItem.desviaciónPct.toFixed(1)}%</strong></div>
         </div>
@@ -97,7 +97,7 @@ const option = computed(() => ({
     },
   },
   legend: {
-    data: ["Estimado (JP+CS+AF)", "Dedicado"],
+    data: ["Estimado (JP+CS+AF)", "Incurridas"],
     bottom: 10,
   },
   grid: {
@@ -133,9 +133,9 @@ const option = computed(() => ({
       },
     },
     {
-      name: "Dedicado",
+      name: "Incurridas",
       type: "bar",
-      data: chartData.value.dedicado,
+      data: chartData.value.incurridas,
       itemStyle: {
         color: "#10b981",
       },

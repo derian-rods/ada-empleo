@@ -39,7 +39,7 @@ const chartData = computed(() => {
       code: r.code,
       subject: r.subject,
       estimatedTotal: r.estimatedHoursTotal || r.estimatedHours || 0,
-      actual: r.actualHours || 0,
+      incurridas: r.actualHours || 0,
       difference:
         (r.estimatedHoursTotal || r.estimatedHours || 0) - (r.actualHours || 0),
       status: r.resultStatus,
@@ -48,7 +48,7 @@ const chartData = computed(() => {
   return {
     categories: sortedRequests.map((r) => r.code),
     estimated: sortedRequests.map((r) => r.estimatedTotal),
-    actual: sortedRequests.map((r) => r.actual),
+    incurridas: sortedRequests.map((r) => r.incurridas),
     data: sortedRequests,
   };
 });
@@ -69,7 +69,7 @@ const handleChartClick = (params: any) => {
 
 const option = computed(() => ({
   title: {
-    text: `Comparativa Global: Estimado vs Real (${props.requests.length} peticiones) - Click en código para abrir en GPSAE`,
+    text: `Comparativa Global: Estimado (JP+CS+AF) vs Incurridas (${props.requests.length} demandas)`,
     left: "center",
     textStyle: {
       fontSize: 14,
@@ -98,8 +98,8 @@ const option = computed(() => ({
           <div style="font-weight: bold; margin-bottom: 6px; font-size: 13px; cursor: pointer; color: #3b82f6; text-decoration: underline;">${dataItem.code} (click para abrir)</div>
           <div style="font-size: 11px; margin-bottom: 8px; color: var(--text-soft); word-break: break-word;">${dataItem.subject}</div>
           <div style="border-top: 1px solid var(--border-color); margin: 6px 0; padding-top: 6px;"></div>
-          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Estimado:</span> <strong>${dataItem.estimatedTotal.toFixed(1)}h</strong></div>
-          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Real:</span> <strong>${dataItem.actual.toFixed(1)}h</strong></div>
+          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Estimado (JP+CS+AF):</span> <strong>${dataItem.estimatedTotal.toFixed(1)}h</strong></div>
+          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Incurridas:</span> <strong>${dataItem.incurridas.toFixed(1)}h</strong></div>
           <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Diferencia:</span> <strong>${dataItem.difference.toFixed(1)}h</strong></div>
           <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Estado:</span> <strong style="color: ${dataItem.status === "profit" ? "#22c55e" : dataItem.status === "loss" ? "#ef4444" : "#6b7280"}">${dataItem.status}</strong></div>
         </div>
@@ -107,7 +107,7 @@ const option = computed(() => ({
     },
   },
   legend: {
-    data: ["Estimado", "Real"],
+    data: ["Estimado (JP+CS+AF)", "Incurridas"],
     bottom: 0,
   },
   grid: {
@@ -149,7 +149,7 @@ const option = computed(() => ({
   ],
   series: [
     {
-      name: "Estimado",
+      name: "Estimado (JP+CS+AF)",
       type: "bar",
       data: chartData.value.estimated,
       itemStyle: {
@@ -157,9 +157,9 @@ const option = computed(() => ({
       },
     },
     {
-      name: "Real",
+      name: "Incurridas",
       type: "bar",
-      data: chartData.value.actual,
+      data: chartData.value.incurridas,
       itemStyle: {
         color: "#10b981",
       },
