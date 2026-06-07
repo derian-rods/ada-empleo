@@ -11,6 +11,7 @@ import {
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import VChart from "vue-echarts";
+import { buildGpsaeRequestUrl } from "../../../domain/gpsae";
 import type { CalculatedRequest } from "../../../domain/types";
 
 use([
@@ -52,9 +53,23 @@ const chartData = computed(() => {
   };
 });
 
+// Handle click on bars to open GPSAE link
+const handleChartClick = (params: any) => {
+  if (params.componentType === "series") {
+    const dataIndex = params.dataIndex;
+    const code = chartData.value.data[dataIndex]?.code;
+    if (code) {
+      const url = buildGpsaeRequestUrl(code);
+      if (url) {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
+    }
+  }
+};
+
 const option = computed(() => ({
   title: {
-    text: `Comparativa Global: Estimado vs Real (${props.requests.length} peticiones)`,
+    text: `Comparativa Global: Estimado vs Real (${props.requests.length} peticiones) - Click en código para abrir en GPSAE`,
     left: "center",
     textStyle: {
       fontSize: 14,
@@ -80,7 +95,7 @@ const option = computed(() => ({
 
       return `
         <div style="max-width: 280px; word-wrap: break-word; white-space: normal;">
-          <div style="font-weight: bold; margin-bottom: 6px; font-size: 13px;">${dataItem.code}</div>
+          <div style="font-weight: bold; margin-bottom: 6px; font-size: 13px; cursor: pointer; color: #3b82f6; text-decoration: underline;">${dataItem.code} (click para abrir)</div>
           <div style="font-size: 11px; margin-bottom: 8px; color: var(--text-soft); word-break: break-word;">${dataItem.subject}</div>
           <div style="border-top: 1px solid var(--border-color); margin: 6px 0; padding-top: 6px;"></div>
           <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Estimado:</span> <strong>${dataItem.estimatedTotal.toFixed(1)}h</strong></div>
@@ -162,7 +177,12 @@ onMounted(() => {
 <template>
   <div class="chart-wrapper">
     <div class="chart-container">
-      <VChart ref="chartRef" :option="option" autoresize />
+      <VChart
+        ref="chartRef"
+        :option="option"
+        autoresize
+        @click="handleChartClick"
+      />
     </div>
   </div>
 </template>
