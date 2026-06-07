@@ -16,6 +16,11 @@ import {
 } from "../domain/normalizeCsv";
 import { buildCalculatedRequests } from "../domain/relationships";
 import { calculateDashboardSummary } from "../domain/calculations";
+import {
+  SOPRA_STERIA_COLLABORATORS,
+  assignCompanyToTimeEntries,
+  filterTimeEntriesByCompany,
+} from "../domain/companies";
 
 export type CsvKind = "parents" | "children" | "timeEntries";
 
@@ -52,6 +57,9 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const timeEntriesLoaded = ref(false);
   const isCalculating = ref(false);
 
+  // Company Filter
+  const selectedCompanyFilter = ref<"Sopra Steria" | "Otros" | null>(null);
+
   const hasData = computed(
     () => parentsLoaded.value && timeEntriesLoaded.value,
   );
@@ -75,6 +83,47 @@ export const useDashboardStore = defineStore("dashboard", () => {
   );
 
   const canCalculate = computed(() => allCsvsValid.value);
+
+  // Filtered data by company
+  const timeEntriesWithCompany = computed(() => {
+    return assignCompanyToTimeEntries(
+      timeEntries.value,
+      SOPRA_STERIA_COLLABORATORS,
+    );
+  });
+
+  const filteredTimeEntries = computed(() => {
+    if (!selectedCompanyFilter.value) {
+      return timeEntriesWithCompany.value;
+    }
+    return filterTimeEntriesByCompany(
+      timeEntriesWithCompany.value,
+      selectedCompanyFilter.value,
+    );
+  });
+
+  const filteredCalculatedRequests = computed(() => {
+    if (!selectedCompanyFilter.value) {
+      return calculatedRequests.value;
+    }
+    // Filter calculated requests based on filtered time entries
+    const filteredUserSet = new Set(
+      filteredTimeEntries.value.map((te) => te.user),
+    );
+    return calculatedRequests.value.filter((cr) => {
+      // Keep request if it has people from the filtered company
+      return cr.people.some((person) => filteredUserSet.has(person));
+    });
+  });
+
+  const filteredSummary = computed(() => {
+    if (!summary.value || !selectedCompanyFilter.value) {
+      return summary.value;
+    }
+    // Recalculate summary based on filtered requests
+    const filtered = filteredCalculatedRequests.value;
+    return calculateDashboardSummary(filtered, orphanTimeEntries.value);
+  });
 
   function parseCsvFile(file: File): Promise<Record<string, unknown>[]> {
     return new Promise((resolve, reject) => {
@@ -313,11 +362,16 @@ export const useDashboardStore = defineStore("dashboard", () => {
     parentsLoaded.value = false;
     childrenLoaded.value = false;
     timeEntriesLoaded.value = false;
+    selectedCompanyFilter.value = null;
     csvLoadStatus.value = {
       parents: { status: "idle", rowsCount: 0 },
       children: { status: "idle", rowsCount: 0 },
       timeEntries: { status: "idle", rowsCount: 0 },
     };
+  }
+
+  function setCompanyFilter(company: "Sopra Steria" | "Otros" | null) {
+    selectedCompanyFilter.value = company;
   }
 
   return {
@@ -327,6 +381,11 @@ export const useDashboardStore = defineStore("dashboard", () => {
     calculatedRequests,
     orphanTimeEntries,
     summary,
+    // Filtered data
+    filteredTimeEntries,
+    filteredCalculatedRequests,
+    filteredSummary,
+    selectedCompanyFilter,
     errors,
     warnings,
     parentsLoaded,
@@ -344,5 +403,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
     loadChildren,
     loadTimeEntries,
     reset,
+    setCompanyFilter,
   };
 });

@@ -3,6 +3,7 @@ import { ref, computed } from "vue";
 import Toast from "primevue/toast";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
+import Dropdown from "primevue/dropdown";
 import Sidebar from "primevue/sidebar";
 import DashboardSidebar from "./dashboard/DashboardSidebar.vue";
 import { useDashboardStore } from "../stores/dashboard";
@@ -12,6 +13,13 @@ const store = useDashboardStore();
 const themeStore = useThemeStore();
 const showAlertsPanel = ref(false);
 const currentMainView = ref("dashboard");
+
+// Company filter options
+const companyOptions = [
+  { label: "Todas las empresas", value: null },
+  { label: "Sopra Steria", value: "Sopra Steria" },
+  { label: "Otros", value: "Otros" },
+];
 
 const emit = defineEmits<{
   "select-item": [viewId: string];
@@ -71,9 +79,21 @@ const sidebarItems = [
 
     <Toolbar class="app-toolbar" :disabled="store.isProcessingCsv">
       <template #start>
-        <h2 style="margin: 0; font-size: 1.25rem">
-          Control de estimaciones e incurridos ADA – Empleo
-        </h2>
+        <div style="display: flex; align-items: center; gap: 2rem">
+          <h2 style="margin: 0; font-size: 1.25rem">
+            Control de estimaciones e incurridos ADA – Empleo
+          </h2>
+          <!-- Company Filter Dropdown -->
+          <Dropdown
+            v-model="store.selectedCompanyFilter"
+            :options="companyOptions"
+            option-label="label"
+            option-value="value"
+            @change="store.setCompanyFilter($event)"
+            style="width: 200px"
+            placeholder="Seleccionar empresa"
+          />
+        </div>
       </template>
       <template #end>
         <div class="toolbar-end">
