@@ -36,7 +36,7 @@ const appBreakdown = computed(() => {
     string,
     {
       estimated: number;
-      actual: number;
+      incurridas: number;
       count: number;
     }
   > = {};
@@ -45,18 +45,18 @@ const appBreakdown = computed(() => {
     if (r.applications && r.applications.length > 0) {
       r.applications.forEach((app) => {
         if (!apps[app]) {
-          apps[app] = { estimated: 0, actual: 0, count: 0 };
+          apps[app] = { estimated: 0, incurridas: 0, count: 0 };
         }
         apps[app].estimated += r.estimatedHoursTotal || r.estimatedHours || 0;
-        apps[app].actual += r.actualHours || 0;
+        apps[app].incurridas += r.actualHours || 0;
         apps[app].count++;
       });
     }
   });
 
-  // Sort by actual hours descending
+  // Sort by incurridas hours descending
   return Object.entries(apps)
-    .sort((a, b) => b[1].actual - a[1].actual)
+    .sort((a, b) => b[1].incurridas - a[1].incurridas)
     .map(([name, data]) => ({
       name,
       ...data,
@@ -94,16 +94,16 @@ const option = computed(() => ({
         <div style="max-width: 280px; word-wrap: break-word;">
           <div style="font-weight: bold; margin-bottom: 6px; font-size: 13px;">${app.name}</div>
           <div style="border-top: 1px solid var(--border-color); margin: 6px 0; padding-top: 6px;"></div>
-          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Estimado:</span> <strong>${app.estimated.toFixed(1)}h</strong></div>
-          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Real:</span> <strong>${app.actual.toFixed(1)}h</strong></div>
-          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Diferencia:</span> <strong>${(app.estimated - app.actual).toFixed(1)}h</strong></div>
-          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Peticiones:</span> <strong>${app.count}</strong></div>
+          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Estimado (JP+CS+AF):</span> <strong>${app.estimated.toFixed(1)}h</strong></div>
+          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Incurridas:</span> <strong>${app.incurridas.toFixed(1)}h</strong></div>
+          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Diferencia:</span> <strong>${(app.estimated - app.incurridas).toFixed(1)}h</strong></div>
+          <div style="margin-bottom: 4px;"><span style="color: var(--text-secondary);">Demandas:</span> <strong>${app.count}</strong></div>
         </div>
       `;
     },
   },
   legend: {
-    data: ["Estimado", "Real"],
+    data: ["Estimado (JP+CS+AF)", "Incurridas"],
     bottom: 0,
   },
   grid: {
@@ -145,7 +145,7 @@ const option = computed(() => ({
   ],
   series: [
     {
-      name: "Estimado",
+      name: "Estimado (JP+CS+AF)",
       type: "bar",
       data: appBreakdown.value.map((a) => a.estimated),
       itemStyle: {
@@ -153,9 +153,9 @@ const option = computed(() => ({
       },
     },
     {
-      name: "Real",
+      name: "Incurridas",
       type: "bar",
-      data: appBreakdown.value.map((a) => a.actual),
+      data: appBreakdown.value.map((a) => a.incurridas),
       itemStyle: {
         color: "#10b981",
       },
