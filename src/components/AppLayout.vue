@@ -3,7 +3,6 @@ import { ref, computed } from "vue";
 import Toast from "primevue/toast";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
-import Dropdown from "primevue/dropdown";
 import Sidebar from "primevue/sidebar";
 import DashboardSidebar from "./dashboard/DashboardSidebar.vue";
 import { useDashboardStore } from "../stores/dashboard";
@@ -37,12 +36,6 @@ const allAlerts = computed(() => [
 ]);
 
 const alertCount = computed(() => allAlerts.value.length);
-
-// Opciones para dropdown de empresa
-const companyFilterOptions = [
-  { label: "Todos", value: null },
-  { label: "Sopra Steria", value: "Sopra Steria" },
-];
 
 // Navigation items con estructura de DashboardSidebar
 const sidebarItems = [
@@ -81,18 +74,6 @@ const sidebarItems = [
         <h2 style="margin: 0; font-size: 1.25rem">
           Control de estimaciones e incurridos ADA – Empleo
         </h2>
-        <div class="toolbar-center" v-if="store.hasData">
-          <Dropdown
-            :model-value="store.selectedCompanyFilter"
-            :options="companyFilterOptions"
-            option-label="label"
-            option-value="value"
-            placeholder="Seleccionar"
-            size="small"
-            @update:model-value="store.setCompanyFilter"
-            class="company-dropdown"
-          />
-        </div>
       </template>
       <template #end>
         <div class="toolbar-end">
@@ -189,17 +170,6 @@ const sidebarItems = [
   align-items: center;
   margin-left: 2rem;
   gap: 0.75rem;
-}
-
-.filter-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-color);
-  white-space: nowrap;
-}
-
-.company-dropdown {
-  min-width: 150px;
 }
 
 .toolbar-end {

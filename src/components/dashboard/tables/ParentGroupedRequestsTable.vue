@@ -17,7 +17,6 @@ import type {
   TimeEntry,
   CalculatedRequest,
 } from "../../../domain/types";
-import { useDashboardStore } from "../../../stores/dashboard";
 
 interface ParentGroupedRequestsTableProps {
   parents: ParentRequest[];
@@ -31,8 +30,6 @@ const props = withDefaults(defineProps<ParentGroupedRequestsTableProps>(), {
   loading: false,
 });
 
-const dashboardStore = useDashboardStore();
-
 // State
 const expandedRows = ref<string[]>([]);
 const filters = ref<ParentGroupedTableFilters>({});
@@ -40,11 +37,11 @@ const showFiltersModal = ref(false); // Modal hidden by default
 
 // Build and filter data
 const groupedRows = computed(() => {
-  // Usar TimeEntries filtrados por empresa desde el store
+  // Usar TimeEntries del prop
   const rows = buildParentGroupedTableRows(
     props.parents,
     props.children,
-    dashboardStore.filteredTimeEntries, // TimeEntries filtrados por empresa
+    props.timeEntries, // TimeEntries del prop
     props.calculatedRequests,
   );
   return filterParentGroupedRows(rows, filters.value);
@@ -242,12 +239,6 @@ function clearFilters() {
         style="width: 80px"
       />
 
-      <Column field="users" header="Nº usuarios" sortable style="width: 100px">
-        <template #body="{ data }">
-          {{ data.users.length }}
-        </template>
-      </Column>
-
       <Column field="estimatedHours" header="Est." sortable style="width: 80px">
         <template #body="{ data }">{{ fmt(data.estimatedHours) }}</template>
       </Column>
@@ -259,21 +250,6 @@ function clearFilters() {
         style="width: 80px"
       >
         <template #body="{ data }">{{ fmt(data.actualHours) }}</template>
-      </Column>
-
-      <Column
-        field="filteredActualHours"
-        header="Filtradas"
-        sortable
-        style="width: 100px"
-      >
-        <template #body="{ data }">
-          {{
-            data.filteredActualHours !== undefined
-              ? fmt(data.filteredActualHours)
-              : "-"
-          }}
-        </template>
       </Column>
 
       <Column
@@ -319,7 +295,7 @@ function clearFilters() {
 
       <Column
         field="consumedHbs"
-        header="HBS Real"
+        header="HBS Inc."
         sortable
         style="width: 100px"
       >
@@ -336,12 +312,12 @@ function clearFilters() {
           <span
             class="difference-value"
             :class="{
-              profit: data.differenceHbs < 0,
-              loss: data.differenceHbs >= 0,
+              profit: data.estimatedHbs - data.consumedHbs > 0,
+              loss: data.estimatedHbs - data.consumedHbs < 0,
             }"
           >
-            {{ data.differenceHbs >= 0 ? "+" : ""
-            }}{{ fmt(data.differenceHbs) }}
+            {{ data.estimatedHbs - data.consumedHbs > 0 ? "+" : ""
+            }}{{ fmt(data.estimatedHbs - data.consumedHbs) }}
           </span>
         </template>
       </Column>

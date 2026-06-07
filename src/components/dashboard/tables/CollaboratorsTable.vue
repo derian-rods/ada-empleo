@@ -12,7 +12,6 @@ import {
   buildCollaboratorsPageSummary,
   filterCollaborators,
   formatHours,
-  enrichCollaboratorsSummaryWithAllCompanyCollaborators,
   type CollaboratorFilters,
 } from "../../../domain/collaborators";
 import type {
@@ -20,7 +19,6 @@ import type {
   ChildRequest,
   ParentRequest,
 } from "../../../domain/types";
-import { useDashboardStore } from "../../../stores/dashboard";
 
 interface Props {
   timeEntries: TimeEntry[];
@@ -29,7 +27,6 @@ interface Props {
 }
 
 const props = defineProps<Props>();
-const dashboardStore = useDashboardStore();
 
 // State
 const filters = ref<{
@@ -42,12 +39,12 @@ const expandedRows = ref<string[]>([]);
 const showCollaboratorModal = ref(false);
 const showFiltersModal = ref(false);
 
-// Computed: TimeEntries filtrados por empresa seleccionada
+// Computed: TimeEntries
 const filteredByCompanyTimeEntries = computed(() => {
-  return dashboardStore.filteredTimeEntries;
+  return props.timeEntries;
 });
 
-// Computed: Colaboradores agrupados (basado en TimeEntries filtrados por empresa)
+// Computed: Colaboradores agrupados (basado en TimeEntries)
 const collaboratorsSummary = computed(() => {
   return buildCollaboratorsSummary(
     filteredByCompanyTimeEntries.value,
@@ -56,16 +53,9 @@ const collaboratorsSummary = computed(() => {
   );
 });
 
-// Computed: Enriquecer resumen con todos los colaboradores de la empresa seleccionada
+// Computed: Enriquecer resumen
 const enrichedCollaboratorsSummary = computed(() => {
-  if (!dashboardStore.selectedCompanyFilter) {
-    return collaboratorsSummary.value;
-  }
-
-  return enrichCollaboratorsSummaryWithAllCompanyCollaborators(
-    collaboratorsSummary.value,
-    dashboardStore.companyCollaborators,
-  );
+  return collaboratorsSummary.value;
 });
 
 // Computed: Resumen de página
@@ -115,9 +105,10 @@ function clearFilters() {
   expandedRows.value = [];
 }
 
-// Guardar colaboradores actualizados
+// Guardar colaboradores actualizados (deshabilitado por ahora)
 function onSaveCollaborators(collaborators: any[]) {
-  dashboardStore.setCompanyCollaborators(collaborators);
+  // TODO: Implementar guardar colaboradores cuando se implemente el filtro de empresa
+  console.log("Colaboradores a guardar:", collaborators);
 }
 </script>
 
@@ -347,7 +338,7 @@ function onSaveCollaborators(collaborators: any[]) {
     <!-- Modal de gestión de colaboradores -->
     <CollaboratorManagementModal
       :visible="showCollaboratorModal"
-      :collaborators="dashboardStore.companyCollaborators"
+      :collaborators="[]"
       @update:visible="showCollaboratorModal = $event"
       @save="onSaveCollaborators"
     />

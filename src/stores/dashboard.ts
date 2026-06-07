@@ -16,13 +16,6 @@ import {
 } from "../domain/normalizeCsv";
 import { buildCalculatedRequests } from "../domain/relationships";
 import { calculateDashboardSummary } from "../domain/calculations";
-import {
-  SOPRA_STERIA_COLLABORATORS,
-  assignCompanyToTimeEntries,
-  filterTimeEntriesByCompany,
-  getUniqueCompaniesFromTimeEntries,
-  type CompanyCollaborator,
-} from "../domain/companies";
 
 export type CsvKind = "parents" | "children" | "timeEntries";
 
@@ -38,12 +31,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const parents = ref<ParentRequest[]>([]);
   const children = ref<ChildRequest[]>([]);
   const timeEntries = ref<TimeEntry[]>([]);
-
-  // Company/Filter data
-  const companyCollaborators = ref<CompanyCollaborator[]>(
-    SOPRA_STERIA_COLLABORATORS,
-  );
-  const selectedCompanyFilter = ref<string | null>("Sopra Steria"); // Por defecto: Sopra Steria
 
   // Computed results
   const calculatedRequests = ref<CalculatedRequest[]>([]);
@@ -88,59 +75,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
   );
 
   const canCalculate = computed(() => allCsvsValid.value);
-
-  // Computed: TimeEntries enriquecidos con companyName
-  const enrichedTimeEntries = computed(() => {
-    return assignCompanyToTimeEntries(
-      timeEntries.value,
-      companyCollaborators.value,
-    );
-  });
-
-  // Computed: TimeEntries filtrados por empresa seleccionada
-  const filteredTimeEntries = computed(() => {
-    return filterTimeEntriesByCompany(
-      enrichedTimeEntries.value,
-      selectedCompanyFilter.value,
-    );
-  });
-
-  // Computed: Empresas únicas en los TimeEntries
-  const availableCompanies = computed(() => {
-    return getUniqueCompaniesFromTimeEntries(enrichedTimeEntries.value);
-  });
-
-  // Computed: Calculated requests filtrados por empresa (sensibles al filtro)
-  const filteredCalculatedRequests = computed(() => {
-    if (!selectedCompanyFilter.value) {
-      return calculatedRequests.value; // Sin filtro, usa todos
-    }
-
-    // Filtrar calculated requests que tengan al menos un TimeEntry del filtro
-    const filteredTimeEntriesSet = new Set(
-      filteredTimeEntries.value.map((e) => e.parentTaskId || e.petitionId),
-    );
-
-    return calculatedRequests.value.filter((cr) => {
-      // Incluir si tiene al menos un time entry en el filtro
-      return filteredTimeEntriesSet.has(cr.parentId);
-    });
-  });
-
-  // Computed: Summary filtrado por empresa (sensible al filtro)
-  const filteredSummary = computed(() => {
-    if (!selectedCompanyFilter.value) {
-      return summary.value; // Sin filtro, usa el resumen completo
-    }
-
-    // Recalcular summary basado en calculatedRequests filtrados
-    return calculateDashboardSummary(
-      filteredCalculatedRequests.value,
-      orphanTimeEntries.value.filter(
-        (e) => e.companyName === selectedCompanyFilter.value,
-      ),
-    );
-  });
 
   function parseCsvFile(file: File): Promise<Record<string, unknown>[]> {
     return new Promise((resolve, reject) => {
@@ -377,20 +311,11 @@ export const useDashboardStore = defineStore("dashboard", () => {
     parentsLoaded.value = false;
     childrenLoaded.value = false;
     timeEntriesLoaded.value = false;
-    selectedCompanyFilter.value = null;
     csvLoadStatus.value = {
       parents: { status: "idle", rowsCount: 0 },
       children: { status: "idle", rowsCount: 0 },
       timeEntries: { status: "idle", rowsCount: 0 },
     };
-  }
-
-  function setCompanyFilter(company: string | null) {
-    selectedCompanyFilter.value = company;
-  }
-
-  function setCompanyCollaborators(collaborators: CompanyCollaborator[]) {
-    companyCollaborators.value = collaborators;
   }
 
   return {
@@ -412,20 +337,10 @@ export const useDashboardStore = defineStore("dashboard", () => {
     isProcessing,
     allCsvsValid,
     canCalculate,
-    // Company/Filter exports
-    companyCollaborators,
-    selectedCompanyFilter,
-    enrichedTimeEntries,
-    filteredTimeEntries,
-    availableCompanies,
-    filteredCalculatedRequests,
-    filteredSummary,
     // Actions
     loadParents,
     loadChildren,
     loadTimeEntries,
     reset,
-    setCompanyFilter,
-    setCompanyCollaborators,
   };
 });
