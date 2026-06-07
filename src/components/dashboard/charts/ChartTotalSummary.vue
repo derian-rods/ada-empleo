@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { use } from "echarts";
-import { BarChart, PieChart, LineChart } from "echarts/charts";
+import { BarChart, PieChart } from "echarts/charts";
 import {
   TitleComponent,
   TooltipComponent,
   GridComponent,
   LegendComponent,
+  DataZoomComponent,
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import VChart from "vue-echarts";
@@ -15,11 +16,11 @@ import type { CalculatedRequest } from "../../../domain/types";
 use([
   BarChart,
   PieChart,
-  LineChart,
   TitleComponent,
   TooltipComponent,
   GridComponent,
   LegendComponent,
+  DataZoomComponent,
   CanvasRenderer,
 ]);
 
@@ -238,7 +239,7 @@ const statusPieOption = computed(() => ({
 
 const hbsOption = computed(() => ({
   title: {
-    text: "Comparativa HBS: Estimado vs Consumido",
+    text: "Comparativa HBS: Estimado vs Consumido (Global)",
     left: "center",
     textStyle: {
       fontSize: 14,
@@ -258,7 +259,7 @@ const hbsOption = computed(() => ({
     padding: [8, 12],
   },
   legend: {
-    data: ["HBS Estimado", "HBS Consumido"],
+    data: ["HBS Estimado", "HBS Consumido", "Diferencia"],
     bottom: 0,
   },
   grid: {
@@ -270,7 +271,7 @@ const hbsOption = computed(() => ({
   },
   xAxis: {
     type: "category",
-    data: ["HBS"],
+    data: ["Total HBS"],
     axisLabel: {
       fontSize: 11,
     },
@@ -297,6 +298,14 @@ const hbsOption = computed(() => ({
       data: [totals.value.totalConsumedHbs],
       itemStyle: {
         color: "#ec4899",
+      },
+    },
+    {
+      name: "Diferencia",
+      type: "bar",
+      data: [totals.value.totalDifferenceHbs],
+      itemStyle: {
+        color: totals.value.totalDifferenceHbs > 0 ? "#22c55e" : "#ef4444",
       },
     },
   ],

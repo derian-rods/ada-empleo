@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
 import ChartTotalSummary from "./dashboard/charts/ChartTotalSummary.vue";
-import ChartDeviationRanges from "./dashboard/charts/ChartDeviationRanges.vue";
+import ChartGlobalHours from "./dashboard/charts/ChartGlobalHours.vue";
+import ChartProfitLossDistribution from "./dashboard/charts/ChartProfitLossDistribution.vue";
+import ChartGlobalDeviationBuckets from "./dashboard/charts/ChartGlobalDeviationBuckets.vue";
+import ChartGlobalHbs from "./dashboard/charts/ChartGlobalHbs.vue";
+import ChartApplicationBreakdown from "./dashboard/charts/ChartApplicationBreakdown.vue";
 // import ChartRiskMatrix from './dashboard/charts/ChartRiskMatrix.vue'
 // import ChartDeviationDistribution from './dashboard/charts/ChartDeviationDistribution.vue'
 // import ChartEstimatedVsDedicated from "./dashboard/charts/ChartEstimatedVsDedicated.vue";
@@ -46,10 +50,45 @@ watch(
 
 <template>
   <div class="charts-tab">
-    <!-- New summary charts: Total Summary and Deviation Ranges -->
+    <!-- Global charts: Show comprehensive data from ALL requests -->
     <div v-if="renderCharts && requests.length > 0" class="charts-wrapper">
-      <ChartTotalSummary :requests="requests" />
-      <ChartDeviationRanges :requests="requests" />
+      <!-- Summary KPIs and initial overview -->
+      <section class="charts-section">
+        <h2 class="section-title">Resumen Global</h2>
+        <ChartTotalSummary :requests="requests" />
+      </section>
+
+      <!-- Hours comparison for all requests -->
+      <section class="charts-section">
+        <h2 class="section-title">
+          Comparativa de Horas (Todas las Peticiones)
+        </h2>
+        <ChartGlobalHours :requests="requests" />
+      </section>
+
+      <!-- Profit/Loss distribution -->
+      <section class="charts-section">
+        <h2 class="section-title">Distribución: Ganancia vs Pérdida</h2>
+        <ChartProfitLossDistribution :requests="requests" />
+      </section>
+
+      <!-- Deviation buckets -->
+      <section class="charts-section">
+        <h2 class="section-title">Distribución de Desviaciones</h2>
+        <ChartGlobalDeviationBuckets :requests="requests" />
+      </section>
+
+      <!-- HBS global comparison -->
+      <section class="charts-section">
+        <h2 class="section-title">HBS (Horas de Billing) Global</h2>
+        <ChartGlobalHbs :requests="requests" />
+      </section>
+
+      <!-- Applications breakdown -->
+      <section class="charts-section">
+        <h2 class="section-title">Análisis por Aplicación</h2>
+        <ChartApplicationBreakdown :requests="requests" />
+      </section>
     </div>
     <div v-else-if="requests.length === 0" class="no-data">
       <p>No hay datos para mostrar gráficos</p>
@@ -69,7 +108,20 @@ watch(
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 3rem;
+}
+
+.charts-section {
+  width: 100%;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-color);
 }
 
 .no-data {
