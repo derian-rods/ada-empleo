@@ -102,27 +102,31 @@ export const useDashboardStore = defineStore("dashboard", () => {
     );
   });
 
+  const filteredRelationshipResult = computed(() => {
+    return buildCalculatedRequests(
+      parents.value,
+      children.value,
+      filteredTimeEntries.value,
+    );
+  });
+
   const filteredCalculatedRequests = computed(() => {
     if (!selectedCompanyFilter.value) {
       return calculatedRequests.value;
     }
-    // Filter calculated requests based on filtered time entries
-    const filteredUserSet = new Set(
-      filteredTimeEntries.value.map((te) => te.user),
+    return filteredRelationshipResult.value.calculatedRequests.filter(
+      (request) => request.actualHours > 0,
     );
-    return calculatedRequests.value.filter((cr) => {
-      // Keep request if it has people from the filtered company
-      return cr.people.some((person) => filteredUserSet.has(person));
-    });
   });
 
   const filteredSummary = computed(() => {
     if (!summary.value || !selectedCompanyFilter.value) {
       return summary.value;
     }
-    // Recalculate summary based on filtered requests
-    const filtered = filteredCalculatedRequests.value;
-    return calculateDashboardSummary(filtered, orphanTimeEntries.value);
+    return calculateDashboardSummary(
+      filteredCalculatedRequests.value,
+      filteredRelationshipResult.value.orphanTimeEntries,
+    );
   });
 
   function parseCsvFile(file: File): Promise<Record<string, unknown>[]> {
@@ -370,10 +374,6 @@ export const useDashboardStore = defineStore("dashboard", () => {
     };
   }
 
-  function setCompanyFilter(company: "Sopra Steria" | "Otros" | null) {
-    selectedCompanyFilter.value = company;
-  }
-
   return {
     parents,
     children,
@@ -403,6 +403,5 @@ export const useDashboardStore = defineStore("dashboard", () => {
     loadChildren,
     loadTimeEntries,
     reset,
-    setCompanyFilter,
   };
 });

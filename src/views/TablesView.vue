@@ -24,8 +24,8 @@ const activeTab = ref(0);
           <DashboardTablesTabs
             :parents="store.parents"
             :children="store.children"
-            :time-entries="store.timeEntries"
-            :calculated-requests="store.calculatedRequests"
+            :time-entries="store.filteredTimeEntries"
+            :calculated-requests="store.filteredCalculatedRequests"
             :rows-per-page="25"
           />
         </div>
@@ -35,7 +35,7 @@ const activeTab = ref(0);
       <TabPanel header="Colaboradores" leftIcon="pi pi-users" value="1">
         <div class="tab-content">
           <CollaboratorsTable
-            :time-entries="store.timeEntries"
+            :time-entries="store.filteredTimeEntries"
             :children="store.children"
             :parents="store.parents"
           />
@@ -50,9 +50,9 @@ const activeTab = ref(0);
       >
         <div class="tab-content">
           <UnestimatedWithIncurredPanel
-            :calculated-requests="store.calculatedRequests"
+            :calculated-requests="store.filteredCalculatedRequests"
             :children="store.children"
-            :time-entries="store.timeEntries"
+            :time-entries="store.filteredTimeEntries"
           />
         </div>
       </TabPanel>

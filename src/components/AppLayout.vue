@@ -18,7 +18,7 @@ const currentMainView = ref("dashboard");
 const companyOptions = [
   { label: "Todas las empresas", value: null },
   { label: "Sopra Steria", value: "Sopra Steria" },
-  { label: "Otros", value: "Otros" },
+  // { label: "Otros", value: "Otros" },
 ];
 
 const emit = defineEmits<{
@@ -89,7 +89,6 @@ const sidebarItems = [
             :options="companyOptions"
             option-label="label"
             option-value="value"
-            @change="store.setCompanyFilter($event)"
             style="width: 200px"
             placeholder="Seleccionar empresa"
           />

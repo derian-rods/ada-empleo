@@ -44,8 +44,8 @@ const isDashboardRoute = () =>
 
         <SummaryTab
           v-if="store.hasData"
-          :summary="store.summary"
-          :requests="store.calculatedRequests"
+          :summary="store.filteredSummary"
+          :requests="store.filteredCalculatedRequests"
           :warnings="store.warnings"
           :errors="store.errors"
         />

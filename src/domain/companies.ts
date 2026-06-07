@@ -199,7 +199,7 @@ export function assignCompanyToTimeEntries(
 
     return {
       ...entry,
-      companyName: found ? found.company : undefined,
+      companyName: found ? found.company : "Otros",
     };
   });
 }
