@@ -1,14 +1,12 @@
-# Empleo Dashboard - ADA
+# CEETA Dashboard - ADA Empleo
 
-**Control de Estimaciones e Incurridos - Sistema de Análisis de Peticiones y Tiempo Dedicado**
-
-Dashboard profesional de análisis de peticiones y tiempo dedicado usando Vue 3, TypeScript y Vite.
+Dashboard de control de estimaciones, incurridos y HBS para demandas, órdenes de trabajo y tiempo dedicado.
 
 **Versión**: 1.0.0 | **Estado**: Producción ✅
 
 ## 🎯 Características
 
-- ✅ **Carga de CSV** con validación automática (Peticiones padre, hijas, Tiempo dedicado)
+- ✅ **Carga de CSV** con validación automática (Demandas, Órdenes de Trabajo, Tiempo dedicado)
 - ✅ **Tab Colaboradores** - Visualización de tiempo dedicado agrupado por colaborador
 - ✅ **Tablas Scrollables** - Headers sticky con scroll nativo de PrimeVue
 - ✅ **Gráficos Interactivos** - Análisis visual con ECharts
@@ -189,12 +187,24 @@ Genera automáticamente links a GPSAE basados en la configuración de `.env`
 
 ## 📊 Cálculos Principales
 
-| Métrica             | Cálculo                       | Uso                  |
-| ------------------- | ----------------------------- | -------------------- |
-| **Horas Estimadas** | Del CSV Peticiones padre      | Presupuesto          |
-| **Horas Imputadas** | Suma de CSV Tiempo dedicado   | Costo real           |
-| **Desviación**      | Imputadas - Estimadas         | Análisis de varianza |
-| **% Desviación**    | (Imputadas / Estimadas) × 100 | Varianza relativa    |
+Resumen simple para negocio:
+
+| Métrica              | Cómo se obtiene                                                                                                                                                     | Fuente                                  |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| **Horas estimadas**  | Se suman las estimaciones de las órdenes de trabajo de cada demanda. Si una demanda no tiene órdenes, se usa la estimación de la propia demanda.                    | Demandas + Órdenes de Trabajo           |
+| **Horas incurridas** | Se suman exclusivamente las horas imputadas reales.                                                                                                                 | Tiempo dedicado, columna `Horas`        |
+| **Diferencia horas** | `horas estimadas - horas incurridas`. Positivo = ahorro/margen. Negativo = sobreconsumo.                                                                            | Cálculo interno                         |
+| **Desviación %**     | `(horas incurridas - horas estimadas) / horas estimadas * 100`.                                                                                                     | Cálculo interno                         |
+| **HBS estimadas**    | Se calculan desde las horas estimadas por perfil en órdenes de trabajo: `Horas JP`, `Horas CS`, `Horas AF`, `Horas AS / ES`, `Horas AP / TS`, `Horas P`.            | Órdenes de Trabajo                      |
+| **HBS incurridas**   | Cada imputación se convierte a HBS con `horas * ratio del perfil`. El perfil sale de `Perfil (perfilado)`, `Perfil (CAU in-situ)` o de la gestión de colaboradores. | Tiempo dedicado + Gestión colaboradores |
+| **Diferencia HBS**   | `HBS consumidas - HBS estimadas`. Positivo = sobreconsumo HBS. Negativo = ahorro HBS.                                                                               | Cálculo interno                         |
+
+Reglas importantes:
+
+- La fuente de verdad para horas reales es siempre el CSV **Tiempo dedicado**.
+- No se usan las columnas `Tiempo dedicado` ni `Tiempo total dedicado` de demandas/órdenes para calcular incurridas.
+- Si las órdenes no traen horas por perfil, las HBS estimadas no se pueden calcular de forma fiable.
+- Para columnas agrupadas, `Horas AS / ES` usa ratio AS y `Horas AP / TS` usa ratio AP.
 
 ## 🔐 Seguridad
 
