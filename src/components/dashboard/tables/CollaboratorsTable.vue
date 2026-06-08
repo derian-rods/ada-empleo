@@ -454,7 +454,7 @@ function onSaveCollaborators(collaborators: CompanyCollaborator[]) {
 }
 
 :deep(.p-inputtext-sm),
-:deep(.p-dropdown-sm) {
+:deep(.p-select-sm) {
   font-size: 0.875rem;
 }
 

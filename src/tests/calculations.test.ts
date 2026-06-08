@@ -65,6 +65,9 @@ describe("calculateDashboardSummary", () => {
     expect(summary.totalEstimatedHours).toBe(150);
     expect(summary.totalActualHours).toBe(150);
     expect(summary.totalDifferenceHours).toBe(0);
+    expect(summary.totalEstimatedHbs).toBe(0);
+    expect(summary.totalConsumedHbs).toBe(160);
+    expect(summary.totalDifferenceHbs).toBe(160);
     expect(summary.profitableRequests).toBe(1);
     expect(summary.lossRequests).toBe(1);
     expect(summary.neutralRequests).toBe(0);

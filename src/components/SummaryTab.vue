@@ -20,9 +20,9 @@ function fmtPct(n: number): string {
 }
 
 function getDifferenceHbsClass(diff: number): string {
-  if (diff > 0) return "loss"; // Sobreconsumo = rojo
-  if (diff < 0) return "profit"; // Ahorro = verde
-  return ""; // Neutral = blanco
+  if (diff > 0) return "loss";
+  if (diff < 0) return "profit";
+  return "";
 }
 
 function getDifferenceHbsSign(diff: number): string {
@@ -194,11 +194,13 @@ function getDifferenceHbsSign(diff: number): string {
   color: var(--text-secondary);
 }
 
-.kpi-value.profit {
+.kpi-value.profit,
+.kpi-value-large.profit {
   color: var(--color-success);
 }
 
-.kpi-value.loss {
+.kpi-value.loss,
+.kpi-value-large.loss {
   color: var(--color-danger);
 }
 </style>

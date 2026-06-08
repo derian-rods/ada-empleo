@@ -35,22 +35,24 @@ const expandedRows = ref<string[]>([]);
 const filters = ref<ParentGroupedTableFilters>({});
 const showFiltersModal = ref(false); // Modal hidden by default
 
-// Build and filter data
-const groupedRows = computed(() => {
-  // Usar TimeEntries del prop
-  const rows = buildParentGroupedTableRows(
+// Build base data once; filter option lists must not depend on active filters.
+const baseGroupedRows = computed(() => {
+  return buildParentGroupedTableRows(
     props.parents,
     props.children,
-    props.timeEntries, // TimeEntries del prop
+    props.timeEntries,
     props.calculatedRequests,
   );
-  return filterParentGroupedRows(rows, filters.value);
+});
+
+const groupedRows = computed(() => {
+  return filterParentGroupedRows(baseGroupedRows.value, filters.value);
 });
 
 // Unique filter options
 const uniqueUsers = computed(() => {
   const users = new Set<string>();
-  groupedRows.value.forEach((row) => {
+  baseGroupedRows.value.forEach((row) => {
     row.users.forEach((u) => users.add(u));
   });
   return Array.from(users).sort();
@@ -58,7 +60,7 @@ const uniqueUsers = computed(() => {
 
 const uniqueRoles = computed(() => {
   const roles = new Set<string>();
-  groupedRows.value.forEach((row) => {
+  baseGroupedRows.value.forEach((row) => {
     row.roles.forEach((r) => roles.add(r));
   });
   return Array.from(roles).sort();
@@ -66,7 +68,7 @@ const uniqueRoles = computed(() => {
 
 const uniqueApplications = computed(() => {
   const apps = new Set<string>();
-  groupedRows.value.forEach((row) => {
+  baseGroupedRows.value.forEach((row) => {
     row.applications.forEach((a) => apps.add(a));
   });
   return Array.from(apps).sort();
@@ -74,7 +76,7 @@ const uniqueApplications = computed(() => {
 
 const uniqueStatuses = computed(() => {
   const statuses = new Set<string>();
-  groupedRows.value.forEach((row) => {
+  baseGroupedRows.value.forEach((row) => {
     if (row.status) statuses.add(row.status);
   });
   return Array.from(statuses).sort();
@@ -82,7 +84,7 @@ const uniqueStatuses = computed(() => {
 
 const uniqueProjects = computed(() => {
   const projects = new Set<string>();
-  groupedRows.value.forEach((row) => {
+  baseGroupedRows.value.forEach((row) => {
     if (row.project) projects.add(row.project);
   });
   return Array.from(projects).sort();
@@ -462,7 +464,7 @@ function clearFilters() {
       <!-- Empty state -->
       <template #empty>
         <div class="empty-state">
-          <p>No hay peticiones que mostrar con los filtros aplicados</p>
+          <p>No hay demandas que mostrar con los filtros aplicados</p>
         </div>
       </template>
     </DataTable>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Dialog from "primevue/dialog";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import MultiSelect from "primevue/multiselect";
 import InputText from "primevue/inputtext";
 import Button from "primevue/button";
@@ -96,7 +96,7 @@ const handleClearFilters = () => {
       <!-- Proyecto -->
       <div class="filter-item compact">
         <label>Proyecto</label>
-        <Dropdown
+        <Select
           :model-value="filters.project || null"
           @update:model-value="updateFilter('project', $event)"
           :options="uniqueProjects"
@@ -108,7 +108,7 @@ const handleClearFilters = () => {
       <!-- Aplicación -->
       <div class="filter-item compact">
         <label>Aplicación</label>
-        <Dropdown
+        <Select
           :model-value="filters.application || null"
           @update:model-value="updateFilter('application', $event)"
           :options="uniqueApplications"
@@ -120,7 +120,7 @@ const handleClearFilters = () => {
       <!-- Estado -->
       <div class="filter-item compact">
         <label>Estado</label>
-        <Dropdown
+        <Select
           :model-value="filters.status || null"
           @update:model-value="updateFilter('status', $event)"
           :options="uniqueStatuses"
@@ -195,7 +195,7 @@ const handleClearFilters = () => {
 }
 
 :deep(.p-inputtext),
-:deep(.p-dropdown),
+:deep(.p-select),
 :deep(.p-multiselect) {
   width: 100%;
   background: var(--bg-secondary);
@@ -206,7 +206,7 @@ const handleClearFilters = () => {
 }
 
 :deep(.p-inputtext:focus),
-:deep(.p-dropdown:focus),
+:deep(.p-select:focus),
 :deep(.p-multiselect:focus) {
   border-color: var(--color-primary);
 }

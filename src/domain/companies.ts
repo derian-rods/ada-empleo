@@ -200,6 +200,7 @@ export function assignCompanyToTimeEntries(
     return {
       ...entry,
       companyName: found ? found.company : "Otros",
+      profiledRole: entry.profiledRole ?? found?.profile,
     };
   });
 }

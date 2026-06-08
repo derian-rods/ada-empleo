@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { useRoute } from "vue-router";
 import Toast from "primevue/toast";
 import Toolbar from "primevue/toolbar";
 import Button from "primevue/button";
-import Dropdown from "primevue/dropdown";
-import Sidebar from "primevue/sidebar";
+import Select from "primevue/select";
+import Drawer from "primevue/drawer";
 import DashboardSidebar from "./dashboard/DashboardSidebar.vue";
 import { useDashboardStore } from "../stores/dashboard";
 import { useThemeStore } from "../stores/theme";
 
 const store = useDashboardStore();
 const themeStore = useThemeStore();
+const route = useRoute();
 const showAlertsPanel = ref(false);
-const currentMainView = ref("dashboard");
 
 // Company filter options
 const companyOptions = [
@@ -33,9 +34,16 @@ function handleThemeToggle() {
 }
 
 function handleNavigationSelect(viewId: string) {
-  currentMainView.value = viewId;
   emit("select-item", viewId);
 }
+
+function getActiveItemIdFromPath(path: string): string {
+  if (path.startsWith("/tables")) return "tables";
+  if (path.startsWith("/charts")) return "analytics";
+  return "dashboard";
+}
+
+const activeMainView = computed(() => getActiveItemIdFromPath(route.path));
 
 // Compute alerts info
 const allAlerts = computed(() => [
@@ -72,7 +80,7 @@ const sidebarItems = [
   <div class="app-layout">
     <!-- Main Navigation Sidebar (Left) -->
     <DashboardSidebar
-      :active-item-id="currentMainView"
+      :active-item-id="activeMainView"
       :items="sidebarItems"
       @select-item="handleNavigationSelect"
     />
@@ -84,7 +92,7 @@ const sidebarItems = [
             Control de estimaciones e incurridos ADA – Empleo
           </h2>
           <!-- Company Filter Dropdown -->
-          <Dropdown
+          <Select
             v-model="store.selectedCompanyFilter"
             :options="companyOptions"
             option-label="label"
@@ -124,7 +132,7 @@ const sidebarItems = [
     </Toolbar>
 
     <!-- Alerts Sidebar -->
-    <Sidebar
+    <Drawer
       v-model:visible="showAlertsPanel"
       position="right"
       class="alerts-sidebar"
@@ -147,7 +155,7 @@ const sidebarItems = [
           <span>{{ alert.text }}</span>
         </div>
       </div>
-    </Sidebar>
+    </Drawer>
 
     <main
       class="app-content"

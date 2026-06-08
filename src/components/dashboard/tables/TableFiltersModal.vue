@@ -3,7 +3,7 @@ import { computed } from "vue";
 import Dialog from "primevue/dialog";
 import InputText from "primevue/inputtext";
 import MultiSelect from "primevue/multiselect";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import Checkbox from "primevue/checkbox";
 import Button from "primevue/button";
 import type { ParentGroupedTableFilters } from "../../../domain/parentGroupedTable";
@@ -70,7 +70,7 @@ const handleClearFilters = () => {
     <div class="filters-modal-content">
       <!-- Row 1: Búsqueda (códigos) -->
       <div class="filter-item compact">
-        <label>Código padre</label>
+        <label>Código demanda</label>
         <InputText
           :model-value="filters.parentCode || ''"
           @update:model-value="updateFilter('parentCode', $event)"
@@ -79,7 +79,7 @@ const handleClearFilters = () => {
       </div>
 
       <div class="filter-item compact">
-        <label>Código hija</label>
+        <label>Código OT</label>
         <InputText
           :model-value="filters.childCode || ''"
           @update:model-value="updateFilter('childCode', $event)"
@@ -89,7 +89,7 @@ const handleClearFilters = () => {
 
       <div class="filter-item compact">
         <label>Proyecto</label>
-        <Dropdown
+        <Select
           :model-value="filters.project || null"
           @update:model-value="updateFilter('project', $event)"
           :options="uniqueProjects"
@@ -100,7 +100,7 @@ const handleClearFilters = () => {
 
       <!-- Row 2: Asuntos -->
       <div class="filter-item compact">
-        <label>Asunto padre</label>
+        <label>Asunto demanda</label>
         <InputText
           :model-value="filters.parentSubject || ''"
           @update:model-value="updateFilter('parentSubject', $event)"
@@ -109,7 +109,7 @@ const handleClearFilters = () => {
       </div>
 
       <div class="filter-item compact">
-        <label>Asunto hija</label>
+        <label>Asunto OT</label>
         <InputText
           :model-value="filters.childSubject || ''"
           @update:model-value="updateFilter('childSubject', $event)"
@@ -119,7 +119,7 @@ const handleClearFilters = () => {
 
       <div class="filter-item compact">
         <label>Estado</label>
-        <Dropdown
+        <Select
           :model-value="filters.status || null"
           @update:model-value="updateFilter('status', $event)"
           :options="uniqueStatuses"
@@ -168,7 +168,7 @@ const handleClearFilters = () => {
       <!-- Row 4: Resultado y Riesgo -->
       <div class="filter-item compact">
         <label>Resultado</label>
-        <Dropdown
+        <Select
           :model-value="filters.resultStatus || null"
           @update:model-value="updateFilter('resultStatus', $event)"
           :options="[
@@ -185,7 +185,7 @@ const handleClearFilters = () => {
 
       <div class="filter-item compact">
         <label>Riesgo</label>
-        <Dropdown
+        <Select
           :model-value="filters.riskLevel || null"
           @update:model-value="updateFilter('riskLevel', $event)"
           :options="[
@@ -299,7 +299,7 @@ const handleClearFilters = () => {
 
 :deep(.p-inputtext),
 :deep(.p-multiselect),
-:deep(.p-dropdown) {
+:deep(.p-select) {
   width: 100%;
   background: var(--bg-secondary);
   border-color: var(--border-color);
@@ -310,7 +310,7 @@ const handleClearFilters = () => {
 
 :deep(.p-inputtext:focus),
 :deep(.p-multiselect:focus),
-:deep(.p-dropdown:focus) {
+:deep(.p-select:focus) {
   border-color: var(--color-primary);
 }
 

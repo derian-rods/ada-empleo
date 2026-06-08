@@ -5,7 +5,10 @@ import type {
   CalculatedRequest,
   ResultStatus,
 } from "./types";
-import { calculateConsumedHbs } from "./hbs";
+import {
+  calculateConsumedHbs,
+  calculateEstimatedHbsFromProfileHours,
+} from "./hbs";
 
 export type RiskLevel = "high" | "medium" | "low";
 
@@ -153,41 +156,22 @@ export function buildParentGroupedTableRows(
     }
   }
 
-  // Build parent -> time entries mapping
-  const timeEntriesByParent = new Map<string, TimeEntry[]>();
-  for (const te of timeEntries) {
-    // Try to resolve parent from calculated requests if available
-    const calc = calculatedRequests.find(
-      (c) =>
-        c.people.includes(te.user || "") ||
-        c.activities.includes(te.activity || ""),
-    );
-    if (calc) {
-      const list = timeEntriesByParent.get(calc.parentId);
-      if (list) {
-        list.push(te);
-      } else {
-        timeEntriesByParent.set(calc.parentId, [te]);
-      }
-    }
-  }
-
   // Build child -> time entries mapping
   const timeEntriesByChild = new Map<string, TimeEntry[]>();
   for (const te of timeEntries) {
-    if (te.petitionId && childMap.has(te.petitionId)) {
-      const list = timeEntriesByChild.get(te.petitionId);
+    const childId =
+      te.petitionId && childMap.has(te.petitionId)
+        ? te.petitionId
+        : te.parentTaskId && childMap.has(te.parentTaskId)
+          ? te.parentTaskId
+          : undefined;
+
+    if (childId) {
+      const list = timeEntriesByChild.get(childId);
       if (list) {
         list.push(te);
       } else {
-        timeEntriesByChild.set(te.petitionId, [te]);
-      }
-    } else if (te.parentTaskId && childMap.has(te.parentTaskId)) {
-      const list = timeEntriesByChild.get(te.parentTaskId);
-      if (list) {
-        list.push(te);
-      } else {
-        timeEntriesByChild.set(te.parentTaskId, [te]);
+        timeEntriesByChild.set(childId, [te]);
       }
     }
   }
@@ -282,9 +266,21 @@ export function buildParentGroupedTableRows(
           : 0;
 
       // HBS calculations
-      const estimatedHbs = child.estimatedHours ?? 0; // Note: cannot be calculated accurately without per-user breakdown
+      const estimatedHbs = calculateEstimatedHbsFromProfileHours({
+        jp: child.estimatedHoursJp,
+        cs: child.estimatedHoursCs,
+        af: child.estimatedHoursAf,
+        asEs: child.estimatedHoursAsEs,
+        apTs: child.estimatedHoursApTs,
+        p: child.estimatedHoursP,
+      });
       const consumedHbs = calculateConsumedHbs(
-        childTimeEntries.map((te) => ({ user: te.user, hours: te.hours })),
+        childTimeEntries.map((te) => ({
+          user: te.user,
+          hours: te.hours,
+          profiledRole: te.profiledRole,
+          cauRole: te.cauRole,
+        })),
       );
       const differenceHbs = consumedHbs - estimatedHbs;
       const deviationPercentHbs =
@@ -539,9 +535,13 @@ export function filterParentGroupedRows(
         return false;
       }
 
+      if (filters.application?.length && !row.application) {
+        return false;
+      }
+
       if (
-        filters.application &&
-        !row.applications.some((a) => filters.application!.includes(a))
+        filters.application?.length &&
+        !filters.application.includes(row.application!)
       ) {
         return false;
       }

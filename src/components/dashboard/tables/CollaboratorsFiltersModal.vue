@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import Dialog from "primevue/dialog";
-import Dropdown from "primevue/dropdown";
-import Calendar from "primevue/calendar";
+import Select from "primevue/select";
+import DatePicker from "primevue/datepicker";
 import Button from "primevue/button";
 
 interface CollaboratorsFiltersModalProps {
@@ -64,7 +64,7 @@ const handleClearFilters = () => {
       <!-- Colaboradores -->
       <div class="filter-item compact">
         <label>Colaboradores</label>
-        <Dropdown
+        <Select
           :model-value="filters.collaboratorNames || []"
           @update:model-value="updateFilter('collaboratorNames', $event)"
           :options="collaboratorOptions"
@@ -80,7 +80,7 @@ const handleClearFilters = () => {
       <!-- Desde -->
       <div class="filter-item compact">
         <label>Desde</label>
-        <Calendar
+        <DatePicker
           :model-value="filters.dateFrom || null"
           @update:model-value="updateFilter('dateFrom', $event)"
           date-format="dd/mm/yy"
@@ -92,7 +92,7 @@ const handleClearFilters = () => {
       <!-- Hasta -->
       <div class="filter-item compact">
         <label>Hasta</label>
-        <Calendar
+        <DatePicker
           :model-value="filters.dateTo || null"
           @update:model-value="updateFilter('dateTo', $event)"
           date-format="dd/mm/yy"
@@ -104,7 +104,7 @@ const handleClearFilters = () => {
       <!-- Petición -->
       <div class="filter-item compact">
         <label>Petición</label>
-        <Dropdown
+        <Select
           :model-value="filters.petitionCode || null"
           @update:model-value="updateFilter('petitionCode', $event)"
           :options="petitionOptions"
@@ -168,8 +168,8 @@ const handleClearFilters = () => {
   white-space: nowrap;
 }
 
-:deep(.p-dropdown),
-:deep(.p-calendar) {
+:deep(.p-select),
+:deep(.p-datepicker) {
   width: 100%;
   background: var(--bg-secondary);
   border-color: var(--border-color);
@@ -178,8 +178,8 @@ const handleClearFilters = () => {
   padding: 0.4rem 0.5rem;
 }
 
-:deep(.p-dropdown:focus),
-:deep(.p-calendar:focus) {
+:deep(.p-select:focus),
+:deep(.p-datepicker:focus) {
   border-color: var(--color-primary);
 }
 

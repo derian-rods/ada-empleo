@@ -14,6 +14,10 @@ export const HBS_PROFILES = {
   AN: { name: "Analista de negocio", ratio: 1.16 },
   ARQ: { name: "Arquitecto de sistemas", ratio: 1.33 },
   AS: { name: "Analista de sistemas", ratio: 1.18 },
+  ES: { name: "Especialista de sistemas", ratio: 1.18 },
+  AP: { name: "Analista programador", ratio: 1.0 },
+  TS: { name: "Técnico de sistemas", ratio: 1.0 },
+  P: { name: "Programador", ratio: 1.0 },
   DE: { name: "Desarrollador", ratio: 1.0 },
 } as const;
 
@@ -53,6 +57,42 @@ export function getCollaboratorProfile(
   return COLLABORATORS[collaboratorName.trim()];
 }
 
+export function getProfileCodeFromRole(role?: string): ProfileCode | undefined {
+  if (!role) return undefined;
+
+  const normalized = role.toLowerCase().trim();
+  const compact = normalized.replace(/[()]/g, " ");
+  const tokens = compact.split(/\s+|\/|-/).filter(Boolean);
+  const hasToken = (token: string) => tokens.includes(token);
+  if (
+    !normalized ||
+    normalized === "sin rol" ||
+    normalized === "sin rol asignado"
+  ) {
+    return undefined;
+  }
+
+  if (normalized.includes("gestor") || hasToken("gp")) return "GP";
+  if (normalized.includes("consultor") || hasToken("cd")) return "CD";
+  if (normalized.includes("analista de negocio") || hasToken("an")) return "AN";
+  if (normalized.includes("arquitecto") || hasToken("arq")) return "ARQ";
+  if (normalized.includes("analista de sistemas") || hasToken("as"))
+    return "AS";
+  if (normalized.includes("especialista") || hasToken("es")) return "ES";
+  if (normalized.includes("analista programador") || hasToken("ap"))
+    return "AP";
+  if (
+    normalized.includes("técnico") ||
+    normalized.includes("tecnico") ||
+    hasToken("ts")
+  )
+    return "TS";
+  if (normalized === "p" || normalized.includes("programador")) return "P";
+  if (normalized.includes("desarrollador") || hasToken("de")) return "DE";
+
+  return undefined;
+}
+
 /**
  * Get the HBS ratio for a given profile code
  * @param profile - Profile code (GP, CD, AN, ARQ, AS, DE)
@@ -60,9 +100,6 @@ export function getCollaboratorProfile(
  */
 export function getHbsRatioByProfile(profile: ProfileCode | undefined): number {
   if (!profile || !HBS_PROFILES[profile]) {
-    console.warn(
-      `[HBS] Unknown profile: ${profile}, using ratio 1.0 as fallback`,
-    );
     return 1.0;
   }
   return HBS_PROFILES[profile].ratio;
@@ -76,20 +113,45 @@ export function getHbsRatioByProfile(profile: ProfileCode | undefined): number {
  * @returns Total consumed HBS
  */
 export function calculateConsumedHbs(
-  timeEntries: Array<{ user?: string; hours: number }>,
+  timeEntries: Array<{
+    user?: string;
+    hours: number;
+    profiledRole?: string;
+    cauRole?: string;
+  }>,
 ): number {
   return timeEntries.reduce((total, entry) => {
     if (!entry.user) {
-      console.warn("[HBS] Time entry without user, hours not counted for HBS");
       return total;
     }
 
-    const profile = getCollaboratorProfile(entry.user);
+    const profile =
+      getProfileCodeFromRole(entry.profiledRole) ??
+      getProfileCodeFromRole(entry.cauRole) ??
+      getCollaboratorProfile(entry.user);
     const ratio = getHbsRatioByProfile(profile);
     const hbs = entry.hours * ratio;
 
     return total + hbs;
   }, 0);
+}
+
+export function calculateEstimatedHbsFromProfileHours(hours: {
+  jp?: number;
+  cs?: number;
+  af?: number;
+  asEs?: number;
+  apTs?: number;
+  p?: number;
+}): number {
+  return (
+    (hours.jp ?? 0) * HBS_PROFILES.GP.ratio +
+    (hours.cs ?? 0) * HBS_PROFILES.CD.ratio +
+    (hours.af ?? 0) * HBS_PROFILES.AN.ratio +
+    (hours.asEs ?? 0) * HBS_PROFILES.AS.ratio +
+    (hours.apTs ?? 0) * HBS_PROFILES.AP.ratio +
+    (hours.p ?? 0) * HBS_PROFILES.P.ratio
+  );
 }
 
 /**

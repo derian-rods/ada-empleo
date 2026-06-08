@@ -36,20 +36,18 @@ const router = createRouter({
 });
 
 // Navigation guard para mostrar/ocultar loading
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, from) => {
   const dashboardStore = useDashboardStore();
 
   // Si la ruta requiere datos y no los hay, redirigir a dashboard
   if (to.meta.requiresData && !dashboardStore.hasData) {
-    next("/dashboard");
-    return;
+    return "/dashboard";
   }
 
   if (to.path !== from.path) {
     const navigationStore = useNavigationStore();
     navigationStore.setIsNavigating(true);
   }
-  next();
 });
 
 router.afterEach(() => {

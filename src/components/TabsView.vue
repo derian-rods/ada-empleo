@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import TabView from "primevue/tabview";
+import Tabs from "primevue/tabs";
+import TabList from "primevue/tablist";
+import Tab from "primevue/tab";
+import TabPanels from "primevue/tabpanels";
 import TabPanel from "primevue/tabpanel";
 import SummaryTab from "./SummaryTab.vue";
 import DashboardTablesTabs from "./dashboard/tables/DashboardTablesTabs.vue";
@@ -10,76 +13,85 @@ import OrphanTimeEntriesPanel from "./OrphanTimeEntriesPanel.vue";
 import { useDashboardStore } from "../stores/dashboard";
 
 const store = useDashboardStore();
-const activeTab = ref(0);
+const activeTab = ref("resumen");
 </script>
 
 <template>
-  <TabView
-    v-model:activeIndex="activeTab"
+  <Tabs
+    v-model:value="activeTab"
     class="tabs-view"
     :disabled="store.isProcessing"
   >
-    <!-- Resumen Tab -->
-    <TabPanel header="Resumen" value="resumen" :leftIcon="'pi pi-fw pi-home'">
-      <SummaryTab
-        :summary="store.filteredSummary"
-        :requests="store.filteredCalculatedRequests"
-        :warnings="store.warnings"
-        :errors="store.errors"
-      />
-    </TabPanel>
+    <TabList>
+      <Tab value="resumen" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-home"></i>
+        <span>Resumen</span>
+      </Tab>
+      <Tab value="tablas" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-table"></i>
+        <span>Tabla de Peticiones</span>
+      </Tab>
+      <Tab value="colaboradores" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-users"></i>
+        <span>Colaboradores</span>
+      </Tab>
+      <Tab value="graficos" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-chart-bar"></i>
+        <span>Gráficas</span>
+      </Tab>
+      <Tab value="huerfanos" class="flex items-center gap-2">
+        <i class="pi pi-fw pi-exclamation-circle"></i>
+        <span>Tiempos Huérfanos ({{ store.orphanTimeEntries.length }})</span>
+      </Tab>
+    </TabList>
 
-    <!-- Tabla Tab with subtabs -->
-    <TabPanel
-      header="Tabla de Peticiones"
-      value="tablas"
-      :leftIcon="'pi pi-fw pi-table'"
-    >
-      <DashboardTablesTabs
-        :parents="store.parents"
-        :children="store.children"
-        :time-entries="store.filteredTimeEntries"
-        :calculated-requests="store.filteredCalculatedRequests"
-        :rows-per-page="25"
-      />
-    </TabPanel>
+    <TabPanels>
+      <!-- Resumen Tab -->
+      <TabPanel value="resumen">
+        <SummaryTab
+          :summary="store.filteredSummary"
+          :requests="store.filteredCalculatedRequests"
+          :warnings="store.warnings"
+          :errors="store.errors"
+        />
+      </TabPanel>
 
-    <!-- Colaboradores Tab -->
-    <TabPanel
-      header="Colaboradores"
-      value="colaboradores"
-      :leftIcon="'pi pi-fw pi-users'"
-    >
-      <CollaboratorsTable
-        :time-entries="store.filteredTimeEntries"
-        :children="store.children"
-        :parents="store.parents"
-      />
-    </TabPanel>
+      <!-- Tabla Tab with subtabs -->
+      <TabPanel value="tablas">
+        <DashboardTablesTabs
+          :parents="store.parents"
+          :children="store.children"
+          :time-entries="store.filteredTimeEntries"
+          :calculated-requests="store.filteredCalculatedRequests"
+          :rows-per-page="25"
+        />
+      </TabPanel>
 
-    <!-- Gráficas Tab -->
-    <TabPanel
-      header="Gráficas"
-      value="graficos"
-      :leftIcon="'pi pi-fw pi-chart-bar'"
-    >
-      <ChartsTab
-        :requests="store.calculatedRequests"
-        :parents="store.parents"
-        :children="store.children"
-        :time-entries="store.timeEntries"
-      />
-    </TabPanel>
+      <!-- Colaboradores Tab -->
+      <TabPanel value="colaboradores">
+        <CollaboratorsTable
+          :time-entries="store.filteredTimeEntries"
+          :children="store.children"
+          :parents="store.parents"
+        />
+      </TabPanel>
 
-    <!-- Tiempos Huérfanos Tab -->
-    <TabPanel
-      :header="`Tiempos Huérfanos (${store.orphanTimeEntries.length})`"
-      value="huerfanos"
-      :leftIcon="'pi pi-fw pi-exclamation-circle'"
-    >
-      <OrphanTimeEntriesPanel :orphans="store.orphanTimeEntries" />
-    </TabPanel>
-  </TabView>
+      <!-- Gráficas Tab -->
+      <TabPanel value="graficos">
+        <ChartsTab
+          :requests="store.calculatedRequests"
+          :parents="store.parents"
+          :children="store.children"
+          :time-entries="store.timeEntries"
+        />
+      </TabPanel>
+
+      <!-- Tiempos Huérfanos Tab -->
+      <TabPanel value="huerfanos">
+        <OrphanTimeEntriesPanel :orphans="store.orphanTimeEntries" />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
 </template>
 
 <style scoped>

@@ -413,7 +413,7 @@ function clearFilters() {
 
 :deep(.p-inputtext-sm),
 :deep(.p-multiselect-sm),
-:deep(.p-dropdown-sm) {
+:deep(.p-select-sm) {
   font-size: 0.875rem;
   background: var(--bg-secondary);
   border-color: var(--border-color);
@@ -422,7 +422,7 @@ function clearFilters() {
 
 :deep(.p-inputtext-sm:focus),
 :deep(.p-multiselect-sm:focus),
-:deep(.p-dropdown-sm:focus) {
+:deep(.p-select-sm:focus) {
   border-color: var(--color-primary);
 }
 

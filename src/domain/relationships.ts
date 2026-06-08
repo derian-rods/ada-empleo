@@ -6,7 +6,10 @@ import type {
   CalculatedRequest,
   ResultStatus,
 } from "./types";
-import { calculateConsumedHbs } from "./hbs";
+import {
+  calculateConsumedHbs,
+  calculateEstimatedHbsFromProfileHours,
+} from "./hbs";
 
 export interface RelationshipResult {
   calculatedRequests: CalculatedRequest[];
@@ -72,7 +75,7 @@ export function buildCalculatedRequests(
     const estimatedHours =
       childrenEstimated > 0 ? childrenEstimated : parent.estimatedHours;
 
-    // Profile-based estimated hours (JP, CS, AF from children)
+    // Profile-based estimated hours from children
     const estimatedHoursJp = parentChildren.reduce(
       (sum, c) => sum + (c.estimatedHoursJp ?? 0),
       0,
@@ -85,8 +88,25 @@ export function buildCalculatedRequests(
       (sum, c) => sum + (c.estimatedHoursAf ?? 0),
       0,
     );
+    const estimatedHoursAsEs = parentChildren.reduce(
+      (sum, c) => sum + (c.estimatedHoursAsEs ?? 0),
+      0,
+    );
+    const estimatedHoursApTs = parentChildren.reduce(
+      (sum, c) => sum + (c.estimatedHoursApTs ?? 0),
+      0,
+    );
+    const estimatedHoursP = parentChildren.reduce(
+      (sum, c) => sum + (c.estimatedHoursP ?? 0),
+      0,
+    );
     const estimatedHoursTotal =
-      estimatedHoursJp + estimatedHoursCs + estimatedHoursAf;
+      estimatedHoursJp +
+      estimatedHoursCs +
+      estimatedHoursAf +
+      estimatedHoursAsEs +
+      estimatedHoursApTs +
+      estimatedHoursP;
 
     // Actual hours: always from time entries
     const actualHours = entries.reduce((sum, te) => sum + te.hours, 0);
@@ -132,15 +152,24 @@ export function buildCalculatedRequests(
     // HBS CALCULATIONS
     // Consumed HBS: from time entries (each entry uses collaborator's HBS ratio)
     const consumedHbs = calculateConsumedHbs(
-      entries.map((e) => ({ user: e.user, hours: e.hours })),
+      entries.map((e) => ({
+        user: e.user,
+        hours: e.hours,
+        profiledRole: e.profiledRole,
+        cauRole: e.cauRole,
+      })),
     );
 
-    // Estimated HBS: We cannot estimate HBS accurately without per-collaborator data
-    // The system stores estimated hours at the request level, not per-user
-    // Return 0 with warning (see hbs.ts::calculateEstimatedHbs for details)
-    const estimatedHbs = 0; // Cannot be calculated from request-level data
+    const estimatedHbs = calculateEstimatedHbsFromProfileHours({
+      jp: estimatedHoursJp,
+      cs: estimatedHoursCs,
+      af: estimatedHoursAf,
+      asEs: estimatedHoursAsEs,
+      apTs: estimatedHoursApTs,
+      p: estimatedHoursP,
+    });
 
-    // HBS Difference: consumed - estimated (note: inverted semantics from hours)
+    // HBS Difference: consumed - estimated
     // Positive difference = over-consumption (bad)
     // Negative difference = under-consumption (good)
     const differenceHbs = consumedHbs - estimatedHbs;
@@ -167,6 +196,9 @@ export function buildCalculatedRequests(
       estimatedHoursJp,
       estimatedHoursCs,
       estimatedHoursAf,
+      estimatedHoursAsEs,
+      estimatedHoursApTs,
+      estimatedHoursP,
       estimatedHoursTotal,
       actualHours,
       differenceHours,

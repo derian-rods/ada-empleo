@@ -4,9 +4,11 @@ import {
   getHbsRatioByProfile,
   calculateConsumedHbs,
   calculateEstimatedHbs,
+  calculateEstimatedHbsFromProfileHours,
   getCollaboratorFullProfile,
   getAllCollaborators,
   getAllProfiles,
+  getProfileCodeFromRole,
   HBS_PROFILES,
   COLLABORATORS,
 } from "./hbs";
@@ -62,11 +64,20 @@ describe("HBS Module", () => {
       expect(ratio).toBe(1.0);
     });
 
-    it("debe loguear warning para perfil desconocido", () => {
+    it("no debe loguear warning para perfil desconocido", () => {
       const consoleSpy = vi.spyOn(console, "warn");
       getHbsRatioByProfile(undefined);
-      expect(consoleSpy).toHaveBeenCalled();
+      expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
+    });
+  });
+
+  describe("getProfileCodeFromRole", () => {
+    it("debe resolver perfiles desde textos actuales", () => {
+      expect(getProfileCodeFromRole("Gestor de proyecto (GP)")).toBe("GP");
+      expect(getProfileCodeFromRole("Consultor digital (CD)")).toBe("CD");
+      expect(getProfileCodeFromRole("Analista de sistemas (AS)")).toBe("AS");
+      expect(getProfileCodeFromRole("Desarrollador (DE)")).toBe("DE");
     });
   });
 
@@ -99,10 +110,20 @@ describe("HBS Module", () => {
       ];
       const hbs = calculateConsumedHbs(entries);
       expect(hbs).toBe(5 * 1.69); // Solo cuenta la segunda
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("without user"),
-      );
+      expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
+    });
+
+    it("debe priorizar perfil de la imputación sobre usuario desconocido", () => {
+      const entries = [
+        {
+          user: "Persona Desconocida",
+          hours: 10,
+          profiledRole: "Consultor digital (CD)",
+        },
+      ];
+      const hbs = calculateConsumedHbs(entries);
+      expect(hbs).toBeCloseTo(14.9);
     });
 
     it("debe usar ratio 1.0 para colaborador desconocido", () => {
@@ -140,14 +161,24 @@ describe("HBS Module", () => {
       expect(hbs).toBe(100 * 1.69); // 169
     });
 
-    it("debe calcular con ratio 1.0 para colaborador desconocido", () => {
+    it("debe calcular con ratio 1.0 para colaborador desconocido sin warning", () => {
       const consoleSpy = vi.spyOn(console, "warn");
       const hbs = calculateEstimatedHbs(100, "Persona Desconocida");
       expect(hbs).toBe(100);
-      expect(consoleSpy).toHaveBeenCalledWith(
-        expect.stringContaining("ratio 1.0"),
-      );
+      expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
+    });
+
+    it("debe calcular HBS estimadas desde horas por perfil de OT", () => {
+      const hbs = calculateEstimatedHbsFromProfileHours({
+        jp: 10,
+        cs: 10,
+        af: 10,
+        asEs: 10,
+        apTs: 10,
+        p: 10,
+      });
+      expect(hbs).toBeCloseTo(75.2);
     });
   });
 
@@ -174,14 +205,14 @@ describe("HBS Module", () => {
       const collaborators = getAllCollaborators();
       expect(collaborators.length).toBe(17);
       expect(collaborators).toContain("Gerardo Manuel García Guillén");
-      expect(collaborators).toContain("Derian Rodríguez Salazar");
+      expect(collaborators).toContain("Derian Rodriguez Salazar");
     });
   });
 
   describe("getAllProfiles", () => {
     it("debe retornar array con todos los perfiles", () => {
       const profiles = getAllProfiles();
-      expect(profiles.length).toBe(6);
+      expect(profiles.length).toBe(10);
       expect(profiles.some((p: any) => p.code === "GP")).toBe(true);
       expect(profiles.some((p: any) => p.code === "DE")).toBe(true);
     });

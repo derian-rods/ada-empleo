@@ -345,7 +345,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
       const result = buildCalculatedRequests(
         parents.value,
         children.value,
-        timeEntries.value,
+        timeEntriesWithCompany.value,
       );
 
       // Permitir que la UI se actualice entre operaciones
@@ -385,8 +385,11 @@ export const useDashboardStore = defineStore("dashboard", () => {
     }
   }
 
-  function saveManagedCollaborators(collaborators: CompanyCollaborator[]) {
+  async function saveManagedCollaborators(
+    collaborators: CompanyCollaborator[],
+  ) {
     managedCollaborators.value = collaborators;
+    await recalculate();
   }
 
   function reset() {

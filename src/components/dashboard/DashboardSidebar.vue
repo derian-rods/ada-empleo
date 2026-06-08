@@ -68,11 +68,6 @@ function isItemActive(itemId: string): boolean {
     @mouseenter="handleSidebarMouseEnter"
     @mouseleave="handleSidebarMouseLeave"
   >
-    <!-- Logo/Header -->
-    <div class="sidebar-header">
-      <i class="pi pi-bars"></i>
-    </div>
-
     <!-- Items -->
     <div class="sidebar-items">
       <div
@@ -137,27 +132,11 @@ function isItemActive(itemId: string): boolean {
   min-width: 80px;
 }
 
-.sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 60px;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 1.2rem;
-  color: var(--color-primary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.sidebar-header:hover {
-  background: var(--bg-primary);
-}
-
 .sidebar-items {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.5rem;
+  padding: 0.75rem 0.5rem 0.5rem;
   flex: 1;
   overflow-y: auto;
 }

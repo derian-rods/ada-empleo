@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import TabView from "primevue/tabview";
+import Tabs from "primevue/tabs";
+import TabList from "primevue/tablist";
+import Tab from "primevue/tab";
+import TabPanels from "primevue/tabpanels";
 import TabPanel from "primevue/tabpanel";
 import Card from "primevue/card";
 import DashboardTablesTabs from "../components/dashboard/tables/DashboardTablesTabs.vue";
@@ -9,54 +12,64 @@ import UnestimatedWithIncurredPanel from "../components/dashboard/tables/Unestim
 import { useDashboardStore } from "../stores/dashboard";
 
 const store = useDashboardStore();
-const activeTab = ref(0);
+const activeTab = ref("requests");
 </script>
 
 <template>
   <div v-if="store.hasData" class="tables-view">
-    <TabView
-      :activeIndex="activeTab"
-      @update:activeIndex="(i) => (activeTab = i)"
-    >
-      <!-- Peticiones Tab -->
-      <TabPanel header="Peticiones" leftIcon="pi pi-briefcase" value="0">
-        <div class="tab-content">
-          <DashboardTablesTabs
-            :parents="store.parents"
-            :children="store.children"
-            :time-entries="store.filteredTimeEntries"
-            :calculated-requests="store.filteredCalculatedRequests"
-            :rows-per-page="25"
-          />
-        </div>
-      </TabPanel>
+    <Tabs v-model:value="activeTab" class="tables-tabs">
+      <TabList>
+        <Tab value="requests" class="flex items-center gap-2">
+          <i class="pi pi-briefcase"></i>
+          <span>Peticiones</span>
+        </Tab>
+        <Tab value="collaborators" class="flex items-center gap-2">
+          <i class="pi pi-users"></i>
+          <span>Colaboradores</span>
+        </Tab>
+        <Tab value="orphans" class="flex items-center gap-2">
+          <i class="pi pi-exclamation-triangle"></i>
+          <span>Tiempo Huérfano</span>
+        </Tab>
+      </TabList>
 
-      <!-- Colaboradores Tab -->
-      <TabPanel header="Colaboradores" leftIcon="pi pi-users" value="1">
-        <div class="tab-content">
-          <CollaboratorsTable
-            :time-entries="store.filteredTimeEntries"
-            :children="store.children"
-            :parents="store.parents"
-          />
-        </div>
-      </TabPanel>
+      <TabPanels>
+        <!-- Peticiones Tab -->
+        <TabPanel value="requests">
+          <div class="tab-content">
+            <DashboardTablesTabs
+              :parents="store.parents"
+              :children="store.children"
+              :time-entries="store.filteredTimeEntries"
+              :calculated-requests="store.filteredCalculatedRequests"
+              :rows-per-page="25"
+            />
+          </div>
+        </TabPanel>
 
-      <!-- Tiempo Huérfano Tab -->
-      <TabPanel
-        header="Tiempo Huérfano"
-        leftIcon="pi pi-exclamation-triangle"
-        value="2"
-      >
-        <div class="tab-content">
-          <UnestimatedWithIncurredPanel
-            :calculated-requests="store.filteredCalculatedRequests"
-            :children="store.children"
-            :time-entries="store.filteredTimeEntries"
-          />
-        </div>
-      </TabPanel>
-    </TabView>
+        <!-- Colaboradores Tab -->
+        <TabPanel value="collaborators">
+          <div class="tab-content">
+            <CollaboratorsTable
+              :time-entries="store.filteredTimeEntries"
+              :children="store.children"
+              :parents="store.parents"
+            />
+          </div>
+        </TabPanel>
+
+        <!-- Tiempo Huérfano Tab -->
+        <TabPanel value="orphans">
+          <div class="tab-content">
+            <UnestimatedWithIncurredPanel
+              :calculated-requests="store.filteredCalculatedRequests"
+              :children="store.children"
+              :time-entries="store.filteredTimeEntries"
+            />
+          </div>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   </div>
 
   <!-- Empty state -->
@@ -78,18 +91,18 @@ const activeTab = ref(0);
   min-height: 0;
 }
 
-.tables-view :deep(.p-tabview) {
+.tables-view :deep(.p-tabs) {
   display: flex;
   flex-direction: column;
   height: 100%;
   min-height: 0;
 }
 
-.tables-view :deep(.p-tabview-nav) {
+.tables-view :deep(.p-tablist) {
   flex-shrink: 0;
 }
 
-.tables-view :deep(.p-tabview-panels) {
+.tables-view :deep(.p-tabpanels) {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -97,15 +110,7 @@ const activeTab = ref(0);
   min-height: 0;
 }
 
-.tables-view :deep(.p-tabview-panel) {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: auto;
-  min-height: 0;
-}
-
-.tables-view :deep(.p-tabview-content) {
+.tables-view :deep(.p-tabpanel) {
   display: flex;
   flex-direction: column;
   height: 100%;

@@ -91,11 +91,14 @@ export interface CalculatedRequest {
   status?: string;
   application?: string;
   estimatedHours: number;
-  // Profile-based estimated hours (JP, CS, AF)
+  // Profile-based estimated hours from órdenes de trabajo
   estimatedHoursJp?: number;
   estimatedHoursCs?: number;
   estimatedHoursAf?: number;
-  estimatedHoursTotal?: number; // JP + CS + AF
+  estimatedHoursAsEs?: number;
+  estimatedHoursApTs?: number;
+  estimatedHoursP?: number;
+  estimatedHoursTotal?: number; // Sum of all profile-based estimated hours
   actualHours: number;
   differenceHours: number;
   deviationPercent: number;

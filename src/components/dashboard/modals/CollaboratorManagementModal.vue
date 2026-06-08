@@ -3,7 +3,7 @@ import { computed, ref, watch } from "vue";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
-import Dropdown from "primevue/dropdown";
+import Select from "primevue/select";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import ConfirmDialog from "primevue/confirmdialog";
@@ -310,7 +310,7 @@ function onHide() {
 
         <div class="form-group">
           <label for="profile">Perfil *</label>
-          <Dropdown
+          <Select
             id="profile"
             v-model="formData.profile"
             :options="profileOptions"
@@ -323,7 +323,7 @@ function onHide() {
 
         <div class="form-group">
           <label for="company">Empresa *</label>
-          <Dropdown
+          <Select
             id="company"
             v-model="formData.company"
             :options="companyOptions"

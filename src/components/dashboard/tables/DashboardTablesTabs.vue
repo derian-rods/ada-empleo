@@ -35,7 +35,7 @@ const activeTab = ref("grouped");
     <TabList>
       <Tab value="grouped" class="flex items-center gap-2">
         <i class="pi pi-fw pi-sitemap"></i>
-        <span>Tabla agrupada por padre</span>
+        <span>Órdenes de trabajo por demanda</span>
       </Tab>
       <Tab value="unestimated" class="flex items-center gap-2">
         <i class="pi pi-fw pi-exclamation-circle"></i>
