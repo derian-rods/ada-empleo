@@ -14,6 +14,8 @@ import {
   formatHours,
   type CollaboratorFilters,
 } from "../../../domain/collaborators";
+import type { CompanyCollaborator } from "../../../domain/companies";
+import { useDashboardStore } from "../../../stores/dashboard";
 import type {
   TimeEntry,
   ChildRequest,
@@ -27,6 +29,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const store = useDashboardStore();
 
 // State
 const filters = ref<{
@@ -57,6 +60,10 @@ const collaboratorsSummary = computed(() => {
 const enrichedCollaboratorsSummary = computed(() => {
   return collaboratorsSummary.value;
 });
+
+const collaboratorManagementList = computed(
+  () => store.allManagedCollaborators,
+);
 
 // Computed: Resumen de página
 const pageSummary = computed(() => {
@@ -105,10 +112,8 @@ function clearFilters() {
   expandedRows.value = [];
 }
 
-// Guardar colaboradores actualizados (deshabilitado por ahora)
-function onSaveCollaborators(collaborators: any[]) {
-  // TODO: Implementar guardar colaboradores cuando se implemente el filtro de empresa
-  console.log("Colaboradores a guardar:", collaborators);
+function onSaveCollaborators(collaborators: CompanyCollaborator[]) {
+  store.saveManagedCollaborators(collaborators);
 }
 </script>
 
@@ -338,7 +343,7 @@ function onSaveCollaborators(collaborators: any[]) {
     <!-- Modal de gestión de colaboradores -->
     <CollaboratorManagementModal
       :visible="showCollaboratorModal"
-      :collaborators="[]"
+      :collaborators="collaboratorManagementList"
       @update:visible="showCollaboratorModal = $event"
       @save="onSaveCollaborators"
     />

@@ -20,6 +20,8 @@ import {
   SOPRA_STERIA_COLLABORATORS,
   assignCompanyToTimeEntries,
   filterTimeEntriesByCompany,
+  normalizeCollaboratorName,
+  type CompanyCollaborator,
 } from "../domain/companies";
 
 export type CsvKind = "parents" | "children" | "timeEntries";
@@ -59,6 +61,9 @@ export const useDashboardStore = defineStore("dashboard", () => {
 
   // Company Filter
   const selectedCompanyFilter = ref<"Sopra Steria" | "Otros" | null>(null);
+  const managedCollaborators = ref<CompanyCollaborator[]>([
+    ...SOPRA_STERIA_COLLABORATORS,
+  ]);
 
   const hasData = computed(
     () => parentsLoaded.value && timeEntriesLoaded.value,
@@ -88,7 +93,33 @@ export const useDashboardStore = defineStore("dashboard", () => {
   const timeEntriesWithCompany = computed(() => {
     return assignCompanyToTimeEntries(
       timeEntries.value,
-      SOPRA_STERIA_COLLABORATORS,
+      managedCollaborators.value,
+    );
+  });
+
+  const allManagedCollaborators = computed(() => {
+    const byName = new Map<string, CompanyCollaborator>();
+
+    for (const collaborator of managedCollaborators.value) {
+      byName.set(normalizeCollaboratorName(collaborator.name), collaborator);
+    }
+
+    for (const entry of timeEntries.value) {
+      if (!entry.user) continue;
+      const name = entry.user.trim();
+      const normalizedName = normalizeCollaboratorName(name);
+      if (!normalizedName || byName.has(normalizedName)) continue;
+
+      byName.set(normalizedName, {
+        id: `csv-${normalizedName}`,
+        name,
+        company: "Otros",
+        profile: entry.profiledRole || entry.cauRole || "Sin rol asignado",
+      });
+    }
+
+    return Array.from(byName.values()).sort((a, b) =>
+      a.name.localeCompare(b.name),
     );
   });
 
@@ -354,6 +385,10 @@ export const useDashboardStore = defineStore("dashboard", () => {
     }
   }
 
+  function saveManagedCollaborators(collaborators: CompanyCollaborator[]) {
+    managedCollaborators.value = collaborators;
+  }
+
   function reset() {
     parents.value = [];
     children.value = [];
@@ -367,6 +402,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     childrenLoaded.value = false;
     timeEntriesLoaded.value = false;
     selectedCompanyFilter.value = null;
+    managedCollaborators.value = [...SOPRA_STERIA_COLLABORATORS];
     csvLoadStatus.value = {
       parents: { status: "idle", rowsCount: 0 },
       children: { status: "idle", rowsCount: 0 },
@@ -386,6 +422,8 @@ export const useDashboardStore = defineStore("dashboard", () => {
     filteredCalculatedRequests,
     filteredSummary,
     selectedCompanyFilter,
+    managedCollaborators,
+    allManagedCollaborators,
     errors,
     warnings,
     parentsLoaded,
@@ -402,6 +440,7 @@ export const useDashboardStore = defineStore("dashboard", () => {
     loadParents,
     loadChildren,
     loadTimeEntries,
+    saveManagedCollaborators,
     reset,
   };
 });

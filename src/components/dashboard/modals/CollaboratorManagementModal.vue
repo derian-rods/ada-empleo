@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import Dialog from "primevue/dialog";
 import Button from "primevue/button";
 import InputText from "primevue/inputtext";
@@ -30,6 +30,16 @@ const toast = useToast();
 const localCollaborators = ref<CompanyCollaborator[]>([...props.collaborators]);
 const editingCollaborator = ref<CompanyCollaborator | null>(null);
 const showForm = ref(false);
+const searchTerm = ref("");
+
+watch(
+  () => [props.visible, props.collaborators] as const,
+  ([visible]) => {
+    if (visible) {
+      localCollaborators.value = [...props.collaborators];
+    }
+  },
+);
 
 // Form state
 const formData = ref<{
@@ -44,6 +54,7 @@ const formData = ref<{
 
 // Available profiles
 const profileOptions = [
+  { label: "Sin rol asignado", value: "Sin rol asignado" },
   { label: "Gestor de proyecto (GP)", value: "Gestor de proyecto (GP)" },
   { label: "Consultor digital (CD)", value: "Consultor digital (CD)" },
   { label: "Analista de sistemas (AS)", value: "Analista de sistemas (AS)" },
@@ -58,10 +69,18 @@ const companyOptions = [
 
 // Computed
 const isFormValid = computed(() => {
-  return (
-    formData.value.name.trim().length > 0 &&
-    formData.value.profile.trim().length > 0
-  );
+  return formData.value.name.trim().length > 0;
+});
+
+const displayedCollaborators = computed(() => {
+  const search = searchTerm.value.trim().toLowerCase();
+  if (!search) return localCollaborators.value;
+
+  return localCollaborators.value.filter((collaborator) => {
+    return [collaborator.name, collaborator.profile, collaborator.company]
+      .filter((value): value is string => Boolean(value))
+      .some((value) => value.toLowerCase().includes(search));
+  });
 });
 
 // Métodos
@@ -114,7 +133,7 @@ function saveCollaborator() {
       localCollaborators.value[index] = {
         ...editingCollaborator.value,
         name: formData.value.name.trim(),
-        profile: formData.value.profile,
+        profile: formData.value.profile || "Sin rol asignado",
         company: formData.value.company,
       };
     }
@@ -129,7 +148,7 @@ function saveCollaborator() {
     const newCollaborator: CompanyCollaborator = {
       id: `cc-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: formData.value.name.trim(),
-      profile: formData.value.profile,
+      profile: formData.value.profile || "Sin rol asignado",
       company: formData.value.company,
     };
     localCollaborators.value.push(newCollaborator);
@@ -203,11 +222,16 @@ function onHide() {
           severity="success"
           size="small"
         />
+        <InputText
+          v-model="searchTerm"
+          placeholder="Buscar colaborador, rol o empresa"
+          class="search-input"
+        />
       </div>
 
       <!-- Tabla de colaboradores -->
       <DataTable
-        :value="localCollaborators"
+        :value="displayedCollaborators"
         striped-rows
         removable-sort
         size="small"
@@ -351,6 +375,10 @@ function onHide() {
   display: flex;
   gap: 0.5rem;
   align-items: center;
+}
+
+.search-input {
+  max-width: 24rem;
 }
 
 .collaborators-crud-table {
